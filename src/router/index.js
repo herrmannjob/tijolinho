@@ -6,8 +6,7 @@ import FormRegister from'../views/Register.vue'
 
 import FormRegisterClient from'../views/RegisterClient.vue'
 import Calendar from'../views/Calendar.vue'
-import * as query from '../services/querys_amplify.js'
-query
+
 Vue.use(VueRouter)
 
 const routes = [

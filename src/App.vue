@@ -3,7 +3,7 @@
     <router-view/>
   </div>
 </template>
-<style lang="scss">
+<style lang="css">
 html, body{
   overflow-y: hidden;
   height: 100% !important;
