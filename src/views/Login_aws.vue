@@ -17,12 +17,12 @@
 
 <script>
 import { AmplifyEventBus } from 'aws-amplify-vue'
-import { Auth } from 'aws-amplify'
+import { Auth  } from 'aws-amplify'
 const photoPickerConfig = {
   path: 'images/',
 }
 export default {
-  name: 'app',
+  name: 'FormLoginAws',
   async beforeCreate() {
     try {
       const user = await Auth.currentAuthenticatedUser()

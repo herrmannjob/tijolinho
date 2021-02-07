@@ -17,7 +17,7 @@ const routes = [
   },
   {
     path: '/aws',
-    name: 'Login_aws',
+    name: 'FormLoginAws',
     component: FormLoginAws
   },
   {
