@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import FormLogin from '../views/Login.vue'
-import FormLoginAws from '../views/Login_aws.vue'
+import LoginAws from '../views/Login_aws.vue'
 import FormRegister from'../views/Register.vue'
 
 import FormRegisterClient from'../views/RegisterClient.vue'
@@ -17,8 +17,8 @@ const routes = [
   },
   {
     path: '/aws',
-    name: 'FormLoginAws',
-    component: FormLoginAws
+    name: 'LoginAws',
+    component: LoginAws
   },
   {
     path: '/register',

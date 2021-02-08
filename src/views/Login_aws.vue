@@ -22,7 +22,7 @@ const photoPickerConfig = {
   path: 'images/',
 }
 export default {
-  name: 'FormLoginAws',
+  name: 'LoginAws',
   async beforeCreate() {
     try {
       const user = await Auth.currentAuthenticatedUser()
