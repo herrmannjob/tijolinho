@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <h6>Código do cliente:</h6>
+  <div data-app>
+    <h5 style="margin:1rem">Código do cliente:</h5>
     <div class="form-container-client">
       <div class="init-client">
         <v-flex
@@ -14,6 +14,7 @@
             </div>
             <div class="side facebook side--back">Add Image</div>
             <input
+              class="card"
               type="file"
               style="display: none"
               ref="image"
@@ -38,62 +39,72 @@
               label="E-mail"
               required
             ></v-text-field>
-            <v-menu
-              ref="menu"
-              v-model="menu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              min-width="auto"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="date"
-                  label="Data de nascimento"
-                  prepend-icon="mdi-calendar"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                ref="picker"
-                v-model="date"
-                :max="new Date().toISOString().substr(0, 10)"
-                min="1950-01-01"
-                @change="save"
-              ></v-date-picker>
-            </v-menu>
+            <v-dialog
+                        ref="dialog"
+                        v-model="modal"
+                        :return-value.sync="date"
+                        persistent
+                        width="290px"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            v-model="date"
+                            label="Data de Inicio"
+                            prepend-icon="mdi-calendar"
+                            readonly
+                            v-bind="attrs"
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker v-model="date" scrollable>
+                          <v-spacer></v-spacer>
+                          <v-btn text color="secondary" @click="modal = false">
+                            Cancel
+                          </v-btn>
+                          <v-btn
+                            text
+                            color="secondary"
+                            @click="$refs.dialog.save(date)"
+                          >
+                            OK
+                          </v-btn>
+                        </v-date-picker>
+                      </v-dialog>                    
           </v-col>
 
           <v-col cols="12" md="6">
             <v-text-field label="Conjuge" required></v-text-field>
-            <v-menu
-              ref="menu"
-              v-model="menu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              min-width="auto"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="date"
-                  label="Data de nascimento do conjuge"
-                  prepend-icon="mdi-calendar"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                ref="picker"
-                v-model="date"
-                :max="new Date().toISOString().substr(0, 10)"
-                min="1950-01-01"
-                @change="save"
-              ></v-date-picker>
-            </v-menu>
+                                <v-dialog
+                        ref="dialog"
+                        v-model="modal"
+                        :return-value.sync="date"
+                        persistent
+                        width="290px"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            v-model="date"
+                            label="Data nascimento Conjuge"
+                            prepend-icon="mdi-calendar"
+                            readonly
+                            v-bind="attrs"
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker v-model="date" scrollable>
+                          <v-spacer></v-spacer>
+                          <v-btn text color="secondary" @click="modal = false">
+                            Cancel
+                          </v-btn>
+                          <v-btn
+                            text
+                            color="secondary"
+                            @click="$refs.dialog.save(date)"
+                          >
+                            OK
+                          </v-btn>
+                        </v-date-picker>
+                      </v-dialog>
             <v-text-field label="Telefone" required></v-text-field>
           </v-col>
           <div>
@@ -105,15 +116,163 @@
             >
               <p class="button-primario">SALVAR DADOS</p>
             </v-btn>
-            <v-btn class="m2" outlined>
-              <p class="button-secundario">CADASTRAR OBRA</p>
-            </v-btn>
           </div>
+          <v-dialog v-model="dialog" persistent max-width="800px">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                color="primary"
+                class="btn-secundario"
+                outlined
+                data-app
+                @click="openDialog"
+                v-bind="attrs"
+                v-on="on"
+              >
+                CADASTRAR OBRA
+              </v-btn>
+            </template>
+            <v-card>
+              <v-card-title>
+                <span class="headline">Cadastrar Obra</span>
+              </v-card-title>
+              <v-card-text>
+                <v-form v-model="valid">
+                  <v-row>
+                    <v-col cols="12" md="6">
+                      <v-text-field
+                        v-model="firstname"
+                        :rules="nameRules"
+                        label="Nome"
+                        :close-on-content-click="false"
+                        required
+                      ></v-text-field>
+                      <v-text-field
+                        v-model="email"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                        :rules="emailRules"
+                        label="E-mail"
+                        required
+                      ></v-text-field>
+                      <v-select
+                        :items="categoria"
+                        :close-on-content-click="false"
+                        :menu-props="{ top: true, offsetY: true }"
+                        label="Categoria"
+                        required
+                      ></v-select>
+                    </v-col>
+
+                    <v-col cols="12" md="6">
+                      <v-dialog
+                        ref="dialog"
+                        v-model="modal"
+                        :return-value.sync="date"
+                        persistent
+                        width="290px"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            v-model="date"
+                            label="Data de Inicio"
+                            prepend-icon="mdi-calendar"
+                            readonly
+                            v-bind="attrs"
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker v-model="date" scrollable>
+                          <v-spacer></v-spacer>
+                          <v-btn text color="secondary" @click="modal = false">
+                            Cancel
+                          </v-btn>
+                          <v-btn
+                            text
+                            color="secondary"
+                            @click="$refs.dialog.save(date)"
+                          >
+                            OK
+                          </v-btn>
+                        </v-date-picker>
+                      </v-dialog>
+
+                      <v-menu
+                        ref="menu"
+                        v-model="menu"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="auto"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            v-model="date"
+                            label="Termino previsto"
+                            prepend-icon="mdi-calendar"
+                            readonly
+                            required
+                            v-bind="attrs"
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          ref="picker"
+                          v-model="date"
+                          :max="new Date().toISOString().substr(0, 10)"
+                          min="1950-01-01"
+                          @change="save"
+                        ></v-date-picker>
+                      </v-menu>
+                      <v-text-field
+                        label="Gasto estimado"
+                        required
+                        readonly
+                        v-bind="attrs"
+                        v-on="on"
+                      ></v-text-field>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="12" md="6">
+                      <v-text-field label="Telefone" required></v-text-field>
+                      <v-text-field label="Cep" required></v-text-field>
+                      <v-text-field label="Complemento" required></v-text-field>
+                    </v-col>
+                    <v-col cols="12" md="6">
+                      <v-text-field label="Endereço" required></v-text-field>
+
+                      <v-select
+                        :items="items"
+                        :menu-props="{ top: true, offsetY: true }"
+                        label="Cidade"
+                      ></v-select>
+                      <v-select
+                        :items="estados"
+                        :menu-props="{ top: true, offsetY: true }"
+                        label="Estado"
+                      ></v-select>
+                    </v-col>
+                  </v-row>
+                </v-form>
+                <small>*indicates required field</small>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1" text @click="dialog = false">
+                  Cancelar
+                </v-btn>
+                <v-btn color="blue darken-1" text @click="dialog = false">
+                  SALVAR
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-row>
       </v-form>
 
       <div class="middle-client">
-        <router-link class="link" to="/">
+        <router-link class="return" to="/">
           <v-icon class="return">mdi-arrow-left</v-icon></router-link
         >
       </div>
@@ -134,7 +293,14 @@ export default {
       e1: 1,
       picker: new Date().toISOString().substr(0, 10),
       menu: false,
-      items: ["MG", "PA", "PB", "PR", "PE"],
+      estados: ["MG", "PA", "PB", "PR", "PE"],
+      categoria: [
+        "Residencial",
+        "Reforma",
+        "Comercial",
+        "Restauração",
+        "Criação",
+      ],
       image: image,
       valid: false,
       show: false,
@@ -144,8 +310,8 @@ export default {
       email: "",
       password: "",
       emailRules: [
-        (v) => !!v || "E-mail is required",
-        (v) => /.+@.+/.test(v) || "E-mail must be valid",
+        (v) => !!v || "E-mail é obrigatório",
+        (v) => /.+@.+/.test(v) || "E-mail precisa ser em um formato válido",
       ],
     };
   },
@@ -161,7 +327,12 @@ export default {
     pickFile() {
       this.$refs.image.click();
     },
-
+    closeMyDialog() {
+      this.dialog = false;
+    },
+    openDialog() {
+      this.dialog = true;
+    },
     onFilePicked(e) {
       const files = e.target.files;
       if (files[0] !== undefined) {
@@ -193,7 +364,19 @@ export default {
   align-items: flex-end;
   margin-top: 2rem;
 }
-
+.v-card {
+  color: #002b4b;
+  font-family: "Comfortaa", cursive;
+}
+.btn-secundario {
+  background: white;
+  width: 11rem;
+  margin-left: 10px;
+  margin-top: 6px;
+  margin-right: 1rem;
+  font-size: 12px;
+  font-family: "Roboto", sans-serif;
+}
 .form-container-client {
   display: flex;
   flex-direction: row;
@@ -210,13 +393,17 @@ export default {
   width: 15rem;
   margin: inherit;
 }
-.teste {
-  color: white !important;
-  margin: auto;
-}
 .return {
   color: #002b4b !important;
   margin: 0;
+  text-decoration: none;
+  margin-left: 30rem;
+}
+.v-menu__content {
+  align-self: center !important;
+  justify-self: center !important;
+  top: unset !important;
+  left: unset !important;
 }
 .init-client {
   width: 8rem;
@@ -226,6 +413,8 @@ export default {
 .middle-client {
   width: 1rem;
   font-weight: bold;
+  margin-left: 16rem;
+  text-decoration: none;
 }
 .end-client {
   width: 1rem;
@@ -246,7 +435,6 @@ export default {
   color: #f3eff5;
   transform-style: preserve-3d;
 }
-
 .side {
   display: block;
   position: absolute;
@@ -300,8 +488,17 @@ export default {
     display: flex;
     flex-direction: column;
   }
-  .middle-client{
-    display: none; 
+  .middle-client {
+    display: none;
+  }
+  .v-picker {
+    border-radius: 4px;
+    contain: layout style;
+    display: inline-flex;
+    flex-direction: column;
+    font-size: 1rem;
+    vertical-align: center;
+    position: relative;
 }
 }
 </style>
