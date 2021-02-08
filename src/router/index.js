@@ -5,7 +5,7 @@ import LoginAws from '../views/Login_aws.vue'
 import FormRegister from'../views/Register.vue'
 
 import FormRegisterClient from'../views/RegisterClient.vue'
-import Calendar from'../views/Calendar.vue'
+// import Calendar from'../views/Calendar.vue'
 
 Vue.use(VueRouter)
 
@@ -28,7 +28,7 @@ const routes = [
   {
     path: '/calendar',
     name: 'Calendar',
-    component: Calendar
+    component: FormRegister
   },
   {
     path: '/register-client',

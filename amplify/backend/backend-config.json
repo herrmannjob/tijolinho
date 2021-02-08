@@ -1,38 +1,14 @@
 {
   "auth": {
-    "tijolinhoprojeto6fe523d7": {
+    "tijolinhoawsprojetobe40f64c": {
       "service": "Cognito",
       "providerPlugin": "awscloudformation",
       "dependsOn": [],
       "customAuth": false
     }
   },
-  "function": {
-    "S3Trigger2f75a3d7": {
-      "service": "Lambda",
-      "providerPlugin": "awscloudformation",
-      "build": true
-    }
-  },
-  "storage": {
-    "tijolinhoStorage": {
-      "service": "S3",
-      "providerPlugin": "awscloudformation",
-      "dependsOn": [
-        {
-          "category": "function",
-          "resourceName": "S3Trigger2f75a3d7",
-          "attributes": [
-            "Name",
-            "Arn",
-            "LambdaExecutionRole"
-          ]
-        }
-      ]
-    }
-  },
   "api": {
-    "tijolinhoBackEnd": {
+    "tijolinhoawsprojeto": {
       "service": "AppSync",
       "providerPlugin": "awscloudformation",
       "output": {
@@ -40,7 +16,7 @@
           "defaultAuthentication": {
             "authenticationType": "AMAZON_COGNITO_USER_POOLS",
             "userPoolConfig": {
-              "userPoolId": "authtijolinhoprojeto6fe523d7"
+              "userPoolId": "authtijolinhoawsprojetobe40f64c"
             }
           },
           "additionalAuthenticationProviders": []

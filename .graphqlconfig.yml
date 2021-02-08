@@ -1,6 +1,6 @@
 projects:
-  tijolinhoBackEnd:
-    schemaPath: amplify/backend/api/tijolinhoBackEnd/build/schema.graphql
+  tijolinhoawsprojeto:
+    schemaPath: src/graphql/schema.json
     includes:
       - src/graphql/**/*.js
     excludes:
@@ -10,7 +10,6 @@ projects:
         codeGenTarget: javascript
         generatedFileName: ''
         docsFilePath: src/graphql
-        maxDepth: 3
 extensions:
   amplify:
     version: 3
