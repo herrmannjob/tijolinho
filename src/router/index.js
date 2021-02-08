@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import FormLogin from '../views/Login.vue'
 import LoginAws from '../views/Login_aws.vue'
 import FormRegister from'../views/Register.vue'
-
+import ListClient from'../views/Client.vue'
 import FormRegisterClient from'../views/RegisterClient.vue'
 // import Calendar from'../views/Calendar.vue'
 
@@ -19,6 +19,11 @@ const routes = [
     path: '/aws',
     name: 'LoginAws',
     component: LoginAws
+  },
+  {
+    path: '/client',
+    name: 'ListClient',
+    component:ListClient
   },
   {
     path: '/register',

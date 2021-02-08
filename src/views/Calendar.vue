@@ -80,7 +80,7 @@ export default {
 </script>
 <style lang="css">
 html, body {
-  overflow-y: hidden;
+  overflow-y:auto;
 }
 .home {
   display: flex;
