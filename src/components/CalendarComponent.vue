@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid data-app>
+  <v-container fluid>
     <v-row align="center">
       <v-col
         class="d-flex"
