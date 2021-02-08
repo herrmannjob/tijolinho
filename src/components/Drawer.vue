@@ -12,7 +12,7 @@
             @click="item.method"
             >
               <v-list-item-icon>
-                <v-icon dark large color="#fff">{{ item.icon }}</v-icon>
+                  <v-icon dark large>{{ item.icon }}</v-icon>
               </v-list-item-icon>
             </v-list-item>
         </v-list>
@@ -55,6 +55,9 @@ export default {
 <style lang="css">
 html, body {
   overflow-y: hidden;
+}
+.left-drawer{
+  height: 100%;
 }
 .v-navigation-drawer {
   background-color: #002b4b !important;

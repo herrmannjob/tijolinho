@@ -1,5 +1,5 @@
 <template>
-  <div class="container-login">
+  <div class="container-login" style="overflow:hidden!important">
     <div class="space-init">
       <v-form>
         <v-container>

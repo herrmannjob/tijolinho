@@ -3,14 +3,14 @@
     <Drawer />
     <div class="content">
       <TopBar />
-      <FormRegisterClient/>
+      <ListClient/>
     </div>
   </div>
 </template>
 
 <script>
 // import { api, urls } from '../services/Api'
-import FormRegisterClient from '@/components/FormRegisterClient.vue'
+import ListClient from '@/components/ListClient.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 
@@ -18,7 +18,7 @@ import TopBar from '@/components/TopBar.vue'
 export default {
   name: 'Calendar',
   components: {
-    FormRegisterClient, Drawer, TopBar
+   ListClient, Drawer, TopBar
   },
   
 }
@@ -30,7 +30,7 @@ html, body {
 .home {
   display: flex;
   align-self: stretch;
-  height: 100vh;
+  height: 100%!important;
   width: 100%;
 }
 .content {
