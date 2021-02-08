@@ -10,8 +10,8 @@
         <v-divider vertical></v-divider>
         <div class="col right-col">
           <p class="title">Compromissos:</p>
-          <div class="row group-data">
-            <p class="date col">{{ today }}</p>
+          <div class="row date">
+            <p class="col">{{ today }}</p>
             <v-btn
               text
               color="primary"
@@ -96,6 +96,7 @@ html, body {
 }
 .right-col > .title {
   margin-top: 20px;
+  text-align: left;
 }
 .card-right {
   margin-top: 10px;
@@ -115,5 +116,10 @@ html, body {
   display: block;
   width: 65px !important;
   height: 65px !important;
+}
+.date {
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 </style>

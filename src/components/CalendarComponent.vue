@@ -37,6 +37,9 @@
         ></v-select>
       </v-col>
     </v-row>
+    
+    <FormCalendar :form.sync="form" :date="date_clicked" />
+
     <FullCalendar :options="calendarOptions" />
   </v-container>
 </template>
@@ -48,6 +51,7 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import Swal from '@/plugins/sweetalert'
+import FormCalendar from '@/components/FormCalendar'
 
 // import { DataStore } from '@aws-amplify/datastore';
 // import { AgendaObra } from '../../config/models';
@@ -55,7 +59,7 @@ import Swal from '@/plugins/sweetalert'
 export default {
   name: 'CalendarComponent',
   components: {
-    FullCalendar
+    FullCalendar, FormCalendar
   },
   data () {
     return {
@@ -78,7 +82,7 @@ export default {
         timeZone: 'UTC',
         selectable: true,
         dateClick: this.dateClick,
-        select: this.selectDate,
+        // select: this.selectDate,
         events: [
           {
               title: 'Reunião com Edu',
@@ -101,6 +105,8 @@ export default {
           }
         ]
       },
+      form: false,
+      date_clicked: '',
       task_titulo: null,
       task_cliente: null,
       task_obra: null,
@@ -130,7 +136,10 @@ export default {
           break;
       }
     },
-    dateClick () {
+    dateClick (info) {
+      this.form = true
+      this.date_clicked =  info.dateStr
+
       // const obra = await DataStore.save(
       //   new AgendaObra({
       //     "Obra": info.dateStr,
@@ -142,18 +151,18 @@ export default {
       //   })
       // )
       // console.log(obra)
-      Swal.fire({
-        title: 'Nova tarefa:',
-        input: 'text',
-        inputLabel: 'Digite o título:',
-        inputValue: '',
-        showCancelButton: true,
-        inputValidator: (value) => {
-          if (!value) {
-            return 'Digite o título!'
-          } else this.task_titulo = value
-        }
-      })
+      // Swal.fire({
+      //   title: 'Nova tarefa:',
+      //   input: 'text',
+      //   inputLabel: 'Digite o título:',
+      //   inputValue: '',
+      //   showCancelButton: true,
+      //   inputValidator: (value) => {
+      //     if (!value) {
+      //       return 'Digite o título!'
+      //     } else this.task_titulo = value
+      //   }
+      // })
       
     },
     selectDate (info) {
