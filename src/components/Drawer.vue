@@ -12,7 +12,7 @@
             @click="item.method"
             >
               <v-list-item-icon>
-                  <v-icon dark large>{{ item.icon }}</v-icon>
+                <v-icon dark large color="#fff">{{ item.icon }}</v-icon>
               </v-list-item-icon>
             </v-list-item>
         </v-list>

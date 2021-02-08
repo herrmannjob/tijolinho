@@ -10,7 +10,7 @@
         arquitetura e engenharia inteligente!
       </h4>
       <div class="form-container">
-        <v-stepper v-model="e1" data-app style="display:grid">
+        <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step :complete="e1 > 1" step="1">
               <p>Perfil</p>
@@ -190,12 +190,6 @@ h4 {
   margin-top: 3rem;
   margin-right: 3rem;
   margin-left: 3rem;
-}
-.v-menu__content {
-  align-self: center !important;
-  justify-self: center !important;
-  top: unset !important;
-  left: unset !important;
 }
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */
