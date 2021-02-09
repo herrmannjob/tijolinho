@@ -139,31 +139,6 @@ export default {
     dateClick (info) {
       this.form = true
       this.date_clicked =  info.dateStr
-
-      // const obra = await DataStore.save(
-      //   new AgendaObra({
-      //     "Obra": info.dateStr,
-      //     "titulo": "Lorem ipsum dolor sit amet",
-      //     "descricao": "Lorem ipsum dolor sit amet",
-      //     "data_inicio": "1970-01-01Z",
-      //     "data_fim": "1970-01-01Z",
-      //     "duracao": "Lorem ipsum dolor sit amet"
-      //   })
-      // )
-      // console.log(obra)
-      // Swal.fire({
-      //   title: 'Nova tarefa:',
-      //   input: 'text',
-      //   inputLabel: 'Digite o título:',
-      //   inputValue: '',
-      //   showCancelButton: true,
-      //   inputValidator: (value) => {
-      //     if (!value) {
-      //       return 'Digite o título!'
-      //     } else this.task_titulo = value
-      //   }
-      // })
-      
     },
     selectDate (info) {
       Swal.fire('selected ' + info.startStr + ' to ' + info.endStr)

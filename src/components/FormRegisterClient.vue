@@ -402,8 +402,6 @@ export default {
 .v-menu__content {
   align-self: center !important;
   justify-self: center !important;
-  top: unset !important;
-  left: unset !important;
 }
 .init-client {
   width: 8rem;

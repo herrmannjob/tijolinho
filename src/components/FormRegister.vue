@@ -28,7 +28,7 @@
             <v-stepper-content step="1">
               <v-card class="mb-12" height="380px">
                 <v-form v-model="valid">
-                  <v-container>
+                  <v-container style="padding-bottom:unset">
                     <v-text-field
                       v-model="firstname"
                       :rules="nameRules"
@@ -194,8 +194,6 @@ h4 {
 .v-menu__content {
   align-self: center !important;
   justify-self: center !important;
-  top: unset !important;
-  left: unset !important;
 }
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */
