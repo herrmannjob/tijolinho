@@ -4,7 +4,7 @@
     <div class="content">
       <TopBar />
       <div class="components row">
-        <div class="col-3 left-col">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3 left-col">
           <v-avatar
             class="avatar"
             tile
@@ -51,7 +51,7 @@
             </v-btn>
           </div>
         </div>
-        <div class="col">
+        <div class="col-12 col-sm-6 col-md-8 col-lg-9">
           <div class="row cards-report">
             <v-card
               elevation="2"
@@ -178,6 +178,7 @@ html, body {
   align-items: center;
   justify-content: space-evenly;
   height: 50%;
+  padding-left: unset;
 }
 .group-data > p {
   padding: 0;
@@ -203,9 +204,10 @@ html, body {
   justify-content: space-around;
   margin-top: 20px;
   margin-bottom: 20px;
+  max-width: 95%;
 }
 .one-card {
-  width: 9em;
-  height: 6em;
+  width: 7em;
+  height: 7em;
 }
 </style>
