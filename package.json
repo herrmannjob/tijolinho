@@ -9,7 +9,6 @@
     "start": "vue-cli-service serve"
   },
   "dependencies": {
-
     "@fullcalendar/daygrid": "^5.5.0",
     "@fullcalendar/interaction": "^5.5.0",
     "@fullcalendar/timegrid": "^5.5.1",
@@ -22,9 +21,11 @@
     "bootstrap-vue": "^2.21.2",
     "core-js": "^3.6.5",
     "fullcalendar": "^5.5.1",
+    "gantt-elastic": "^1.0.12",
+    "gantt-elastic-header": "^0.1.11",
     "moment": "^2.29.1",
     "register-service-worker": "^1.7.1",
-    "svelte-gantt": "^3.0.3-beta",
+    "sweetalert2": "^10.14.0",
     "vue": "^2.6.12",
     "vue-router": "^3.2.0",
     "vuetify": "^2.2.11",

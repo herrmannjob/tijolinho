@@ -4,10 +4,9 @@
     <div class="content">
       <TopBar />
       <div class="components row">
-        <div class="col-9">
+        <div class="col-9 calendar">
           <CalendarComponent />
         </div>
-        <v-divider vertical></v-divider>
         <div class="col right-col">
           <p class="title">Compromissos:</p>
           <div class="row date">
@@ -90,6 +89,9 @@ html, body {
 }
 .content {
   width: 100%;
+}
+.calendar {
+  border-right: lightgray 0.1px solid;
 }
 .components {
   padding: 20px;
