@@ -28,12 +28,12 @@
                 elevation="2"
                 depressed
                 class="btn-primario"
-                @click="onSubmit"
+                @click="login"
               >
                 <p class="button-primario">Entrar</p>
               </v-btn>
               <br />
-              <v-btn class="m2" outlined>
+              <v-btn class="m2" outlined @click="loginCognito">
                 <p class="button-secundario">LOGIN COM COGNITO</p>
               </v-btn>
             </div>
@@ -112,7 +112,7 @@ export default {
   },
      
   methods: {
-    async onSubmit() {
+    async login () {
       try {
         const user = await Auth.signIn(this.email, this.password)
         console.log('user: ', user)
@@ -129,7 +129,8 @@ export default {
     //   } catch (err) {
     //     console.log('error resending code: ', err);
     //   }
-    // }
+    // },
+    loginCognito () { this.$router.push('calendar') }
   },
 };
 </script>
