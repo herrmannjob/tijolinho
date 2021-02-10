@@ -20,6 +20,8 @@
 
 <script>
 // import { api, urls } from '../services/Api'
+import { AmplifyEventBus } from 'aws-amplify-vue'
+import { Auth  } from 'aws-amplify'
 export default {
   name: 'TopBar',
   components: {
@@ -27,7 +29,27 @@ export default {
   data () {
     return {
       username: 'Usuário Teste',
+      signedIn: false
     }
+  },
+  async beforeCreate() {
+    try {
+      const user = await Auth.currentAuthenticatedUser()
+      console.log(user)
+      this.signedIn = true
+      this.$router.push('calendar')
+    } catch (error) {
+      console.log('erro: ', error)
+      this.signedIn = false
+    }
+    AmplifyEventBus.$on('authState', info => {
+      console.log('info: ', info)
+      if (info === 'signedIn') {
+        this.signedIn = true
+      } else {
+        this.signedIn = false
+      }
+    });
   },
   methods: {
     async login () {

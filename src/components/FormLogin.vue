@@ -130,7 +130,7 @@ export default {
     //     console.log('error resending code: ', err);
     //   }
     // },
-    loginCognito () { this.$router.push('calendar') }
+    loginCognito () { this.$router.push('aws') }
   },
 };
 </script>
