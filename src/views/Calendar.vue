@@ -56,6 +56,8 @@ import CalendarComponent from '@/components/CalendarComponent.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 import moment from '@/plugins/moment'
+import { DataStore } from '@aws-amplify/datastore'
+import { Obra } from '@/models';
 
 export default {
   name: 'Calendar',
@@ -70,9 +72,16 @@ export default {
   },
   created () {
     this.today = moment().format('ll')
+    this.getObras()
   },
   methods: {
-    async login () {
+    async getObras () {
+      try {
+        const obras = await DataStore.query(Obra)
+        console.log("Obras!", JSON.stringify(obras, null, 2))
+      } catch (error) {
+        console.log("Error: ", error)
+      }
     }
   }
 }

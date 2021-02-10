@@ -40,7 +40,13 @@
     
     <FormCalendar :form.sync="form" :date="date_clicked" />
 
-    <FullCalendar :options="calendarOptions" />
+    <CalendarWeek :options="calendarOptions" v-if="view_week" />
+
+    <CalendarDay :options="calendarOptions" v-if="view_day" />
+
+    <CalendarMonth :options="calendarOptions" v-if="view_month" />
+
+    <FullCalendar :options="calendarOptions" v-show="false" />
   </v-container>
 </template>
 
@@ -52,6 +58,9 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import Swal from '@/plugins/sweetalert'
 import FormCalendar from '@/components/FormCalendar'
+import CalendarWeek from '@/components/CalendarWeek'
+import CalendarDay from '@/components/CalendarDay'
+import CalendarMonth from '@/components/CalendarMonth'
 
 // import { DataStore } from '@aws-amplify/datastore';
 // import { AgendaObra } from '../../config/models';
@@ -59,12 +68,15 @@ import FormCalendar from '@/components/FormCalendar'
 export default {
   name: 'CalendarComponent',
   components: {
-    FullCalendar, FormCalendar
+    FormCalendar, CalendarWeek, CalendarDay, CalendarMonth, FullCalendar
   },
   data () {
     return {
       items: ['Dia', 'Semana', 'Mês'],
       calendar_view: '',
+      view_week: true,
+      view_day: false,
+      view_month: false,
       calendarOptions: {
         plugins: [ dayGridPlugin, timeGridPlugin, interactionPlugin ],
         initialView: 'timeGridWeek',
@@ -121,17 +133,26 @@ export default {
     changeView () {
       switch (this.calendar_view) {
         case 'Mês':
-          // this.calendarOptions.initialView = 'dayGridMonth'
+          this.calendarOptions.initialView = 'dayGridMonth'
+          this.view_week = false
+          this.view_day = false
+          this.view_month = true
           // this.fullCalendar('changeView', 'dayGridMonth')
           break;
         case 'Dia':
           // $('#calendar').fullCalendar( 'changeView', 'timeGridDay');
-          // this.calendarOptions.initialView = 'timeGridDay'
+          this.calendarOptions.initialView = 'timeGridDay'
+          this.view_week = false
+          this.view_month = false
+          this.view_day = true
           // this.fullCalendar('changeView', 'timeGridDay')
           break;
         default:
           // document.getElementById('calendar').fullCalendar( 'changeView', 'timeGridWeek');
-          // this.calendarOptions.initialView = 'timeGridWeek'
+          this.calendarOptions.initialView = 'timeGridWeek'
+          this.view_day = false
+          this.view_month = false
+          this.view_week = true
           // this.fullCalendar('changeView', 'timeGridWeek')
           break;
       }
