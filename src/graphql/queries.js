@@ -1,33 +1,6 @@
 /* eslint-disable */
 // this is an auto generated file. This will be overwritten
 
-export const getEmpresa = /* GraphQL */ `
-  query GetEmpresa($id: ID!) {
-    getEmpresa(id: $id) {
-      id
-      nome
-      cnpj
-      telefone
-      email
-      usuarioID
-      foto
-      Endereco {
-        id
-        cep
-        bairro
-        cidade
-        rua
-        estado
-        pais
-        numero
-        createdAt
-        updatedAt
-      }
-      createdAt
-      updatedAt
-    }
-  }
-`;
 export const listEmpresas = /* GraphQL */ `
   query ListEmpresas(
     $filter: ModelEmpresaFilterInput
@@ -43,6 +16,11 @@ export const listEmpresas = /* GraphQL */ `
         email
         usuarioID
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Endereco {
           id
           cep
@@ -52,29 +30,95 @@ export const listEmpresas = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
       }
       nextToken
+      startedAt
     }
   }
 `;
-export const getEndereco = /* GraphQL */ `
-  query GetEndereco($id: ID!) {
-    getEndereco(id: $id) {
+export const getEmpresa = /* GraphQL */ `
+  query GetEmpresa($id: ID!) {
+    getEmpresa(id: $id) {
       id
-      cep
-      bairro
-      cidade
-      rua
-      estado
-      pais
-      numero
+      nome
+      cnpj
+      telefone
+      email
+      usuarioID
+      foto
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
+      Endereco {
+        id
+        cep
+        bairro
+        cidade
+        rua
+        estado
+        pais
+        numero
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+export const syncEmpresas = /* GraphQL */ `
+  query SyncEmpresas(
+    $filter: ModelEmpresaFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncEmpresas(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        nome
+        cnpj
+        telefone
+        email
+        usuarioID
+        foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Endereco {
+          id
+          cep
+          bairro
+          cidade
+          rua
+          estado
+          pais
+          numero
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
+      nextToken
+      startedAt
     }
   }
 `;
@@ -94,40 +138,50 @@ export const listEnderecos = /* GraphQL */ `
         estado
         pais
         numero
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
       nextToken
+      startedAt
     }
   }
 `;
-export const getUsuario = /* GraphQL */ `
-  query GetUsuario($id: ID!) {
-    getUsuario(id: $id) {
+export const getEndereco = /* GraphQL */ `
+  query GetEndereco($id: ID!) {
+    getEndereco(id: $id) {
       id
-      nome
-      email
-      telefone
-      cpf
-      data_nascimento
-      data_nascimento_conjuge
-      nome_conjuge
-      foto
-      Empresas {
-        items {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
-          createdAt
-          updatedAt
-        }
-        nextToken
-      }
-      Endereco {
+      cep
+      bairro
+      cidade
+      rua
+      estado
+      pais
+      numero
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const syncEnderecos = /* GraphQL */ `
+  query SyncEnderecos(
+    $filter: ModelEnderecoFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncEnderecos(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
         id
         cep
         bairro
@@ -136,17 +190,14 @@ export const getUsuario = /* GraphQL */ `
         estado
         pais
         numero
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      TipoUsuario {
-        id
-        nome
-        createdAt
-        updatedAt
-      }
-      createdAt
-      updatedAt
+      nextToken
+      startedAt
     }
   }
 `;
@@ -167,8 +218,14 @@ export const listUsuarios = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -179,29 +236,148 @@ export const listUsuarios = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
       }
       nextToken
+      startedAt
     }
   }
 `;
-export const getTipoUsuario = /* GraphQL */ `
-  query GetTipoUsuario($id: ID!) {
-    getTipoUsuario(id: $id) {
+export const getUsuario = /* GraphQL */ `
+  query GetUsuario($id: ID!) {
+    getUsuario(id: $id) {
       id
       nome
+      email
+      telefone
+      cpf
+      data_nascimento
+      data_nascimento_conjuge
+      nome_conjuge
+      foto
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
+      Empresas {
+        items {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        nextToken
+        startedAt
+      }
+      Endereco {
+        id
+        cep
+        bairro
+        cidade
+        rua
+        estado
+        pais
+        numero
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
+      TipoUsuario {
+        id
+        nome
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+export const syncUsuarios = /* GraphQL */ `
+  query SyncUsuarios(
+    $filter: ModelUsuarioFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncUsuarios(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        nome
+        email
+        telefone
+        cpf
+        data_nascimento
+        data_nascimento_conjuge
+        nome_conjuge
+        foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresas {
+          nextToken
+          startedAt
+        }
+        Endereco {
+          id
+          cep
+          bairro
+          cidade
+          rua
+          estado
+          pais
+          numero
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        TipoUsuario {
+          id
+          nome
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
+      nextToken
+      startedAt
     }
   }
 `;
@@ -215,79 +391,54 @@ export const listTipoUsuarios = /* GraphQL */ `
       items {
         id
         nome
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
       nextToken
+      startedAt
     }
   }
 `;
-export const getObra = /* GraphQL */ `
-  query GetObra($id: ID!) {
-    getObra(id: $id) {
+export const getTipoUsuario = /* GraphQL */ `
+  query GetTipoUsuario($id: ID!) {
+    getTipoUsuario(id: $id) {
       id
       nome
-      foto
-      Endereco {
-        id
-        cep
-        bairro
-        cidade
-        rua
-        estado
-        pais
-        numero
-        createdAt
-        updatedAt
-      }
-      TipoObra {
-        id
-        nome
-        template
-        createdAt
-        updatedAt
-      }
-      Empresa {
-        id
-        nome
-        cnpj
-        telefone
-        email
-        usuarioID
-        foto
-        Endereco {
-          id
-          cep
-          bairro
-          cidade
-          rua
-          estado
-          pais
-          numero
-          createdAt
-          updatedAt
-        }
-        createdAt
-        updatedAt
-      }
-      Usuarios {
-        items {
-          id
-          nome
-          email
-          telefone
-          cpf
-          data_nascimento
-          data_nascimento_conjuge
-          nome_conjuge
-          foto
-          createdAt
-          updatedAt
-        }
-        nextToken
-      }
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
+    }
+  }
+`;
+export const syncTipoUsuarios = /* GraphQL */ `
+  query SyncTipoUsuarios(
+    $filter: ModelTipoUsuarioFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncTipoUsuarios(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        nome
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
+      nextToken
+      startedAt
     }
   }
 `;
@@ -302,6 +453,25 @@ export const listObras = /* GraphQL */ `
         id
         nome
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -311,16 +481,142 @@ export const listObras = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
+        }
+        Usuarios {
+          nextToken
+          startedAt
         }
         TipoObra {
           id
           nome
           template
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
+      }
+      nextToken
+      startedAt
+    }
+  }
+`;
+export const getObra = /* GraphQL */ `
+  query GetObra($id: ID!) {
+    getObra(id: $id) {
+      id
+      nome
+      foto
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
+      Empresa {
+        id
+        nome
+        cnpj
+        telefone
+        email
+        usuarioID
+        foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Endereco {
+          id
+          cep
+          bairro
+          cidade
+          rua
+          estado
+          pais
+          numero
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
+      Endereco {
+        id
+        cep
+        bairro
+        cidade
+        rua
+        estado
+        pais
+        numero
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
+      Usuarios {
+        items {
+          id
+          nome
+          email
+          telefone
+          cpf
+          data_nascimento
+          data_nascimento_conjuge
+          nome_conjuge
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        nextToken
+        startedAt
+      }
+      TipoObra {
+        id
+        nome
+        template
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+export const syncObras = /* GraphQL */ `
+  query SyncObras(
+    $filter: ModelObraFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncObras(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        nome
+        foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresa {
           id
           nome
@@ -329,27 +625,44 @@ export const listObras = /* GraphQL */ `
           email
           usuarioID
           foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        Endereco {
+          id
+          cep
+          bairro
+          cidade
+          rua
+          estado
+          pais
+          numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
       nextToken
-    }
-  }
-`;
-export const getTipoObra = /* GraphQL */ `
-  query GetTipoObra($id: ID!) {
-    getTipoObra(id: $id) {
-      id
-      nome
-      template
-      createdAt
-      updatedAt
+      startedAt
     }
   }
 `;
@@ -364,63 +677,56 @@ export const listTipoObras = /* GraphQL */ `
         id
         nome
         template
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
       nextToken
+      startedAt
     }
   }
 `;
-export const getCronogramaObra = /* GraphQL */ `
-  query GetCronogramaObra($id: ID!) {
-    getCronogramaObra(id: $id) {
+export const getTipoObra = /* GraphQL */ `
+  query GetTipoObra($id: ID!) {
+    getTipoObra(id: $id) {
       id
-      Obra_ {
+      nome
+      template
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const syncTipoObras = /* GraphQL */ `
+  query SyncTipoObras(
+    $filter: ModelTipoObraFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncTipoObras(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
         id
         nome
-        foto
-        Endereco {
-          id
-          cep
-          bairro
-          cidade
-          rua
-          estado
-          pais
-          numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
-          createdAt
-          updatedAt
-        }
-        Usuarios {
-          nextToken
-        }
+        template
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      data_inicio
-      data_fim
-      tempo_previsto
-      gasto_previsto
-      createdAt
-      updatedAt
+      nextToken
+      startedAt
     }
   }
 `;
@@ -433,21 +739,137 @@ export const listCronogramaObras = /* GraphQL */ `
     listCronogramaObras(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        Obra_ {
-          id
-          nome
-          foto
-          createdAt
-          updatedAt
-        }
         data_inicio
         data_fim
         tempo_previsto
         gasto_previsto
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
+        Obra_ {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
       nextToken
+      startedAt
+    }
+  }
+`;
+export const getCronogramaObra = /* GraphQL */ `
+  query GetCronogramaObra($id: ID!) {
+    getCronogramaObra(id: $id) {
+      id
+      data_inicio
+      data_fim
+      tempo_previsto
+      gasto_previsto
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
+      Obra_ {
+        id
+        nome
+        foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        Endereco {
+          id
+          cep
+          bairro
+          cidade
+          rua
+          estado
+          pais
+          numero
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        Usuarios {
+          nextToken
+          startedAt
+        }
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
+    }
+  }
+`;
+export const syncCronogramaObras = /* GraphQL */ `
+  query SyncCronogramaObras(
+    $filter: ModelCronogramaObraFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncCronogramaObras(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        data_inicio
+        data_fim
+        tempo_previsto
+        gasto_previsto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Obra_ {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
+      nextToken
+      startedAt
     }
   }
 `;
@@ -455,22 +877,6 @@ export const getControleFinanceiroObra = /* GraphQL */ `
   query GetControleFinanceiroObra($id: ID!) {
     getControleFinanceiroObra(id: $id) {
       id
-      CronogramaObra {
-        id
-        Obra_ {
-          id
-          nome
-          foto
-          createdAt
-          updatedAt
-        }
-        data_inicio
-        data_fim
-        tempo_previsto
-        gasto_previsto
-        createdAt
-        updatedAt
-      }
       nome
       data_pagamento
       proximo_vencimento
@@ -479,8 +885,33 @@ export const getControleFinanceiroObra = /* GraphQL */ `
       valor
       forma_pagamento
       quantidade_parcelas
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
+      CronogramaObra {
+        id
+        data_inicio
+        data_fim
+        tempo_previsto
+        gasto_previsto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Obra_ {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
     }
   }
 `;
@@ -497,15 +928,6 @@ export const listControleFinanceiroObras = /* GraphQL */ `
     ) {
       items {
         id
-        CronogramaObra {
-          id
-          data_inicio
-          data_fim
-          tempo_previsto
-          gasto_previsto
-          createdAt
-          updatedAt
-        }
         nome
         data_pagamento
         proximo_vencimento
@@ -514,122 +936,72 @@ export const listControleFinanceiroObras = /* GraphQL */ `
         valor
         forma_pagamento
         quantidade_parcelas
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
-      }
-      nextToken
-    }
-  }
-`;
-export const getTarefa = /* GraphQL */ `
-  query GetTarefa($id: ID!) {
-    getTarefa(id: $id) {
-      id
-      CronogramaObra {
-        id
-        Obra_ {
-          id
-          nome
-          foto
-          createdAt
-          updatedAt
-        }
-        data_inicio
-        data_fim
-        tempo_previsto
-        gasto_previsto
-        createdAt
-        updatedAt
-      }
-      Responsavel {
-        id
-        nome
-        email
-        telefone
-        cpf
-        data_nascimento
-        data_nascimento_conjuge
-        nome_conjuge
-        foto
-        Empresas {
-          nextToken
-        }
-        Endereco {
-          id
-          cep
-          bairro
-          cidade
-          rua
-          estado
-          pais
-          numero
-          createdAt
-          updatedAt
-        }
-        TipoUsuario {
-          id
-          nome
-          createdAt
-          updatedAt
-        }
-        createdAt
-        updatedAt
-      }
-      status {
-        id
-        status
-        createdAt
-        updatedAt
-      }
-      nome_tarefa
-      data_inicio
-      data_fim
-      TarefaOrigem {
-        id
         CronogramaObra {
           id
           data_inicio
           data_fim
           tempo_previsto
           gasto_previsto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        Responsavel {
-          id
-          nome
-          email
-          telefone
-          cpf
-          data_nascimento
-          data_nascimento_conjuge
-          nome_conjuge
-          foto
-          createdAt
-          updatedAt
-        }
-        status {
-          id
-          status
-          createdAt
-          updatedAt
-        }
-        nome_tarefa
-        data_inicio
-        data_fim
-        TarefaOrigem {
-          id
-          nome_tarefa
-          data_inicio
-          data_fim
-          createdAt
-          updatedAt
-        }
+      }
+      nextToken
+      startedAt
+    }
+  }
+`;
+export const syncControleFinanceiroObras = /* GraphQL */ `
+  query SyncControleFinanceiroObras(
+    $filter: ModelControleFinanceiroObraFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncControleFinanceiroObras(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        nome
+        data_pagamento
+        proximo_vencimento
+        fornecedor
+        nota_fiscal
+        valor
+        forma_pagamento
+        quantidade_parcelas
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
+        CronogramaObra {
+          id
+          data_inicio
+          data_fim
+          tempo_previsto
+          gasto_previsto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      createdAt
-      updatedAt
+      nextToken
+      startedAt
     }
   }
 `;
@@ -642,15 +1014,14 @@ export const listTarefas = /* GraphQL */ `
     listTarefas(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        CronogramaObra {
-          id
-          data_inicio
-          data_fim
-          tempo_previsto
-          gasto_previsto
-          createdAt
-          updatedAt
-        }
+        nome_tarefa
+        data_inicio
+        data_fim
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Responsavel {
           id
           nome
@@ -661,40 +1032,273 @@ export const listTarefas = /* GraphQL */ `
           data_nascimento_conjuge
           nome_conjuge
           foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        CronogramaObra {
+          id
+          data_inicio
+          data_fim
+          tempo_previsto
+          gasto_previsto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        TarefaOrigem {
+          id
+          nome_tarefa
+          data_inicio
+          data_fim
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         status {
           id
           status
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
+      }
+      nextToken
+      startedAt
+    }
+  }
+`;
+export const getTarefa = /* GraphQL */ `
+  query GetTarefa($id: ID!) {
+    getTarefa(id: $id) {
+      id
+      nome_tarefa
+      data_inicio
+      data_fim
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
+      Responsavel {
+        id
+        nome
+        email
+        telefone
+        cpf
+        data_nascimento
+        data_nascimento_conjuge
+        nome_conjuge
+        foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresas {
+          nextToken
+          startedAt
+        }
+        Endereco {
+          id
+          cep
+          bairro
+          cidade
+          rua
+          estado
+          pais
+          numero
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        TipoUsuario {
+          id
+          nome
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
+      CronogramaObra {
+        id
+        data_inicio
+        data_fim
+        tempo_previsto
+        gasto_previsto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Obra_ {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
+      TarefaOrigem {
+        id
         nome_tarefa
         data_inicio
         data_fim
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Responsavel {
+          id
+          nome
+          email
+          telefone
+          cpf
+          data_nascimento
+          data_nascimento_conjuge
+          nome_conjuge
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        CronogramaObra {
+          id
+          data_inicio
+          data_fim
+          tempo_previsto
+          gasto_previsto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         TarefaOrigem {
           id
           nome_tarefa
           data_inicio
           data_fim
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
+        status {
+          id
+          status
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
+      status {
+        id
+        status
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      nextToken
     }
   }
 `;
-export const getStatusTarefa = /* GraphQL */ `
-  query GetStatusTarefa($id: ID!) {
-    getStatusTarefa(id: $id) {
-      id
-      status
-      createdAt
-      updatedAt
+export const syncTarefas = /* GraphQL */ `
+  query SyncTarefas(
+    $filter: ModelTarefaFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncTarefas(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        nome_tarefa
+        data_inicio
+        data_fim
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Responsavel {
+          id
+          nome
+          email
+          telefone
+          cpf
+          data_nascimento
+          data_nascimento_conjuge
+          nome_conjuge
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        CronogramaObra {
+          id
+          data_inicio
+          data_fim
+          tempo_previsto
+          gasto_previsto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        TarefaOrigem {
+          id
+          nome_tarefa
+          data_inicio
+          data_fim
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        status {
+          id
+          status
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
+      nextToken
+      startedAt
     }
   }
 `;
@@ -708,10 +1312,54 @@ export const listStatusTarefas = /* GraphQL */ `
       items {
         id
         status
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
       nextToken
+      startedAt
+    }
+  }
+`;
+export const getStatusTarefa = /* GraphQL */ `
+  query GetStatusTarefa($id: ID!) {
+    getStatusTarefa(id: $id) {
+      id
+      status
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const syncStatusTarefas = /* GraphQL */ `
+  query SyncStatusTarefas(
+    $filter: ModelStatusTarefaFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncStatusTarefas(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        status
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
+      nextToken
+      startedAt
     }
   }
 `;
@@ -719,10 +1367,39 @@ export const getAgendaObra = /* GraphQL */ `
   query GetAgendaObra($id: ID!) {
     getAgendaObra(id: $id) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Obra {
         id
         nome
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -732,40 +1409,27 @@ export const getAgendaObra = /* GraphQL */ `
           estado
           pais
           numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -778,22 +1442,70 @@ export const listAgendaObras = /* GraphQL */ `
     listAgendaObras(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        Obra {
-          id
-          nome
-          foto
-          createdAt
-          updatedAt
-        }
         titulo
         descricao
         data_inicio
         data_fim
         duracao
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
+        Obra {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
       nextToken
+      startedAt
+    }
+  }
+`;
+export const syncAgendaObras = /* GraphQL */ `
+  query SyncAgendaObras(
+    $filter: ModelAgendaObraFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncAgendaObras(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        titulo
+        descricao
+        data_inicio
+        data_fim
+        duracao
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Obra {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
+      nextToken
+      startedAt
     }
   }
 `;
@@ -801,6 +1513,16 @@ export const getAgendaParticular = /* GraphQL */ `
   query GetAgendaParticular($id: ID!) {
     getAgendaParticular(id: $id) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Usuario {
         id
         nome
@@ -811,8 +1533,14 @@ export const getAgendaParticular = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -823,25 +1551,22 @@ export const getAgendaParticular = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -858,6 +1583,16 @@ export const listAgendaParticulars = /* GraphQL */ `
     ) {
       items {
         id
+        titulo
+        descricao
+        data_inicio
+        data_fim
+        duracao
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Usuario {
           id
           nome
@@ -868,18 +1603,62 @@ export const listAgendaParticulars = /* GraphQL */ `
           data_nascimento_conjuge
           nome_conjuge
           foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
+      }
+      nextToken
+      startedAt
+    }
+  }
+`;
+export const syncAgendaParticulars = /* GraphQL */ `
+  query SyncAgendaParticulars(
+    $filter: ModelAgendaParticularFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncAgendaParticulars(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
         titulo
         descricao
         data_inicio
         data_fim
         duracao
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
+        Usuario {
+          id
+          nome
+          email
+          telefone
+          cpf
+          data_nascimento
+          data_nascimento_conjuge
+          nome_conjuge
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
       nextToken
+      startedAt
     }
   }
 `;
@@ -887,6 +1666,16 @@ export const getLembreteParticular = /* GraphQL */ `
   query GetLembreteParticular($id: ID!) {
     getLembreteParticular(id: $id) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Usuario {
         id
         nome
@@ -897,8 +1686,14 @@ export const getLembreteParticular = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -909,25 +1704,22 @@ export const getLembreteParticular = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -944,6 +1736,16 @@ export const listLembreteParticulars = /* GraphQL */ `
     ) {
       items {
         id
+        titulo
+        descricao
+        data_inicio
+        data_fim
+        duracao
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Usuario {
           id
           nome
@@ -954,18 +1756,62 @@ export const listLembreteParticulars = /* GraphQL */ `
           data_nascimento_conjuge
           nome_conjuge
           foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
+      }
+      nextToken
+      startedAt
+    }
+  }
+`;
+export const syncLembreteParticulars = /* GraphQL */ `
+  query SyncLembreteParticulars(
+    $filter: ModelLembreteParticularFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncLembreteParticulars(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
         titulo
         descricao
         data_inicio
         data_fim
         duracao
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
+        Usuario {
+          id
+          nome
+          email
+          telefone
+          cpf
+          data_nascimento
+          data_nascimento_conjuge
+          nome_conjuge
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
       nextToken
+      startedAt
     }
   }
 `;
@@ -973,10 +1819,39 @@ export const getLembreteObra = /* GraphQL */ `
   query GetLembreteObra($id: ID!) {
     getLembreteObra(id: $id) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Obra {
         id
         nome
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -986,40 +1861,27 @@ export const getLembreteObra = /* GraphQL */ `
           estado
           pais
           numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1032,22 +1894,70 @@ export const listLembreteObras = /* GraphQL */ `
     listLembreteObras(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        Obra {
-          id
-          nome
-          foto
-          createdAt
-          updatedAt
-        }
         titulo
         descricao
         data_inicio
         data_fim
         duracao
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
+        Obra {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
       nextToken
+      startedAt
+    }
+  }
+`;
+export const syncLembreteObras = /* GraphQL */ `
+  query SyncLembreteObras(
+    $filter: ModelLembreteObraFilterInput
+    $limit: Int
+    $nextToken: String
+    $lastSync: AWSTimestamp
+  ) {
+    syncLembreteObras(
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+      lastSync: $lastSync
+    ) {
+      items {
+        id
+        titulo
+        descricao
+        data_inicio
+        data_fim
+        duracao
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Obra {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
+      nextToken
+      startedAt
     }
   }
 `;

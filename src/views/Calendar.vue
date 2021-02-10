@@ -51,12 +51,15 @@
 </template>
 
 <script>
+/* eslint-disable no-unused-vars */
+
+
 // import { api, urls } from '../services/Api'
 import CalendarComponent from '@/components/CalendarComponent.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 import moment from '@/plugins/moment'
-import { DataStore } from '@aws-amplify/datastore'
+import { DataStore, Predicates } from 'aws-amplify'
 import { Obra } from '@/models';
 
 export default {
@@ -76,12 +79,12 @@ export default {
   },
   methods: {
     async getObras () {
-      try {
-        const obras = await DataStore.query(Obra)
+      //try {
+        const obras = await DataStore.query(Obra, Predicates.ALL  )
         console.log("Obras!", JSON.stringify(obras, null, 2))
-      } catch (error) {
-        console.log("Error: ", error)
-      }
+      //} catch (error) {
+      //  console.log("Error: ", error)
+      //}
     }
   }
 }

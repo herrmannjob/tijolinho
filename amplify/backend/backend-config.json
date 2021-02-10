@@ -16,10 +16,14 @@
           "defaultAuthentication": {
             "authenticationType": "AMAZON_COGNITO_USER_POOLS",
             "userPoolConfig": {
-              "userPoolId": "authtijolinhoawsprojetobe40f64c"
+              "userPoolId": "authtijolinhoawsprojetobe40f64c_userpool_be40f64c"
             }
           },
-          "additionalAuthenticationProviders": []
+          "additionalAuthenticationProviders": [
+            {
+              "authenticationType": "AWS_IAM"
+            }
+          ]
         }
       }
     }
