@@ -237,6 +237,20 @@ export const createUsuario = /* GraphQL */ `
         createdAt
         updatedAt
       }
+      Obra {
+        items {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        nextToken
+        startedAt
+      }
     }
   }
 `;
@@ -302,6 +316,20 @@ export const updateUsuario = /* GraphQL */ `
         createdAt
         updatedAt
       }
+      Obra {
+        items {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        nextToken
+        startedAt
+      }
     }
   }
 `;
@@ -366,6 +394,20 @@ export const deleteUsuario = /* GraphQL */ `
         _lastChangedAt
         createdAt
         updatedAt
+      }
+      Obra {
+        items {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        nextToken
+        startedAt
       }
     }
   }
@@ -1151,6 +1193,10 @@ export const createTarefa = /* GraphQL */ `
           createdAt
           updatedAt
         }
+        Obra {
+          nextToken
+          startedAt
+        }
       }
       CronogramaObra {
         id
@@ -1303,6 +1349,10 @@ export const updateTarefa = /* GraphQL */ `
           createdAt
           updatedAt
         }
+        Obra {
+          nextToken
+          startedAt
+        }
       }
       CronogramaObra {
         id
@@ -1454,6 +1504,10 @@ export const deleteTarefa = /* GraphQL */ `
           _lastChangedAt
           createdAt
           updatedAt
+        }
+        Obra {
+          nextToken
+          startedAt
         }
       }
       CronogramaObra {
@@ -1876,6 +1930,10 @@ export const createAgendaParticular = /* GraphQL */ `
           createdAt
           updatedAt
         }
+        Obra {
+          nextToken
+          startedAt
+        }
       }
     }
   }
@@ -1939,6 +1997,10 @@ export const updateAgendaParticular = /* GraphQL */ `
           _lastChangedAt
           createdAt
           updatedAt
+        }
+        Obra {
+          nextToken
+          startedAt
         }
       }
     }
@@ -2004,6 +2066,10 @@ export const deleteAgendaParticular = /* GraphQL */ `
           createdAt
           updatedAt
         }
+        Obra {
+          nextToken
+          startedAt
+        }
       }
     }
   }
@@ -2067,6 +2133,10 @@ export const createLembreteParticular = /* GraphQL */ `
           _lastChangedAt
           createdAt
           updatedAt
+        }
+        Obra {
+          nextToken
+          startedAt
         }
       }
     }
@@ -2132,6 +2202,10 @@ export const updateLembreteParticular = /* GraphQL */ `
           createdAt
           updatedAt
         }
+        Obra {
+          nextToken
+          startedAt
+        }
       }
     }
   }
@@ -2195,6 +2269,10 @@ export const deleteLembreteParticular = /* GraphQL */ `
           _lastChangedAt
           createdAt
           updatedAt
+        }
+        Obra {
+          nextToken
+          startedAt
         }
       }
     }
