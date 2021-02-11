@@ -140,7 +140,6 @@ export default {
     async getObras () {
       try {
         const obras = await DataStore.query(Obra, data => data.usuarioID("eq", this.user.username))
-        console.log(obras)
         if (obras.length > 0) {
           this.constructions = []
           obras.map(obra => {
@@ -153,9 +152,8 @@ export default {
     },
     async getClients () {
       try {
-        const clientes = await DataStore.query(Usuario, Predicates.ALL  )
+        const clientes = await DataStore.query(Usuario, Predicates.ALL)
         if (clientes.length > 0) {
-          this.clients = []
           clientes.map(cliente => {
             this.clients.push(cliente.nome)
           })

@@ -204,22 +204,22 @@ export default {
         })
         this.phone = `+${this.phone.substr(0,2)} ${this.phone.substr(2,2)} ${this.phone.substr(4,5)} ${this.phone.substr(9,4)}`
         this.date += '-00:00'
-        this.resendConfirmationCode()
-      } catch (error) {
-        this.error = error
-        this.error_dialog = true
-      }
-    },
-    async resendConfirmationCode() {
-      try {
-        await Auth.resendSignUp(this.email)
-        console.log('code resent successfully')
         this.addUser()
       } catch (error) {
         this.error = error
         this.error_dialog = true
       }
     },
+    // async resendConfirmationCode() {
+    //   try {
+    //     await Auth.resendSignUp(this.email)
+    //     console.log('code resent successfully')
+    //     this.addUser()
+    //   } catch (error) {
+    //     this.error = error
+    //     this.error_dialog = true
+    //   }
+    // },
     async addUser () {
       try {
         await DataStore.save(
@@ -230,11 +230,11 @@ export default {
             "data_nascimento": this.date
           })
         )
-        this.$router.push('calendar')
       } catch (error) {
         this.error = error
         this.error_dialog = true
       }
+      this.$router.push('calendar')
     }
   },
 };
