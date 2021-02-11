@@ -107,7 +107,7 @@
                   <v-text-field label="Rua" required></v-text-field>
                   <v-text-field label="Bairro" required></v-text-field>
                   <v-select :items="items" label="Estado" dense></v-select>
-                  <v-select :items="items" label="Cidade" dense></v-select>
+                   <v-text-field label="Cidade" required></v-text-field>
                 </v-form>
 
                 <v-btn color="primary" @click="e1 = 1">
@@ -133,7 +133,8 @@ export default {
       e1: 1,
       picker: new Date().toISOString().substr(0, 10),
       menu: false,
-      items: ["MG", "PA", "PB", "PR", "PE"],
+      items: ["AC","AL","AP",	"AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA",	
+        "PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"	],
       image: image,
       valid: false,
       show: false,
@@ -203,9 +204,6 @@ h4 {
   }
   img {
     display: none;
-  }
-  p {
-    font-size: 4px;
   }
   nav {
     display: none;
