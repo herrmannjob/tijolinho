@@ -1,5 +1,5 @@
 <template>
-  <div class="container-login">
+  <div class="container-login" style="overflow:hidden!important">
     <div class="space-init">
       <v-form>
         <v-container>
@@ -28,12 +28,12 @@
                 elevation="2"
                 depressed
                 class="btn-primario"
-                @click="onSubmit"
+                @click="login"
               >
                 <p class="button-primario">Entrar</p>
               </v-btn>
               <br />
-              <v-btn class="m2" outlined>
+              <v-btn class="m2" outlined @click="loginCognito">
                 <p class="button-secundario">LOGIN COM COGNITO</p>
               </v-btn>
             </div>
@@ -54,15 +54,45 @@
         ></v-carousel-item>
       </v-carousel>
     </div>
+    <v-dialog
+      v-model="showError"
+      persistent
+      max-width="500"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Ocorreu um erro...
+        </v-card-title>
+        <v-card-text v-if="error.code" style="text-align:left">
+          Código: {{ error.code }}
+        </v-card-text>
+        <v-card-text style="text-align:left">
+          Mensagem: {{ error.message }}
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="green darken-1"
+            text
+            @click="showError = false"
+          >
+            Fechar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 <script>
+import { Auth } from 'aws-amplify'
 export default {
   name: "FormLogin",
   data() {
     return {
       email: "",
       password: "",
+      showError: false,
+      error: '',
       show: false,
       items: [
       {
@@ -76,18 +106,31 @@ export default {
         },
       ],
       myStyle:{
-            backgroundColor:"black" 
-            }
+        backgroundColor:"black" 
+      }
     };
   },
      
   methods: {
-    onSubmit() {
-      console.log(this.email);
+    async login () {
+      try {
+        const user = await Auth.signIn(this.email, this.password)
+        console.log('user: ', user)
+        this.$router.push('calendar')
+      } catch (error) {
+        this.error = error
+        this.showError = true
+      }
     },
-    onReset() {
-      console.log(this.password);
-    },
+    // async resendConfirmationCode(username) {
+    //   try {
+    //     await Auth.resendSignUp(username);
+    //     console.log('code resent successfully');
+    //   } catch (err) {
+    //     console.log('error resending code: ', err);
+    //   }
+    // },
+    loginCognito () { this.$router.push('aws') }
   },
 };
 </script>

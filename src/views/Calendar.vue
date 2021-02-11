@@ -4,14 +4,13 @@
     <div class="content">
       <TopBar />
       <div class="components row">
-        <div class="col-9">
+        <div class="col-9 calendar">
           <CalendarComponent />
         </div>
-        <v-divider vertical></v-divider>
         <div class="col right-col">
           <p class="title">Compromissos:</p>
-          <div class="row group-data">
-            <p class="date col">{{ today }}</p>
+          <div class="row date">
+            <p class="col">{{ today }}</p>
             <v-btn
               text
               color="primary"
@@ -52,11 +51,16 @@
 </template>
 
 <script>
+/* eslint-disable no-unused-vars */
+
+
 // import { api, urls } from '../services/Api'
 import CalendarComponent from '@/components/CalendarComponent.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 import moment from '@/plugins/moment'
+import { DataStore, Predicates } from 'aws-amplify'
+import { Obra } from '@/models';
 
 export default {
   name: 'Calendar',
@@ -71,16 +75,23 @@ export default {
   },
   created () {
     this.today = moment().format('ll')
+    this.getObras()
   },
   methods: {
-    async login () {
+    async getObras () {
+      //try {
+        const obras = await DataStore.query(Obra, Predicates.ALL  )
+        console.log("Obras!", JSON.stringify(obras, null, 2))
+      //} catch (error) {
+      //  console.log("Error: ", error)
+      //}
     }
   }
 }
 </script>
 <style lang="css">
 html, body {
-  overflow-y: hidden;
+  overflow-y:auto;
 }
 .home {
   display: flex;
@@ -91,11 +102,15 @@ html, body {
 .content {
   width: 100%;
 }
+.calendar {
+  border-right: lightgray 0.1px solid;
+}
 .components {
   padding: 20px;
 }
 .right-col > .title {
   margin-top: 20px;
+  text-align: left;
 }
 .card-right {
   margin-top: 10px;
@@ -115,5 +130,10 @@ html, body {
   display: block;
   width: 65px !important;
   height: 65px !important;
+}
+.date {
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 </style>

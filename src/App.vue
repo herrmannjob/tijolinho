@@ -5,9 +5,9 @@
 </template>
 <style lang="scss">
 html, body{
-  overflow-y: hidden;
-  height: 100% !important;
-  width: 100% !important;
+ overflow-y: auto;
+ height:100vh;
+ width: 100vw !important;
 }
 #app {
   display: flex;

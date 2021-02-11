@@ -10,7 +10,7 @@
         arquitetura e engenharia inteligente!
       </h4>
       <div class="form-container">
-        <v-stepper v-model="e1">
+        <v-stepper v-model="e1" data-app style="display:grid">
           <v-stepper-header>
             <v-stepper-step :complete="e1 > 1" step="1">
               <p>Perfil</p>
@@ -26,9 +26,9 @@
           </v-stepper-header>
           <v-stepper-items>
             <v-stepper-content step="1">
-              <v-card class="mb-12" height="350px">
+              <v-card class="mb-12" height="380px">
                 <v-form v-model="valid">
-                  <v-container>
+                  <v-container style="padding-bottom:unset">
                     <v-text-field
                       v-model="firstname"
                       :rules="nameRules"
@@ -127,7 +127,7 @@
 <script>
 import image from "../assets/register.png";
 export default {
-  data () {
+  data() {
     return {
       date: null,
       e1: 1,
@@ -143,10 +143,10 @@ export default {
       email: "",
       password: "",
       emailRules: [
-        (v) => !!v || "E-mail is required",
-        (v) => /.+@.+/.test(v) || "E-mail must be valid",
+        (v) => !!v || "E-mail é obrigatório",
+        (v) => /.+@.+/.test(v) || "E-mail precisa ser em um formato válido",
       ],
-    }
+    };
   },
   watch: {
     menu(val) {
@@ -164,7 +164,7 @@ export default {
 html,
 body {
   overflow-y: hidden;
-  background-color: white!important;;
+  background-color: white !important;
 }
 .container-register {
   display: flex;
@@ -191,16 +191,20 @@ h4 {
   margin-right: 3rem;
   margin-left: 3rem;
 }
+.v-menu__content {
+  align-self: center !important;
+  justify-self: center !important;
+}
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */
-  body{
+  body {
     overflow-x: auto;
     overflow-y: auto;
   }
   img {
     display: none;
   }
-  p{
+  p {
     font-size: 4px;
   }
   nav {

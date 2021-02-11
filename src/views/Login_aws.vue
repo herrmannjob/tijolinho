@@ -28,6 +28,7 @@ export default {
       const user = await Auth.currentAuthenticatedUser()
       console.log(user)
       this.signedIn = true
+      this.$router.push('calendar')
     } catch (err) {
       this.signedIn = false
     }
