@@ -251,6 +251,10 @@ export const listUsuarios = /* GraphQL */ `
           createdAt
           updatedAt
         }
+        Obra {
+          nextToken
+          startedAt
+        }
       }
       nextToken
       startedAt
@@ -316,6 +320,20 @@ export const getUsuario = /* GraphQL */ `
         createdAt
         updatedAt
       }
+      Obra {
+        items {
+          id
+          nome
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        nextToken
+        startedAt
+      }
     }
   }
 `;
@@ -374,6 +392,10 @@ export const syncUsuarios = /* GraphQL */ `
           _lastChangedAt
           createdAt
           updatedAt
+        }
+        Obra {
+          nextToken
+          startedAt
         }
       }
       nextToken
@@ -1131,6 +1153,10 @@ export const getTarefa = /* GraphQL */ `
           createdAt
           updatedAt
         }
+        Obra {
+          nextToken
+          startedAt
+        }
       }
       CronogramaObra {
         id
@@ -1566,6 +1592,10 @@ export const getAgendaParticular = /* GraphQL */ `
           createdAt
           updatedAt
         }
+        Obra {
+          nextToken
+          startedAt
+        }
       }
     }
   }
@@ -1718,6 +1748,10 @@ export const getLembreteParticular = /* GraphQL */ `
           _lastChangedAt
           createdAt
           updatedAt
+        }
+        Obra {
+          nextToken
+          startedAt
         }
       }
     }
