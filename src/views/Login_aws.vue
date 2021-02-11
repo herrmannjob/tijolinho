@@ -23,28 +23,31 @@ const photoPickerConfig = {
 }
 export default {
   name: 'LoginAws',
+  data () {
+    return {
+      photoPickerConfig,
+      signedIn: false,
+      user: null
+    }
+  },
   async beforeCreate() {
     try {
-      const user = await Auth.currentAuthenticatedUser()
-      console.log(user)
+      this.user = await Auth.currentAuthenticatedUser()
       this.signedIn = true
       this.$router.push('calendar')
-    } catch (err) {
+    } catch (error) {
+      console.log('erro: ', error)
       this.signedIn = false
+      this.user = null
     }
     AmplifyEventBus.$on('authState', info => {
+      console.log('info: ', info)
       if (info === 'signedIn') {
         this.signedIn = true
       } else {
         this.signedIn = false
       }
     });
-  },
-  data () {
-    return {
-      photoPickerConfig,
-      signedIn: false
-    }
   }
 }
 </script>

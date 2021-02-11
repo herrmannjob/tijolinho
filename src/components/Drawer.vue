@@ -43,7 +43,7 @@ export default {
     },
     clients () {
       console.log('clients')
-      this.$router.push('calendar')
+      this.$router.push('client')
     },
     financial () {
       console.log('financial')

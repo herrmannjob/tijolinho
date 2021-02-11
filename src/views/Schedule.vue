@@ -13,7 +13,7 @@
           </v-avatar>
           <p class="username">{{ username }}</p>
 
-          <div class="group-data" data-app>
+          <div class="group-data-schedule" data-app>
             <v-select
               :items="tasks"
               label="Obra"
@@ -172,7 +172,7 @@ html, body {
   margin-bottom: 10px;
   min-height: 60px;
 }
-.group-data {
+.group-data-schedule{
   display: grid;
   flex-direction: column;
   align-items: center;

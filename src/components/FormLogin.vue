@@ -91,6 +91,7 @@ export default {
     return {
       email: "",
       password: "",
+      user: null,
       showError: false,
       error: '',
       show: false,
@@ -114,22 +115,13 @@ export default {
   methods: {
     async login () {
       try {
-        const user = await Auth.signIn(this.email, this.password)
-        console.log('user: ', user)
+        this.user = await Auth.signIn(this.email, this.password)
         this.$router.push('calendar')
       } catch (error) {
         this.error = error
         this.showError = true
       }
     },
-    // async resendConfirmationCode(username) {
-    //   try {
-    //     await Auth.resendSignUp(username);
-    //     console.log('code resent successfully');
-    //   } catch (err) {
-    //     console.log('error resending code: ', err);
-    //   }
-    // },
     loginCognito () { this.$router.push('aws') }
   },
 };

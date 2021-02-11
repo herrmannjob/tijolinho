@@ -39,72 +39,64 @@
               label="E-mail"
               required
             ></v-text-field>
-            <v-dialog
-                        ref="dialog"
-                        v-model="modal"
-                        :return-value.sync="date"
-                        persistent
-                        width="290px"
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="date"
-                            label="Data de Inicio"
-                            prepend-icon="mdi-calendar"
-                            readonly
-                            v-bind="attrs"
-                            v-on="on"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker v-model="date" scrollable>
-                          <v-spacer></v-spacer>
-                          <v-btn text color="secondary" @click="modal = false">
-                            Cancel
-                          </v-btn>
-                          <v-btn
-                            text
-                            color="secondary"
-                            @click="$refs.dialog.save(date)"
-                          >
-                            OK
-                          </v-btn>
-                        </v-date-picker>
-                      </v-dialog>                    
+            <v-menu
+              ref="menuNasc"
+              v-model="menuNasc"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              offset-y
+              min-width="auto"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="dateNasc"
+                  label="Data de Nascimento"
+                  prepend-icon="mdi-calendar"
+                  readonly
+                  required
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                ref="pickerNasc"
+                v-model="dateNasc"
+                :max="new Date().toISOString().substr(0, 10)"
+                min="1950-01-01"
+                @change="saveNasc"
+              ></v-date-picker>
+            </v-menu>
           </v-col>
 
           <v-col cols="12" md="6">
             <v-text-field label="Conjuge" required></v-text-field>
-                                <v-dialog
-                        ref="dialog"
-                        v-model="modal"
-                        :return-value.sync="date"
-                        persistent
-                        width="290px"
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="date"
-                            label="Data nascimento Conjuge"
-                            prepend-icon="mdi-calendar"
-                            readonly
-                            v-bind="attrs"
-                            v-on="on"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker v-model="date" scrollable>
-                          <v-spacer></v-spacer>
-                          <v-btn text color="secondary" @click="modal = false">
-                            Cancel
-                          </v-btn>
-                          <v-btn
-                            text
-                            color="secondary"
-                            @click="$refs.dialog.save(date)"
-                          >
-                            OK
-                          </v-btn>
-                        </v-date-picker>
-                      </v-dialog>
+            <v-menu
+              ref="menuNascConj"
+              v-model="menuNascConj"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              offset-y
+              min-width="auto"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="dateNascConj"
+                  label="Data de Nascimento do Conjuge"
+                  prepend-icon="mdi-calendar"
+                  readonly
+                  required
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                ref="pickerNascConj"
+                v-model="dateNascConj"
+                :max="new Date().toISOString().substr(0, 10)"
+                min="1950-01-01"
+                @change="saveNascConj"
+              ></v-date-picker>
+            </v-menu>
             <v-text-field label="Telefone" required></v-text-field>
           </v-col>
           <div>
@@ -165,41 +157,9 @@
                     </v-col>
 
                     <v-col cols="12" md="6">
-                      <v-dialog
-                        ref="dialog"
-                        v-model="modal"
-                        :return-value.sync="date"
-                        persistent
-                        width="290px"
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="date"
-                            label="Data de Inicio"
-                            prepend-icon="mdi-calendar"
-                            readonly
-                            v-bind="attrs"
-                            v-on="on"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker v-model="date" scrollable>
-                          <v-spacer></v-spacer>
-                          <v-btn text color="secondary" @click="modal = false">
-                            Cancel
-                          </v-btn>
-                          <v-btn
-                            text
-                            color="secondary"
-                            @click="$refs.dialog.save(date)"
-                          >
-                            OK
-                          </v-btn>
-                        </v-date-picker>
-                      </v-dialog>
-
                       <v-menu
-                        ref="menu"
-                        v-model="menu"
+                        ref="menuInit"
+                        v-model="menuInit"
                         :close-on-content-click="false"
                         transition="scale-transition"
                         offset-y
@@ -207,7 +167,35 @@
                       >
                         <template v-slot:activator="{ on, attrs }">
                           <v-text-field
-                            v-model="date"
+                            v-model="dateInit"
+                            label="Data de inicio"
+                            prepend-icon="mdi-calendar"
+                            readonly
+                            required
+                            v-bind="attrs"
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          ref="pickerInit"
+                          v-model="dateInit"
+                          :max="new Date().toISOString().substr(0, 10)"
+                          min="1950-01-01"
+                          @change="saveInit"
+                        ></v-date-picker>
+                      </v-menu>
+
+                      <v-menu
+                        ref="menuEnd"
+                        v-model="menuEnd"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                        min-width="auto"
+                      >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field
+                            v-model="dateEnd"
                             label="Termino previsto"
                             prepend-icon="mdi-calendar"
                             readonly
@@ -217,11 +205,11 @@
                           ></v-text-field>
                         </template>
                         <v-date-picker
-                          ref="picker"
-                          v-model="date"
+                          ref="pickerEnd"
+                          v-model="dateEnd"
                           :max="new Date().toISOString().substr(0, 10)"
                           min="1950-01-01"
-                          @change="save"
+                          @change="saveEnd"
                         ></v-date-picker>
                       </v-menu>
                       <v-text-field
@@ -242,11 +230,7 @@
                     <v-col cols="12" md="6">
                       <v-text-field label="Endereço" required></v-text-field>
 
-                      <v-select
-                        :items="items"
-                        :menu-props="{ top: true, offsetY: true }"
-                        label="Cidade"
-                      ></v-select>
+                      <v-text-field label="Cidade" required></v-text-field>
                       <v-select
                         :items="estados"
                         :menu-props="{ top: true, offsetY: true }"
@@ -290,10 +274,50 @@ export default {
       imageUrl: "",
       imageFile: "",
       date: null,
+      dateInit: null,
+      dateEnd: null,
+      dateNasc: null,
+      dateNascConj: null,
       e1: 1,
       picker: new Date().toISOString().substr(0, 10),
+      pickerInit: new Date().toISOString().substr(0, 10),
+      pickerEnd: new Date().toISOString().substr(0, 10),
+      pickerNasc: new Date().toISOString().substr(0, 10),
+      pickerNascConj: new Date().toISOString().substr(0, 10),
       menu: false,
-      estados: ["MG", "PA", "PB", "PR", "PE"],
+      menuInit: false,
+      menuEnd: false,
+      menuNasc: false,
+      menuNascConj: false,
+      estados: [
+        "AC",
+        "AL",
+        "AP",
+        "AM",
+        "BA",
+        "CE",
+        "DF",
+        "ES",
+        "GO",
+        "MA",
+        "MT",
+        "MS",
+        "MG",
+        "PA",
+        "PB",
+        "PR",
+        "PE",
+        "PI",
+        "RJ",
+        "RN",
+        "RS",
+        "RO",
+        "RR",
+        "SC",
+        "SP",
+        "SE",
+        "TO",
+      ],
       categoria: [
         "Residencial",
         "Reforma",
@@ -319,10 +343,35 @@ export default {
     menu(val) {
       val && setTimeout(() => (this.$refs.picker.activePicker = "YEAR"));
     },
+    menuInit(val) {
+      val && setTimeout(() => (this.$refs.pickerInit.activePicker = "YEAR"));
+    },
+    menuEnd(val) {
+      val && setTimeout(() => (this.$refs.pickerEnd.activePicker = "YEAR"));
+    },
+    menuNasc(val) {
+      val && setTimeout(() => (this.$refs.pickerNasc.activePicker = "YEAR"));
+    },
+    menuNascConj(val) {
+      val &&
+        setTimeout(() => (this.$refs.pickerNascConj.activePicker = "YEAR"));
+    },
   },
   methods: {
     save(date) {
       this.$refs.menu.save(date);
+    },
+    saveInit(dateInit) {
+      this.$refs.menuInit.save(dateInit);
+    },
+    saveEnd(dateEnd) {
+      this.$refs.menuEnd.save(dateEnd);
+    },
+    saveNasc(dateNasc) {
+      this.$refs.menuNasc.save(dateNasc);
+    },
+    saveNascConj(dateNascConj) {
+      this.$refs.menuNascConj.save(dateNascConj);
     },
     pickFile() {
       this.$refs.image.click();
@@ -497,6 +546,6 @@ export default {
     font-size: 1rem;
     vertical-align: center;
     position: relative;
-}
+  }
 }
 </style>

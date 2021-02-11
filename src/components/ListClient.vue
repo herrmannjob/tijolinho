@@ -8,60 +8,67 @@
             label="Buscar Cliente"
             prepend-inner-icon="mdi-magnify"
           ></v-text-field>
-          <v-btn
-            color="primary"
-            class="btn-primario"
-            data-app
-            @click="openDialog"
-            v-bind="attrs"
-            v-on="on"
-            style="margin-bottom:1rem; margin-left:0; margin-top:0"
-          >
-            <v-icon>mdi-plus</v-icon>
-
-            <router-link class="link-client" to="/register-client"
-              >NOVO CLIENTE</router-link
+          <div style="align-items:flex-start;width:1rem">
+            <v-btn
+              color="primary"
+              class="btn-primario"
+              data-app
+              @click="openDialog"
+              v-bind="attrs"
+              v-on="on"
+              style="margin-bottom:0.5rem; margin-left:0; margin-top:0"
             >
-          </v-btn>
+              <v-icon>mdi-plus</v-icon>
 
-          <v-card>
-            <v-list flat>
-              <template v-for="(item, index) in items.slice(0, 6)">
-                <v-subheader v-if="item.header" :key="item.header">
-                  {{ item.header }}
-                </v-subheader>
-                <v-divider
-                  v-else-if="item.divider"
-                  :key="index"
-                  :inset="item.inset"
-                ></v-divider>
-                <v-list-item v-else :key="item.title">
-                  <v-list-item-content>
-                    <div>
-                      <v-list-item-avatar>
-                        <img :src="item.avatar" />
-                      </v-list-item-avatar>
+              <router-link class="link-client" to="/register-client"
+                >NOVO CLIENTE</router-link
+              >
+            </v-btn>
+          </div>
+          <v-card max-width="900" class="mx-auto">
+            <v-list-item v-for="item in itemsTitle" :key="item.title">
+              <v-list-item-avatar>
+                <v-list-item-title v-text="item.avatar"></v-list-item-title>
+              </v-list-item-avatar>
 
-                      <v-list-item-title v-html="item.name">
-                      </v-list-item-title>
+              <v-list-item-content>
+                <v-list-item-title v-text="item.title"></v-list-item-title>
+              </v-list-item-content>
+              <v-list-item-content>
+                <v-list-item-title v-text="item.obras"></v-list-item-title>
+              </v-list-item-content>
+              <v-list-item-icon>
+                <p>Ações</p>
+              </v-list-item-icon>
+            </v-list-item>
+            <v-list>
+              <v-list-item v-for="item in items" :key="item.title">
+                <v-list-item-avatar>
+                  <v-img :src="item.avatar"></v-img>
+                </v-list-item-avatar>
 
-                      <v-list-item-subtitle
-                        v-html="item.obras"
-                      ></v-list-item-subtitle>
-
-                      <v-icon medium class="mr-2" @click="editItem(item)">
-                        mdi-pencil
-                      </v-icon>
-                      <v-icon medium @click="deleteItem(item)">
-                        mdi-delete
-                      </v-icon>
-                      <v-icon medium @click="deleteItem(item)">
-                        mdi-eye
-                      </v-icon>
-                    </div>
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
+                <v-list-item-content>
+                  <v-list-item-title v-text="item.title"></v-list-item-title>
+                </v-list-item-content>
+                <v-list-item-content>
+                  <v-list-item-title v-text="item.obras"></v-list-item-title>
+                </v-list-item-content>
+                <v-list-item-icon>
+                  <v-icon>
+                    mdi-pencil
+                  </v-icon>
+                </v-list-item-icon>
+                <v-list-item-icon>
+                  <v-icon>
+                    mdi-delete
+                  </v-icon>
+                </v-list-item-icon>
+                <v-list-item-icon>
+                  <v-icon>
+                    mdi-eye
+                  </v-icon>
+                </v-list-item-icon>
+              </v-list-item>
             </v-list>
           </v-card>
         </div>
@@ -115,25 +122,34 @@ export default {
     return {
       today: "",
       username: "Usuário Teste",
-
+      itemsTitle: [
+        {
+          title: "Nome",
+          avatar: "Foto",
+          obras: "Obras ativas",
+          icons: "Ações",
+        },
+      ],
       items: [
-        { header: "Meus clientes" },
         {
+          title: "Jason Oner",
           avatar: "https://cdn.vuetifyjs.com/images/lists/1.jpg",
-          name: "Joao Barcelos",
-          obras: `<span class="font-weight-bold">Quantitade de Obras:3 </span> `,
+          obras: 2,
         },
-        { divider: true, inset: true },
         {
+          title: "Travis Howard",
           avatar: "https://cdn.vuetifyjs.com/images/lists/2.jpg",
-          name: "Claudio Oliveira",
-          obras: `<span class="font-weight-bold">Quantitade de Obras:3 </span> `,
+          obras: 3,
         },
-        { divider: true, inset: true },
         {
+          title: "Ali Connors",
           avatar: "https://cdn.vuetifyjs.com/images/lists/3.jpg",
-          name: "Mariana Vasconcelos",
-          obras: `<span class="font-weight-bold">Quantitade de Obras:3 </span> `,
+          obras: 4,
+        },
+        {
+          title: "Cindy Baker",
+          avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
+          obras: 8,
         },
       ],
     };
@@ -145,19 +161,27 @@ html,
 body {
   overflow-y: auto;
 }
+.teste1 {
+  flex: 0, 0 !important;
+}
 .home {
   display: flex;
   align-self: stretch;
-  height: 100% !important;
+  height: 100vh;
   width: 100%;
 }
 .content {
-  width: 100%;
+  width: 100vw;
+}
+.paragrafo {
+  float: inline-start;
+  flex: 1 1;
 }
 .link-client {
   color: aliceblue;
   text-decoration: none;
 }
+
 .components {
   padding: 20px;
 }
@@ -165,12 +189,13 @@ body {
   margin-top: 20px;
 }
 .card-right {
-  margin-top: 10px;
-  margin-bottom: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
   min-height: 60px;
 }
 .group-data {
-  align-items: center;
+  align-items: flex-start;
+  flex-direction: row;
   padding-left: 25px;
   margin-top: 20px;
   margin-bottom: 20px;
@@ -179,7 +204,7 @@ body {
   padding: 0;
 }
 .avatar {
-  display: block;
+  display: flex;
   width: 65px !important;
   height: 65px !important;
 }

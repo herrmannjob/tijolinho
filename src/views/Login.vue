@@ -17,25 +17,28 @@ export default {
   data () {
     return {
       signedIn: false,
-      error: ''
+      error: '',
+      user: null
     }
   },
   async beforeCreate() {
     try {
-      const user = await Auth.currentAuthenticatedUser()
-      console.log('user: ', user)
+      this.user = await Auth.currentAuthenticatedUser()
       this.signedIn = true
+      this.$router.push('calendar')
     } catch (error) {
-      this.error = error
+      console.log('erro: ', error)
       this.signedIn = false
+      this.user = null
     }
     AmplifyEventBus.$on('authState', info => {
+      console.log('info: ', info)
       if (info === 'signedIn') {
         this.signedIn = true
       } else {
         this.signedIn = false
       }
     });
-  }
+  },
 }
 </script>
