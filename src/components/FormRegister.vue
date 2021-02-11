@@ -90,7 +90,7 @@
               <v-card class="mb-12" color="grey lighten-1" height="350px">
                 <v-form v-model="valid">
                   <v-text-field label="Empresa" v-model="company" required></v-text-field>
-                  <v-text-field label="Telefone" v-model="phone" required></v-text-field>
+                  <v-text-field label="Telefone" v-model="phone" hint="Apenas números (13 dígitos)" placeholder="+55 84 98765 4321" :rules="phone_rules" required></v-text-field>
                 </v-form>
 
                 <v-btn color="primary" @click="e1 = 3">
@@ -179,6 +179,10 @@ export default {
         (v) => !!v || "E-mail é obrigatório",
         (v) => /.+@.+/.test(v) || "E-mail precisa ser em um formato válido",
       ],
+      phone_rules: [
+        (v) => !!v || "Telefone é obrigatório",
+        (v) => v.length === 13 || "Telefone com 13 dígitos - +55 84 98765 4321",
+      ],
       error_dialog: false,
       error: ''
     };
@@ -198,6 +202,18 @@ export default {
           username: this.email,          // optional
           password: this.password
         })
+        this.phone = `+${this.phone.substr(0,2)} ${this.phone.substr(2,2)} ${this.phone.substr(4,5)} ${this.phone.substr(9,4)}`
+        this.date += '-00:00'
+        this.resendConfirmationCode()
+      } catch (error) {
+        this.error = error
+        this.error_dialog = true
+      }
+    },
+    async resendConfirmationCode() {
+      try {
+        await Auth.resendSignUp(this.email)
+        console.log('code resent successfully')
         this.addUser()
       } catch (error) {
         this.error = error

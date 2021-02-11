@@ -7,7 +7,7 @@
         sm="4"
       >
         <v-select
-          :items="items"
+          :items="select_view"
           label="Calendário"
           dense
           v-model="calendar_view"
@@ -20,7 +20,7 @@
         sm="4"
       >
         <v-select
-          :items="items"
+          :items="clients"
           label="Cliente"
           dense
         ></v-select>
@@ -31,7 +31,7 @@
         sm="4"
       >
         <v-select
-          :items="items"
+          :items="constructions"
           label="Obra"
           dense
         ></v-select>
@@ -62,8 +62,9 @@ import CalendarWeek from '@/components/CalendarWeek'
 import CalendarDay from '@/components/CalendarDay'
 import CalendarMonth from '@/components/CalendarMonth'
 
-// import { DataStore } from '@aws-amplify/datastore';
-// import { AgendaObra } from '../../config/models';
+import { DataStore, Predicates } from 'aws-amplify'
+import { Obra, Usuario } from '@/models'
+import { Auth  } from 'aws-amplify'
 
 export default {
   name: 'CalendarComponent',
@@ -72,8 +73,11 @@ export default {
   },
   data () {
     return {
-      items: ['Dia', 'Semana', 'Mês'],
+      user: null,
+      select_view: ['Dia', 'Semana', 'Mês'],
       calendar_view: '',
+      clients: ['Nenhum cliente cadastrado'],
+      constructions: ['Nenhuma obra cadastrada'],
       view_week: true,
       view_day: false,
       view_month: false,
@@ -127,9 +131,39 @@ export default {
       task_observacao: null
     }
   },
-  created () {
+  async created () {
+    this.user = await Auth.currentAuthenticatedUser()
+    this.getObras()
+    this.getClients()
   },
   methods: {
+    async getObras () {
+      try {
+        const obras = await DataStore.query(Obra, data => data.usuarioID("eq", this.user.username))
+        console.log(obras)
+        if (obras.length > 0) {
+          this.constructions = []
+          obras.map(obra => {
+            this.constructions.push(obra.nome)
+          })
+        }
+      } catch (error) {
+        console.log("Error: ", error)
+      }
+    },
+    async getClients () {
+      try {
+        const clientes = await DataStore.query(Usuario, Predicates.ALL  )
+        if (clientes.length > 0) {
+          this.clients = []
+          clientes.map(cliente => {
+            this.clients.push(cliente.nome)
+          })
+        }
+      } catch (error) {
+        console.log("Error: ", error)
+      }
+    },
     changeView () {
       switch (this.calendar_view) {
         case 'Mês':
@@ -137,23 +171,18 @@ export default {
           this.view_week = false
           this.view_day = false
           this.view_month = true
-          // this.fullCalendar('changeView', 'dayGridMonth')
           break;
         case 'Dia':
-          // $('#calendar').fullCalendar( 'changeView', 'timeGridDay');
           this.calendarOptions.initialView = 'timeGridDay'
           this.view_week = false
           this.view_month = false
           this.view_day = true
-          // this.fullCalendar('changeView', 'timeGridDay')
           break;
         default:
-          // document.getElementById('calendar').fullCalendar( 'changeView', 'timeGridWeek');
           this.calendarOptions.initialView = 'timeGridWeek'
           this.view_day = false
           this.view_month = false
           this.view_week = true
-          // this.fullCalendar('changeView', 'timeGridWeek')
           break;
       }
     },
