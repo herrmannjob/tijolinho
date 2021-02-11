@@ -84,7 +84,8 @@
   </div>
 </template>
 <script>
-import { Auth } from 'aws-amplify'
+// import { Auth } from 'aws-amplify'
+import Functions from '@/functions/Functions'
 export default {
   name: "FormLogin",
   data() {
@@ -114,15 +115,9 @@ export default {
      
   methods: {
     async login () {
-      try {
-        this.user = await Auth.signIn(this.email, this.password)
-        this.$router.push('calendar')
-      } catch (error) {
-        this.error = error
-        this.showError = true
-      }
+      Functions.login(this.$router, this.email, this.password)
     },
-    loginCognito () { this.$router.push('aws') }
+    loginCognito () { Functions.loginCognito(this.$router) }
   },
 };
 </script>
