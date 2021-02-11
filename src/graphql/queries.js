@@ -325,6 +325,7 @@ export const getUsuario = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -475,6 +476,7 @@ export const listObras = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -535,6 +537,7 @@ export const getObra = /* GraphQL */ `
       id
       nome
       foto
+      usuarioID
       _version
       _deleted
       _lastChangedAt
@@ -634,6 +637,7 @@ export const syncObras = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -774,6 +778,7 @@ export const listCronogramaObras = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -803,6 +808,7 @@ export const getCronogramaObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -883,6 +889,7 @@ export const syncCronogramaObras = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -927,6 +934,7 @@ export const getControleFinanceiroObra = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -1173,6 +1181,7 @@ export const getTarefa = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -1407,6 +1416,7 @@ export const getAgendaObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -1482,6 +1492,7 @@ export const listAgendaObras = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -1523,6 +1534,7 @@ export const syncAgendaObras = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -1867,6 +1879,7 @@ export const getLembreteObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -1942,6 +1955,7 @@ export const listLembreteObras = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -1983,6 +1997,7 @@ export const syncLembreteObras = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt

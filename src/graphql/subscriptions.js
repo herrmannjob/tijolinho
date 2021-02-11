@@ -221,6 +221,7 @@ export const onCreateUsuario = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -297,6 +298,7 @@ export const onUpdateUsuario = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -373,6 +375,7 @@ export const onDeleteUsuario = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -430,6 +433,7 @@ export const onCreateObra = /* GraphQL */ `
       id
       nome
       foto
+      usuarioID
       _version
       _deleted
       _lastChangedAt
@@ -518,6 +522,7 @@ export const onUpdateObra = /* GraphQL */ `
       id
       nome
       foto
+      usuarioID
       _version
       _deleted
       _lastChangedAt
@@ -606,6 +611,7 @@ export const onDeleteObra = /* GraphQL */ `
       id
       nome
       foto
+      usuarioID
       _version
       _deleted
       _lastChangedAt
@@ -747,6 +753,7 @@ export const onCreateCronogramaObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -816,6 +823,7 @@ export const onUpdateCronogramaObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -885,6 +893,7 @@ export const onDeleteCronogramaObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -969,6 +978,7 @@ export const onCreateControleFinanceiroObra = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -1011,6 +1021,7 @@ export const onUpdateControleFinanceiroObra = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -1053,6 +1064,7 @@ export const onDeleteControleFinanceiroObra = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -1138,6 +1150,7 @@ export const onCreateTarefa = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -1291,6 +1304,7 @@ export const onUpdateTarefa = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -1444,6 +1458,7 @@ export const onDeleteTarefa = /* GraphQL */ `
           id
           nome
           foto
+          usuarioID
           _version
           _deleted
           _lastChangedAt
@@ -1579,6 +1594,7 @@ export const onCreateAgendaObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -1649,6 +1665,7 @@ export const onUpdateAgendaObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -1719,6 +1736,7 @@ export const onDeleteAgendaObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -2179,6 +2197,7 @@ export const onCreateLembreteObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -2249,6 +2268,7 @@ export const onUpdateLembreteObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
@@ -2319,6 +2339,7 @@ export const onDeleteLembreteObra = /* GraphQL */ `
         id
         nome
         foto
+        usuarioID
         _version
         _deleted
         _lastChangedAt
