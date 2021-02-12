@@ -11,7 +11,7 @@
         <v-card-text v-if="message.code.length > 0" style="text-align:left">
           Código: {{ message.code }}
         </v-card-text>
-        <v-card-text style="text-align:left">
+        <v-card-text v-if="message.text.length > 0" style="text-align:left">
           Mensagem: {{ message.text }}
         </v-card-text>
         <v-card-actions>

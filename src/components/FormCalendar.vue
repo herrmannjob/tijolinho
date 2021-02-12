@@ -124,7 +124,6 @@ export default {
         this.message.text = response.error.message
       }
       this.modal = true
-      console.log(response)
     }
   }
 }

@@ -11,8 +11,8 @@
       </v-list-item-avatar>
       
       <span class="top-menu">
-        {{ user_email }}
-
+        <span v-if="username.length > 0">{{ username }}</span>
+        <span v-else>{{ user_email }}</span>
         <v-menu
           bottom
           offset-y
@@ -81,6 +81,9 @@
 // import { api, urls } from '../services/Api'
 import { AmplifyEventBus } from 'aws-amplify-vue'
 import { Auth  } from 'aws-amplify'
+import Functions from '@/functions/Functions'
+import { DataStore } from 'aws-amplify'
+import { Usuario } from '@/models'
 export default {
   name: 'TopBar',
   components: {
@@ -105,9 +108,11 @@ export default {
   },
   async beforeCreate() {
     try {
-      this.user = await Auth.currentAuthenticatedUser()
+      this.user = await Functions.isAuth()
       this.signedIn = true
       this.user_email = this.user.attributes.email
+      const user = await DataStore.query(Usuario, data => data.email("eq", this.user_email))
+      if (user.length > 0) this.username = user[0].nome
     } catch (error) {
       this.signedIn = false
       this.user = null

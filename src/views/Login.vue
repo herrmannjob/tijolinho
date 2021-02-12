@@ -8,7 +8,7 @@
 
 import FormLogin from '@/components/FormLogin.vue'
 import { AmplifyEventBus } from 'aws-amplify-vue'
-import { Auth } from 'aws-amplify'
+import Functions from '@/functions/Functions'
 export default {
   name: 'Login',
   components: {
@@ -23,7 +23,7 @@ export default {
   },
   async beforeCreate() {
     try {
-      this.user = await Auth.currentAuthenticatedUser()
+      this.user = await Functions.isAuth()
       this.signedIn = true
       this.$router.push('calendar')
     } catch (error) {
