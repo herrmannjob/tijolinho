@@ -54,47 +54,23 @@
         ></v-carousel-item>
       </v-carousel>
     </div>
-    <v-dialog
-      v-model="showError"
-      persistent
-      max-width="500"
-    >
-      <v-card>
-        <v-card-title class="headline">
-          Ocorreu um erro...
-        </v-card-title>
-        <v-card-text v-if="error.code" style="text-align:left">
-          Código: {{ error.code }}
-        </v-card-text>
-        <v-card-text style="text-align:left">
-          Mensagem: {{ error.message }}
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="green darken-1"
-            text
-            @click="showError = false"
-          >
-            Fechar
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <ResponseModal :modal.sync="modal" :message="message" />
   </div>
 </template>
 <script>
 // import { Auth } from 'aws-amplify'
 import Functions from '@/functions/Functions'
+import ResponseModal from '@/components/ResponseModal.vue'
 export default {
   name: "FormLogin",
+  components: { ResponseModal },
   data() {
     return {
       email: "",
       password: "",
       user: null,
-      showError: false,
-      error: '',
+      modal: false,
+      message: { title: '', code: '', text: '' },
       show: false,
       items: [
       {
@@ -115,9 +91,16 @@ export default {
      
   methods: {
     async login () {
-      Functions.login(this.$router, this.email, this.password)
+      const response = await Functions.login(this.email, this.password)
+      if (response.status === 'ok') this.$router.push('/calendar')
+      else {
+        this.message.title = "Ocorreu um erro..."
+        this.message.code = response.error.code
+        this.message.text = response.error.message
+        this.modal = true
+      }
     },
-    loginCognito () { Functions.loginCognito(this.$router) }
+    loginCognito () { this.$router.push('aws') }
   },
 };
 </script>

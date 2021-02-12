@@ -62,9 +62,8 @@ import CalendarWeek from '@/components/CalendarWeek'
 import CalendarDay from '@/components/CalendarDay'
 import CalendarMonth from '@/components/CalendarMonth'
 
-import { DataStore, Predicates } from 'aws-amplify'
-import { Obra, Usuario } from '@/models'
-import { Auth  } from 'aws-amplify'
+import { Obra, Usuario, Tarefa } from '@/models'
+import Functions from '@/functions/Functions'
 
 export default {
   name: 'CalendarComponent',
@@ -100,25 +99,6 @@ export default {
         dateClick: this.dateClick,
         // select: this.selectDate,
         events: [
-          {
-              title: 'Reunião com Edu',
-              start: '2021-02-02T10:00:00',
-              end: '2021-02-02T11:00:00',
-          },
-          {
-              title: 'Tijolinho',
-              start: '2021-02-03T18:00:00',
-              end: '2021-02-03T18:20:00',
-          },
-          {
-              title: 'BCH237',
-              start: '2021-02-05T10:30:00',
-              end: '2021-02-05T11:30:00',
-              extendedProps: {
-                  department: 'BioChemistry'
-              },
-              description: 'Lecture'
-          }
         ]
       },
       form: false,
@@ -132,35 +112,24 @@ export default {
     }
   },
   async created () {
-    this.user = await Auth.currentAuthenticatedUser()
+    this.user = await Functions.isAuth()
     this.getObras()
-    this.getClients()
+    this.getTasks()
+    // this.getClients()
   },
   methods: {
     async getObras () {
-      try {
-        const obras = await DataStore.query(Obra, data => data.usuarioID("eq", this.user.username))
-        if (obras.length > 0) {
-          this.constructions = []
-          obras.map(obra => {
-            this.constructions.push(obra.nome)
-          })
-        }
-      } catch (error) {
-        console.log("Error: ", error)
-      }
+      const response = await Functions.getById(Obra, this.user.username)
+      if (response.status === 'ok') this.constructions = response.data
     },
     async getClients () {
-      try {
-        const clientes = await DataStore.query(Usuario, Predicates.ALL)
-        if (clientes.length > 0) {
-          clientes.map(cliente => {
-            this.clients.push(cliente.nome)
-          })
-        }
-      } catch (error) {
-        console.log("Error: ", error)
-      }
+      const response = await Functions.getAll(Usuario)
+      if (response.status === 'ok') this.clients = response.data
+    },
+    async getTasks () {
+      const response = await Functions.getAll(Tarefa)
+      console.log(response)
+      if (response.status === 'ok') this.calendarOptions.events = response.data
     },
     changeView () {
       switch (this.calendar_view) {
