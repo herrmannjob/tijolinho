@@ -40,11 +40,11 @@
     
     <FormCalendar :form.sync="form" :date="date_clicked" />
 
-    <CalendarWeek :options="calendarOptions" v-if="view_week" />
+    <CalendarWeek :options="calendarOptions" v-if="view_week" ref="calendar" />
 
-    <CalendarDay :options="calendarOptions" v-if="view_day" />
+    <CalendarDay :options="calendarOptions" v-if="view_day" ref="calendar" />
 
-    <CalendarMonth :options="calendarOptions" v-if="view_month" />
+    <CalendarMonth :options="calendarOptions" v-if="view_month" ref="calendar" />
 
     <FullCalendar :options="calendarOptions" v-show="false" />
   </v-container>
@@ -117,7 +117,12 @@ export default {
     this.getTasks()
     // this.getClients()
   },
+  // updated () { this.refreshEvents() },
   methods: {
+    refreshEvents () {
+      console.log('refresh')
+      this.$refs.calendar.$emit('refetch-events')
+    },
     async getObras () {
       const response = await Functions.getById(Obra, this.user.username)
       if (response.status === 'ok') this.constructions = response.data
@@ -128,7 +133,6 @@ export default {
     },
     async getTasks () {
       const response = await Functions.getAll(Tarefa)
-      console.log(response)
       if (response.status === 'ok') this.calendarOptions.events = response.data
     },
     changeView () {
