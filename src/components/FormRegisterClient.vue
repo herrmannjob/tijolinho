@@ -224,22 +224,17 @@
                   <v-row>
                     <v-col cols="12" md="6">
                       <v-text-field label="Telefone" required></v-text-field>
-                      <v-text-field label="Cep" required></v-text-field>
+                      <v-text-field label="Cep" required v-model="cep" @change="searchCep" @keyup="searchCep()"></v-text-field>
                       <v-text-field label="Complemento" required></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6">
-                      <v-text-field label="Endereço" required></v-text-field>
+                      <v-text-field  v-model="logradouro" label="Rua" required></v-text-field>
 
-                      <v-text-field label="Cidade" required></v-text-field>
-                      <v-select
-                        :items="estados"
-                        :menu-props="{ top: true, offsetY: true }"
-                        label="Estado"
-                      ></v-select>
+                      <v-text-field  v-model="cidade" label="Cidade" required></v-text-field>
+                         <v-text-field  v-model="estado" label="Estado" required></v-text-field>
                     </v-col>
                   </v-row>
                 </v-form>
-                <small>*indicates required field</small>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
@@ -265,14 +260,22 @@
 </template>
 <script>
 import image from "../assets/register.png";
+import axios from 'axios'
 export default {
   data() {
     return {
+      /* eslint-disable no-mixed-spaces-and-tabs */
       title: "Image Upload",
       dialog: false,
       imageName: "",
       imageUrl: "",
       imageFile: "",
+      cep : null,
+      estado:null,
+      logradouro: null,
+      cidade:null,
+	   	data : null,
+		  messageCep: null ,
       date: null,
       dateInit: null,
       dateEnd: null,
@@ -289,35 +292,6 @@ export default {
       menuEnd: false,
       menuNasc: false,
       menuNascConj: false,
-      estados: [
-        "AC",
-        "AL",
-        "AP",
-        "AM",
-        "BA",
-        "CE",
-        "DF",
-        "ES",
-        "GO",
-        "MA",
-        "MT",
-        "MS",
-        "MG",
-        "PA",
-        "PB",
-        "PR",
-        "PE",
-        "PI",
-        "RJ",
-        "RN",
-        "RS",
-        "RO",
-        "RR",
-        "SC",
-        "SP",
-        "SE",
-        "TO",
-      ],
       categoria: [
         "Residencial",
         "Reforma",
@@ -358,6 +332,17 @@ export default {
     },
   },
   methods: {
+    	searchCep(){
+			if(this.cep.length == 8) {
+				axios.get(`https://viacep.com.br/ws/${ this.cep }/json/`)
+				.then( response => this.data = response.data )
+				.catch( error => console.log(error) )
+          console.log("rua",this.data)
+          this.logradouro= this.data.logradouro
+          this.cidade =this.data.localidade
+            this.estado =this.data.uf
+			}
+		},
     save(date) {
       this.$refs.menu.save(date);
     },
