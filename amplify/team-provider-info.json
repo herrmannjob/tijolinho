@@ -14,6 +14,12 @@
     "categories": {
       "auth": {
         "tijolinhoawsprojetobe40f64c": {}
+      },
+      "function": {
+        "S3Trigger08418c7d": {
+          "deploymentBucketName": "amplify-tijolinhoaws-dev-101559-deployment",
+          "s3Key": "amplify-builds/S3Trigger08418c7d-5a42516d553756664f79-build.zip"
+        }
       }
     }
   }
