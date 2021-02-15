@@ -19,6 +19,7 @@
             <v-text-field
               label="Tarefa*"
               required
+              v-model="title"
             ></v-text-field>
 
             <v-select
@@ -71,28 +72,58 @@
         <v-btn
           color="blue darken-1"
           text
+          @click="save"
         >
           Salvar
         </v-btn>
       </v-card-actions>
     </v-card>
+    <ResponseModal :modal.sync="modal" :message="message" />
   </v-dialog>
 </template>
 
 <script>
+import { Tarefa } from '@/models'
+import Functions from '@/functions/Functions'
+import ResponseModal from '@/components/ResponseModal.vue'
 export default {
   name: 'FormCalendar',
+  components: { ResponseModal },
   props: {
     form: Boolean,
     date: String,
   },
   data () {
     return {
+      title: '',
+      start_date: '',
+      end_date: '',
+      modal: false,
+      message: { title: '', code: '', text: '' }
     }
   },
   methods: {
     close () {
       this.$emit('update:form', false)
+    },
+    async save () {
+      const response = await Functions.putData(Tarefa, {
+        // "CronogramaObra": /* Provide a CronogramaObra instance here */,
+        // "Responsavel": /* Provide a Usuario instance here */,
+        // "status": /* Provide a StatusTarefa instance here */,
+        "nome_tarefa": this.title,
+        "data_inicio": this.date + 'Z',
+        "data_fim": this.date + 'Z',
+        // "TarefaOrigem": /* Provide a Tarefa instance here */
+      })
+      if (response.status === 'ok') {
+        this.message.title = "Tarefa cadastrada com sucesso!"
+      } else {
+        this.message.title = "Ocorreu um erro..."
+        this.message.code = response.error.code
+        this.message.text = response.error.message
+      }
+      this.modal = true
     }
   }
 }

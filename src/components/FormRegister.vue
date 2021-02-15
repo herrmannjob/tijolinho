@@ -89,6 +89,7 @@
             <v-stepper-content step="2">
               <v-card class="mb-12" color="grey lighten-1" height="550px">
                 <v-form v-model="valid">
+
                   <v-text-field label="Empresa" required></v-text-field>
                   <v-text-field label="Telefone" required></v-text-field>
                   <v-text-field
@@ -114,6 +115,10 @@
                     required
                   ></v-text-field>
                  <v-text-field label="Complemento" required></v-text-field>
+
+                  <v-text-field label="Empresa" v-model="company" required></v-text-field>
+                  <v-text-field label="Telefone" v-model="phone" hint="Apenas números (13 dígitos)" placeholder="+55 84 98765 4321" :rules="phone_rules" required></v-text-field>
+
                 </v-form>
 
                 <v-btn color="primary" @click="e1 = 3">
@@ -152,6 +157,7 @@
                  <v-text-field label="Complemento" required></v-text-field>
                 </v-form>
                 <v-btn color="primary" @click="e1 = 1">
+
                   SALVAR
                 </v-btn>
                 <v-btn text>
@@ -163,17 +169,45 @@
         </v-stepper>
       </div>
     </div>
+    <v-dialog
+      v-model="error_dialog"
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="headline">
+          Erro
+        </v-card-title>
+
+        <v-card-text>
+          Tivemos um erro :(<br>
+          {{ error }}
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn
+            text
+            @click="error_dialog = false"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 <script>
 import image from "../assets/register.png";
 import axios from "axios";
-
+import { Auth  } from 'aws-amplify'
+import { DataStore } from '@aws-amplify/datastore';
+import { Usuario } from '@/models';
 export default {
   /* eslint-disable no-mixed-spaces-and-tabs */
   data() {
     return {
-      date: null,
+      user: null,
       e1: 1,
       picker: new Date().toISOString().substr(0, 10),
       menu: false,
@@ -185,15 +219,24 @@ export default {
       image: image,
       valid: false,
       show: false,
-      firstname: "",
       lastname: "",
       nameRules: [(v) => !!v || "Nome é obrigatório"],
+      firstname: "",
       email: "",
       password: "",
+      date: null,
+      company: '',
+      phone: '',
       emailRules: [
         (v) => !!v || "E-mail é obrigatório",
         (v) => /.+@.+/.test(v) || "E-mail precisa ser em um formato válido",
       ],
+      phone_rules: [
+        (v) => !!v || "Telefone é obrigatório",
+        (v) => v.length === 13 || "Telefone com 13 dígitos - +55 84 98765 4321",
+      ],
+      error_dialog: false,
+      error: ''
     };
   },
   watch: {
@@ -205,6 +248,7 @@ export default {
     save(date) {
       this.$refs.menu.save(date);
     },
+
     searchCep() {
       if (this.cep.length == 8) {
         axios
@@ -217,6 +261,47 @@ export default {
         this.estado = this.data.uf;
       }
     },
+
+    async signUp () {
+      try {
+        this.user = await Auth.signUp({
+          username: this.email,          // optional
+          password: this.password
+        })
+        this.phone = `+${this.phone.substr(0,2)} ${this.phone.substr(2,2)} ${this.phone.substr(4,5)} ${this.phone.substr(9,4)}`
+        this.date += '-00:00'
+        this.addUser()
+      } catch (error) {
+        this.error = error
+        this.error_dialog = true
+      }
+    },
+    // async resendConfirmationCode() {
+    //   try {
+    //     await Auth.resendSignUp(this.email)
+    //     console.log('code resent successfully')
+    //     this.addUser()
+    //   } catch (error) {
+    //     this.error = error
+    //     this.error_dialog = true
+    //   }
+    // },
+    async addUser () {
+      try {
+        await DataStore.save(
+          new Usuario({
+            "nome": this.firstname,
+            "email": this.email,
+            "telefone": this.phone,
+            "data_nascimento": this.date
+          })
+        )
+      } catch (error) {
+        this.error = error
+        this.error_dialog = true
+      }
+      this.$router.push('calendar')
+    }
   },
 };
 </script>

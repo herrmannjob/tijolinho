@@ -28,13 +28,14 @@
                 elevation="2"
                 depressed
                 class="btn-primario"
-                @click="onSubmit"
+                @click="login"
               >
                 <p class="button-primario">Entrar</p>
               </v-btn>
               <br />
               <v-btn class="m2" outlined>
                 <p class="button-secundario">PARA FORNECEDORES</p>
+
               </v-btn>
             </div>
           </v-row>
@@ -54,15 +55,23 @@
         ></v-carousel-item>
       </v-carousel>
     </div>
+    <ResponseModal :modal.sync="modal" :message="message" />
   </div>
 </template>
 <script>
+// import { Auth } from 'aws-amplify'
+import Functions from '@/functions/Functions'
+import ResponseModal from '@/components/ResponseModal.vue'
 export default {
   name: "FormLogin",
+  components: { ResponseModal },
   data() {
     return {
       email: "",
       password: "",
+      user: null,
+      modal: false,
+      message: { title: '', code: '', text: '' },
       show: false,
       items: [
       {
@@ -76,18 +85,23 @@ export default {
         },
       ],
       myStyle:{
-            backgroundColor:"black" 
-            }
+        backgroundColor:"black" 
+      }
     };
   },
      
   methods: {
-    onSubmit() {
-      console.log(this.email);
+    async login () {
+      const response = await Functions.login(this.email, this.password)
+      if (response.status === 'ok') this.$router.push('/calendar')
+      else {
+        this.message.title = "Ocorreu um erro..."
+        this.message.code = response.error.code
+        this.message.text = response.error.message
+        this.modal = true
+      }
     },
-    onReset() {
-      console.log(this.password);
-    },
+    loginCognito () { this.$router.push('aws') }
   },
 };
 </script>

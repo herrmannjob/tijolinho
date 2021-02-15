@@ -51,6 +51,9 @@
 </template>
 
 <script>
+/* eslint-disable no-unused-vars */
+
+
 // import { api, urls } from '../services/Api'
 import CalendarComponent from '@/components/CalendarComponent.vue'
 import Drawer from '@/components/Drawer.vue'
@@ -72,8 +75,6 @@ export default {
     this.today = moment().format('ll')
   },
   methods: {
-    async login () {
-    }
   }
 }
 </script>

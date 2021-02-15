@@ -59,6 +59,7 @@ type Usuario implements Info @model @auth(rules: [{allow: private}]) {
   Empresas: [Empresa] @connection(keyName: "byUsuario", fields: ["id"])
   Endereco: Endereco @connection
   TipoUsuario: TipoUsuario! @connection
+  Obra: [Obra] @connection(keyName: "byUsuario", fields: ["id"])
 }
 
 type TipoUsuario implements Tipos @model @auth(rules: [{allow: private}]) {
@@ -66,13 +67,14 @@ type TipoUsuario implements Tipos @model @auth(rules: [{allow: private}]) {
   nome: String!
 }
 
-type Obra implements Info @model @auth(rules: [{allow: private}]) {
+type Obra implements Info @model @key(name: "byUsuario", fields: ["usuarioID"]) @auth(rules: [{allow: private}]) {
   id: ID!
   nome: String!
   foto: [AWSURL]
   Endereco: Endereco! @connection
   TipoObra: TipoObra! @connection
   Empresa: Empresa! @connection
+  usuarioID: ID
   Usuarios: [Usuario] @connection
 }
 

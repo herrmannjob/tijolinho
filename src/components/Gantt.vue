@@ -23,7 +23,6 @@ export default {
   },
   data () {
     return {
-      items: ['Dia', 'Semana', 'Mês'],
       tasks: null,
       options: null
     }
@@ -39,7 +38,6 @@ export default {
         duration: 15 * 24 * 60 * 60 * 1000,
         progress: 85,
         type: 'project',
-        //collapsed: true,
       },
       {
         id: 2,
@@ -57,13 +55,6 @@ export default {
             fill: '#1EBC61',
             stroke: '#0EAC51',
           },
-          /*'tree-row-bar': {
-            fill: '#1EBC61',
-            stroke: '#0EAC51'
-          },
-          'tree-row-bar-polygon': {
-            stroke: '#0EAC51'
-          }*/
         },
       },
       {
@@ -106,7 +97,7 @@ export default {
       },
       chart: {
         progress: {
-          bar: false,
+          bar: true,
         },
         expander: {
           display: true,
@@ -114,7 +105,7 @@ export default {
       },
       taskList: {
         expander: {
-          straight: false,
+          straight: true,
         },
         columns: [
           // {

@@ -291,6 +291,20 @@ export const schema = {
                         "targetName": "usuarioTipoUsuarioId"
                     }
                 },
+                "Obra": {
+                    "name": "Obra",
+                    "isArray": true,
+                    "type": {
+                        "model": "Obra"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true,
+                    "association": {
+                        "connectionType": "HAS_MANY",
+                        "associatedWith": "usuarioID"
+                    }
+                },
                 "obraUsuariosId": {
                     "name": "obraUsuariosId",
                     "isArray": false,
@@ -431,6 +445,13 @@ export const schema = {
                         "targetName": "obraEmpresaId"
                     }
                 },
+                "usuarioID": {
+                    "name": "usuarioID",
+                    "isArray": false,
+                    "type": "ID",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "Usuarios": {
                     "name": "Usuarios",
                     "isArray": true,
@@ -452,6 +473,15 @@ export const schema = {
                 {
                     "type": "model",
                     "properties": {}
+                },
+                {
+                    "type": "key",
+                    "properties": {
+                        "name": "byUsuario",
+                        "fields": [
+                            "usuarioID"
+                        ]
+                    }
                 },
                 {
                     "type": "auth",
@@ -1194,5 +1224,5 @@ export const schema = {
     },
     "enums": {},
     "nonModels": {},
-    "version": "50431cb83f83d40de13142d2187864c1"
+    "version": "52e6024032543b89ce8bec2bd317bc3b"
 };

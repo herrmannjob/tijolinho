@@ -43,6 +43,7 @@ export declare class Usuario {
   readonly Empresas?: (Empresa | null)[];
   readonly Endereco?: Endereco;
   readonly TipoUsuario: TipoUsuario;
+  readonly Obra?: (Obra | null)[];
   readonly obraUsuariosId?: string;
   constructor(init: ModelInit<Usuario>);
   static copyOf(source: Usuario, mutator: (draft: MutableModel<Usuario>) => MutableModel<Usuario> | void): Usuario;
@@ -62,6 +63,7 @@ export declare class Obra {
   readonly Endereco: Endereco;
   readonly TipoObra: TipoObra;
   readonly Empresa: Empresa;
+  readonly usuarioID?: string;
   readonly Usuarios?: (Usuario | null)[];
   constructor(init: ModelInit<Obra>);
   static copyOf(source: Obra, mutator: (draft: MutableModel<Obra>) => MutableModel<Obra> | void): Obra;

@@ -14,6 +14,11 @@ export const createEmpresa = /* GraphQL */ `
       email
       usuarioID
       foto
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Endereco {
         id
         cep
@@ -23,11 +28,12 @@ export const createEmpresa = /* GraphQL */ `
         estado
         pais
         numero
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -44,6 +50,11 @@ export const updateEmpresa = /* GraphQL */ `
       email
       usuarioID
       foto
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Endereco {
         id
         cep
@@ -53,11 +64,12 @@ export const updateEmpresa = /* GraphQL */ `
         estado
         pais
         numero
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -74,6 +86,11 @@ export const deleteEmpresa = /* GraphQL */ `
       email
       usuarioID
       foto
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Endereco {
         id
         cep
@@ -83,11 +100,12 @@ export const deleteEmpresa = /* GraphQL */ `
         estado
         pais
         numero
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -105,6 +123,9 @@ export const createEndereco = /* GraphQL */ `
       estado
       pais
       numero
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -124,6 +145,9 @@ export const updateEndereco = /* GraphQL */ `
       estado
       pais
       numero
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -143,6 +167,9 @@ export const deleteEndereco = /* GraphQL */ `
       estado
       pais
       numero
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -163,6 +190,11 @@ export const createUsuario = /* GraphQL */ `
       data_nascimento_conjuge
       nome_conjuge
       foto
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Empresas {
         items {
           id
@@ -172,10 +204,14 @@ export const createUsuario = /* GraphQL */ `
           email
           usuarioID
           foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         nextToken
+        startedAt
       }
       Endereco {
         id
@@ -186,17 +222,36 @@ export const createUsuario = /* GraphQL */ `
         estado
         pais
         numero
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
       TipoUsuario {
         id
         nome
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      createdAt
-      updatedAt
+      Obra {
+        items {
+          id
+          nome
+          foto
+          usuarioID
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        nextToken
+        startedAt
+      }
     }
   }
 `;
@@ -215,6 +270,11 @@ export const updateUsuario = /* GraphQL */ `
       data_nascimento_conjuge
       nome_conjuge
       foto
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Empresas {
         items {
           id
@@ -224,10 +284,14 @@ export const updateUsuario = /* GraphQL */ `
           email
           usuarioID
           foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         nextToken
+        startedAt
       }
       Endereco {
         id
@@ -238,17 +302,36 @@ export const updateUsuario = /* GraphQL */ `
         estado
         pais
         numero
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
       TipoUsuario {
         id
         nome
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      createdAt
-      updatedAt
+      Obra {
+        items {
+          id
+          nome
+          foto
+          usuarioID
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        nextToken
+        startedAt
+      }
     }
   }
 `;
@@ -267,6 +350,11 @@ export const deleteUsuario = /* GraphQL */ `
       data_nascimento_conjuge
       nome_conjuge
       foto
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Empresas {
         items {
           id
@@ -276,10 +364,14 @@ export const deleteUsuario = /* GraphQL */ `
           email
           usuarioID
           foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         nextToken
+        startedAt
       }
       Endereco {
         id
@@ -290,17 +382,36 @@ export const deleteUsuario = /* GraphQL */ `
         estado
         pais
         numero
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
       TipoUsuario {
         id
         nome
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      createdAt
-      updatedAt
+      Obra {
+        items {
+          id
+          nome
+          foto
+          usuarioID
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        nextToken
+        startedAt
+      }
     }
   }
 `;
@@ -312,6 +423,9 @@ export const createTipoUsuario = /* GraphQL */ `
     createTipoUsuario(input: $input, condition: $condition) {
       id
       nome
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -325,6 +439,9 @@ export const updateTipoUsuario = /* GraphQL */ `
     updateTipoUsuario(input: $input, condition: $condition) {
       id
       nome
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -338,6 +455,9 @@ export const deleteTipoUsuario = /* GraphQL */ `
     deleteTipoUsuario(input: $input, condition: $condition) {
       id
       nome
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -352,25 +472,12 @@ export const createObra = /* GraphQL */ `
       id
       nome
       foto
-      Endereco {
-        id
-        cep
-        bairro
-        cidade
-        rua
-        estado
-        pais
-        numero
-        createdAt
-        updatedAt
-      }
-      TipoObra {
-        id
-        nome
-        template
-        createdAt
-        updatedAt
-      }
+      usuarioID
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Empresa {
         id
         nome
@@ -379,6 +486,11 @@ export const createObra = /* GraphQL */ `
         email
         usuarioID
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Endereco {
           id
           cep
@@ -388,9 +500,25 @@ export const createObra = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
+      }
+      Endereco {
+        id
+        cep
+        bairro
+        cidade
+        rua
+        estado
+        pais
+        numero
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
@@ -405,13 +533,25 @@ export const createObra = /* GraphQL */ `
           data_nascimento_conjuge
           nome_conjuge
           foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         nextToken
+        startedAt
       }
-      createdAt
-      updatedAt
+      TipoObra {
+        id
+        nome
+        template
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
     }
   }
 `;
@@ -424,25 +564,12 @@ export const updateObra = /* GraphQL */ `
       id
       nome
       foto
-      Endereco {
-        id
-        cep
-        bairro
-        cidade
-        rua
-        estado
-        pais
-        numero
-        createdAt
-        updatedAt
-      }
-      TipoObra {
-        id
-        nome
-        template
-        createdAt
-        updatedAt
-      }
+      usuarioID
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Empresa {
         id
         nome
@@ -451,6 +578,11 @@ export const updateObra = /* GraphQL */ `
         email
         usuarioID
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Endereco {
           id
           cep
@@ -460,9 +592,25 @@ export const updateObra = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
+      }
+      Endereco {
+        id
+        cep
+        bairro
+        cidade
+        rua
+        estado
+        pais
+        numero
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
@@ -477,13 +625,25 @@ export const updateObra = /* GraphQL */ `
           data_nascimento_conjuge
           nome_conjuge
           foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         nextToken
+        startedAt
       }
-      createdAt
-      updatedAt
+      TipoObra {
+        id
+        nome
+        template
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
     }
   }
 `;
@@ -496,25 +656,12 @@ export const deleteObra = /* GraphQL */ `
       id
       nome
       foto
-      Endereco {
-        id
-        cep
-        bairro
-        cidade
-        rua
-        estado
-        pais
-        numero
-        createdAt
-        updatedAt
-      }
-      TipoObra {
-        id
-        nome
-        template
-        createdAt
-        updatedAt
-      }
+      usuarioID
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Empresa {
         id
         nome
@@ -523,6 +670,11 @@ export const deleteObra = /* GraphQL */ `
         email
         usuarioID
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Endereco {
           id
           cep
@@ -532,9 +684,25 @@ export const deleteObra = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
+      }
+      Endereco {
+        id
+        cep
+        bairro
+        cidade
+        rua
+        estado
+        pais
+        numero
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
@@ -549,13 +717,25 @@ export const deleteObra = /* GraphQL */ `
           data_nascimento_conjuge
           nome_conjuge
           foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         nextToken
+        startedAt
       }
-      createdAt
-      updatedAt
+      TipoObra {
+        id
+        nome
+        template
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
     }
   }
 `;
@@ -568,6 +748,9 @@ export const createTipoObra = /* GraphQL */ `
       id
       nome
       template
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -582,6 +765,9 @@ export const updateTipoObra = /* GraphQL */ `
       id
       nome
       template
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -596,6 +782,9 @@ export const deleteTipoObra = /* GraphQL */ `
       id
       nome
       template
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -608,10 +797,39 @@ export const createCronogramaObra = /* GraphQL */ `
   ) {
     createCronogramaObra(input: $input, condition: $condition) {
       id
+      data_inicio
+      data_fim
+      tempo_previsto
+      gasto_previsto
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Obra_ {
         id
         nome
         foto
+        usuarioID
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -621,39 +839,27 @@ export const createCronogramaObra = /* GraphQL */ `
           estado
           pais
           numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      data_inicio
-      data_fim
-      tempo_previsto
-      gasto_previsto
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -664,10 +870,39 @@ export const updateCronogramaObra = /* GraphQL */ `
   ) {
     updateCronogramaObra(input: $input, condition: $condition) {
       id
+      data_inicio
+      data_fim
+      tempo_previsto
+      gasto_previsto
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Obra_ {
         id
         nome
         foto
+        usuarioID
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -677,39 +912,27 @@ export const updateCronogramaObra = /* GraphQL */ `
           estado
           pais
           numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      data_inicio
-      data_fim
-      tempo_previsto
-      gasto_previsto
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -720,10 +943,39 @@ export const deleteCronogramaObra = /* GraphQL */ `
   ) {
     deleteCronogramaObra(input: $input, condition: $condition) {
       id
+      data_inicio
+      data_fim
+      tempo_previsto
+      gasto_previsto
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Obra_ {
         id
         nome
         foto
+        usuarioID
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -733,39 +985,27 @@ export const deleteCronogramaObra = /* GraphQL */ `
           estado
           pais
           numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      data_inicio
-      data_fim
-      tempo_previsto
-      gasto_previsto
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -776,22 +1016,6 @@ export const createControleFinanceiroObra = /* GraphQL */ `
   ) {
     createControleFinanceiroObra(input: $input, condition: $condition) {
       id
-      CronogramaObra {
-        id
-        Obra_ {
-          id
-          nome
-          foto
-          createdAt
-          updatedAt
-        }
-        data_inicio
-        data_fim
-        tempo_previsto
-        gasto_previsto
-        createdAt
-        updatedAt
-      }
       nome
       data_pagamento
       proximo_vencimento
@@ -800,8 +1024,34 @@ export const createControleFinanceiroObra = /* GraphQL */ `
       valor
       forma_pagamento
       quantidade_parcelas
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
+      CronogramaObra {
+        id
+        data_inicio
+        data_fim
+        tempo_previsto
+        gasto_previsto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Obra_ {
+          id
+          nome
+          foto
+          usuarioID
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
     }
   }
 `;
@@ -812,22 +1062,6 @@ export const updateControleFinanceiroObra = /* GraphQL */ `
   ) {
     updateControleFinanceiroObra(input: $input, condition: $condition) {
       id
-      CronogramaObra {
-        id
-        Obra_ {
-          id
-          nome
-          foto
-          createdAt
-          updatedAt
-        }
-        data_inicio
-        data_fim
-        tempo_previsto
-        gasto_previsto
-        createdAt
-        updatedAt
-      }
       nome
       data_pagamento
       proximo_vencimento
@@ -836,8 +1070,34 @@ export const updateControleFinanceiroObra = /* GraphQL */ `
       valor
       forma_pagamento
       quantidade_parcelas
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
+      CronogramaObra {
+        id
+        data_inicio
+        data_fim
+        tempo_previsto
+        gasto_previsto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Obra_ {
+          id
+          nome
+          foto
+          usuarioID
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
     }
   }
 `;
@@ -848,22 +1108,6 @@ export const deleteControleFinanceiroObra = /* GraphQL */ `
   ) {
     deleteControleFinanceiroObra(input: $input, condition: $condition) {
       id
-      CronogramaObra {
-        id
-        Obra_ {
-          id
-          nome
-          foto
-          createdAt
-          updatedAt
-        }
-        data_inicio
-        data_fim
-        tempo_previsto
-        gasto_previsto
-        createdAt
-        updatedAt
-      }
       nome
       data_pagamento
       proximo_vencimento
@@ -872,8 +1116,34 @@ export const deleteControleFinanceiroObra = /* GraphQL */ `
       valor
       forma_pagamento
       quantidade_parcelas
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
+      CronogramaObra {
+        id
+        data_inicio
+        data_fim
+        tempo_previsto
+        gasto_previsto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Obra_ {
+          id
+          nome
+          foto
+          usuarioID
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+      }
     }
   }
 `;
@@ -884,22 +1154,14 @@ export const createTarefa = /* GraphQL */ `
   ) {
     createTarefa(input: $input, condition: $condition) {
       id
-      CronogramaObra {
-        id
-        Obra_ {
-          id
-          nome
-          foto
-          createdAt
-          updatedAt
-        }
-        data_inicio
-        data_fim
-        tempo_previsto
-        gasto_previsto
-        createdAt
-        updatedAt
-      }
+      nome_tarefa
+      data_inicio
+      data_fim
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Responsavel {
         id
         nome
@@ -910,8 +1172,14 @@ export const createTarefa = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -922,38 +1190,59 @@ export const createTarefa = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
+        Obra {
+          nextToken
+          startedAt
+        }
       }
-      status {
+      CronogramaObra {
         id
-        status
+        data_inicio
+        data_fim
+        tempo_previsto
+        gasto_previsto
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
+        Obra_ {
+          id
+          nome
+          foto
+          usuarioID
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      nome_tarefa
-      data_inicio
-      data_fim
       TarefaOrigem {
         id
-        CronogramaObra {
-          id
-          data_inicio
-          data_fim
-          tempo_previsto
-          gasto_previsto
-          createdAt
-          updatedAt
-        }
+        nome_tarefa
+        data_inicio
+        data_fim
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Responsavel {
           id
           nome
@@ -964,31 +1253,54 @@ export const createTarefa = /* GraphQL */ `
           data_nascimento_conjuge
           nome_conjuge
           foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        CronogramaObra {
+          id
+          data_inicio
+          data_fim
+          tempo_previsto
+          gasto_previsto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        TarefaOrigem {
+          id
+          nome_tarefa
+          data_inicio
+          data_fim
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         status {
           id
           status
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        nome_tarefa
-        data_inicio
-        data_fim
-        TarefaOrigem {
-          id
-          nome_tarefa
-          data_inicio
-          data_fim
-          createdAt
-          updatedAt
-        }
+      }
+      status {
+        id
+        status
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -999,22 +1311,14 @@ export const updateTarefa = /* GraphQL */ `
   ) {
     updateTarefa(input: $input, condition: $condition) {
       id
-      CronogramaObra {
-        id
-        Obra_ {
-          id
-          nome
-          foto
-          createdAt
-          updatedAt
-        }
-        data_inicio
-        data_fim
-        tempo_previsto
-        gasto_previsto
-        createdAt
-        updatedAt
-      }
+      nome_tarefa
+      data_inicio
+      data_fim
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Responsavel {
         id
         nome
@@ -1025,8 +1329,14 @@ export const updateTarefa = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -1037,38 +1347,59 @@ export const updateTarefa = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
+        Obra {
+          nextToken
+          startedAt
+        }
       }
-      status {
+      CronogramaObra {
         id
-        status
+        data_inicio
+        data_fim
+        tempo_previsto
+        gasto_previsto
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
+        Obra_ {
+          id
+          nome
+          foto
+          usuarioID
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      nome_tarefa
-      data_inicio
-      data_fim
       TarefaOrigem {
         id
-        CronogramaObra {
-          id
-          data_inicio
-          data_fim
-          tempo_previsto
-          gasto_previsto
-          createdAt
-          updatedAt
-        }
+        nome_tarefa
+        data_inicio
+        data_fim
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Responsavel {
           id
           nome
@@ -1079,31 +1410,54 @@ export const updateTarefa = /* GraphQL */ `
           data_nascimento_conjuge
           nome_conjuge
           foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        CronogramaObra {
+          id
+          data_inicio
+          data_fim
+          tempo_previsto
+          gasto_previsto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        TarefaOrigem {
+          id
+          nome_tarefa
+          data_inicio
+          data_fim
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         status {
           id
           status
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        nome_tarefa
-        data_inicio
-        data_fim
-        TarefaOrigem {
-          id
-          nome_tarefa
-          data_inicio
-          data_fim
-          createdAt
-          updatedAt
-        }
+      }
+      status {
+        id
+        status
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1114,22 +1468,14 @@ export const deleteTarefa = /* GraphQL */ `
   ) {
     deleteTarefa(input: $input, condition: $condition) {
       id
-      CronogramaObra {
-        id
-        Obra_ {
-          id
-          nome
-          foto
-          createdAt
-          updatedAt
-        }
-        data_inicio
-        data_fim
-        tempo_previsto
-        gasto_previsto
-        createdAt
-        updatedAt
-      }
+      nome_tarefa
+      data_inicio
+      data_fim
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Responsavel {
         id
         nome
@@ -1140,8 +1486,14 @@ export const deleteTarefa = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -1152,38 +1504,59 @@ export const deleteTarefa = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
+        Obra {
+          nextToken
+          startedAt
+        }
       }
-      status {
+      CronogramaObra {
         id
-        status
+        data_inicio
+        data_fim
+        tempo_previsto
+        gasto_previsto
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
+        Obra_ {
+          id
+          nome
+          foto
+          usuarioID
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      nome_tarefa
-      data_inicio
-      data_fim
       TarefaOrigem {
         id
-        CronogramaObra {
-          id
-          data_inicio
-          data_fim
-          tempo_previsto
-          gasto_previsto
-          createdAt
-          updatedAt
-        }
+        nome_tarefa
+        data_inicio
+        data_fim
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Responsavel {
           id
           nome
@@ -1194,31 +1567,54 @@ export const deleteTarefa = /* GraphQL */ `
           data_nascimento_conjuge
           nome_conjuge
           foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        CronogramaObra {
+          id
+          data_inicio
+          data_fim
+          tempo_previsto
+          gasto_previsto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
+        TarefaOrigem {
+          id
+          nome_tarefa
+          data_inicio
+          data_fim
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         status {
           id
           status
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        nome_tarefa
-        data_inicio
-        data_fim
-        TarefaOrigem {
-          id
-          nome_tarefa
-          data_inicio
-          data_fim
-          createdAt
-          updatedAt
-        }
+      }
+      status {
+        id
+        status
+        _version
+        _deleted
+        _lastChangedAt
         createdAt
         updatedAt
       }
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1230,6 +1626,9 @@ export const createStatusTarefa = /* GraphQL */ `
     createStatusTarefa(input: $input, condition: $condition) {
       id
       status
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -1243,6 +1642,9 @@ export const updateStatusTarefa = /* GraphQL */ `
     updateStatusTarefa(input: $input, condition: $condition) {
       id
       status
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -1256,6 +1658,9 @@ export const deleteStatusTarefa = /* GraphQL */ `
     deleteStatusTarefa(input: $input, condition: $condition) {
       id
       status
+      _version
+      _deleted
+      _lastChangedAt
       createdAt
       updatedAt
     }
@@ -1268,10 +1673,40 @@ export const createAgendaObra = /* GraphQL */ `
   ) {
     createAgendaObra(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Obra {
         id
         nome
         foto
+        usuarioID
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -1281,40 +1716,27 @@ export const createAgendaObra = /* GraphQL */ `
           estado
           pais
           numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1325,10 +1747,40 @@ export const updateAgendaObra = /* GraphQL */ `
   ) {
     updateAgendaObra(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Obra {
         id
         nome
         foto
+        usuarioID
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -1338,40 +1790,27 @@ export const updateAgendaObra = /* GraphQL */ `
           estado
           pais
           numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1382,10 +1821,40 @@ export const deleteAgendaObra = /* GraphQL */ `
   ) {
     deleteAgendaObra(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Obra {
         id
         nome
         foto
+        usuarioID
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -1395,40 +1864,27 @@ export const deleteAgendaObra = /* GraphQL */ `
           estado
           pais
           numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1439,6 +1895,16 @@ export const createAgendaParticular = /* GraphQL */ `
   ) {
     createAgendaParticular(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Usuario {
         id
         nome
@@ -1449,8 +1915,14 @@ export const createAgendaParticular = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -1461,25 +1933,26 @@ export const createAgendaParticular = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
+        Obra {
+          nextToken
+          startedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1490,6 +1963,16 @@ export const updateAgendaParticular = /* GraphQL */ `
   ) {
     updateAgendaParticular(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Usuario {
         id
         nome
@@ -1500,8 +1983,14 @@ export const updateAgendaParticular = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -1512,25 +2001,26 @@ export const updateAgendaParticular = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
+        Obra {
+          nextToken
+          startedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1541,6 +2031,16 @@ export const deleteAgendaParticular = /* GraphQL */ `
   ) {
     deleteAgendaParticular(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Usuario {
         id
         nome
@@ -1551,8 +2051,14 @@ export const deleteAgendaParticular = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -1563,25 +2069,26 @@ export const deleteAgendaParticular = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
+        Obra {
+          nextToken
+          startedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1592,6 +2099,16 @@ export const createLembreteParticular = /* GraphQL */ `
   ) {
     createLembreteParticular(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Usuario {
         id
         nome
@@ -1602,8 +2119,14 @@ export const createLembreteParticular = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -1614,25 +2137,26 @@ export const createLembreteParticular = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
+        Obra {
+          nextToken
+          startedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1643,6 +2167,16 @@ export const updateLembreteParticular = /* GraphQL */ `
   ) {
     updateLembreteParticular(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Usuario {
         id
         nome
@@ -1653,8 +2187,14 @@ export const updateLembreteParticular = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -1665,25 +2205,26 @@ export const updateLembreteParticular = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
+        Obra {
+          nextToken
+          startedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1694,6 +2235,16 @@ export const deleteLembreteParticular = /* GraphQL */ `
   ) {
     deleteLembreteParticular(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Usuario {
         id
         nome
@@ -1704,8 +2255,14 @@ export const deleteLembreteParticular = /* GraphQL */ `
         data_nascimento_conjuge
         nome_conjuge
         foto
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
         Empresas {
           nextToken
+          startedAt
         }
         Endereco {
           id
@@ -1716,25 +2273,26 @@ export const deleteLembreteParticular = /* GraphQL */ `
           estado
           pais
           numero
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         TipoUsuario {
           id
           nome
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
-        createdAt
-        updatedAt
+        Obra {
+          nextToken
+          startedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1745,10 +2303,40 @@ export const createLembreteObra = /* GraphQL */ `
   ) {
     createLembreteObra(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Obra {
         id
         nome
         foto
+        usuarioID
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -1758,40 +2346,27 @@ export const createLembreteObra = /* GraphQL */ `
           estado
           pais
           numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1802,10 +2377,40 @@ export const updateLembreteObra = /* GraphQL */ `
   ) {
     updateLembreteObra(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Obra {
         id
         nome
         foto
+        usuarioID
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -1815,40 +2420,27 @@ export const updateLembreteObra = /* GraphQL */ `
           estado
           pais
           numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;
@@ -1859,10 +2451,40 @@ export const deleteLembreteObra = /* GraphQL */ `
   ) {
     deleteLembreteObra(input: $input, condition: $condition) {
       id
+      titulo
+      descricao
+      data_inicio
+      data_fim
+      duracao
+      _version
+      _deleted
+      _lastChangedAt
+      createdAt
+      updatedAt
       Obra {
         id
         nome
         foto
+        usuarioID
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+        Empresa {
+          id
+          nome
+          cnpj
+          telefone
+          email
+          usuarioID
+          foto
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
         Endereco {
           id
           cep
@@ -1872,40 +2494,27 @@ export const deleteLembreteObra = /* GraphQL */ `
           estado
           pais
           numero
-          createdAt
-          updatedAt
-        }
-        TipoObra {
-          id
-          nome
-          template
-          createdAt
-          updatedAt
-        }
-        Empresa {
-          id
-          nome
-          cnpj
-          telefone
-          email
-          usuarioID
-          foto
+          _version
+          _deleted
+          _lastChangedAt
           createdAt
           updatedAt
         }
         Usuarios {
           nextToken
+          startedAt
         }
-        createdAt
-        updatedAt
+        TipoObra {
+          id
+          nome
+          template
+          _version
+          _deleted
+          _lastChangedAt
+          createdAt
+          updatedAt
+        }
       }
-      titulo
-      descricao
-      data_inicio
-      data_fim
-      duracao
-      createdAt
-      updatedAt
     }
   }
 `;

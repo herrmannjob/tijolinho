@@ -7,7 +7,7 @@
         sm="4"
       >
         <v-select
-          :items="items"
+          :items="select_view"
           label="Calendário"
           dense
           v-model="calendar_view"
@@ -20,7 +20,7 @@
         sm="4"
       >
         <v-select
-          :items="items"
+          :items="clients"
           label="Cliente"
           dense
         ></v-select>
@@ -31,7 +31,7 @@
         sm="4"
       >
         <v-select
-          :items="items"
+          :items="constructions"
           label="Obra"
           dense
         ></v-select>
@@ -40,7 +40,13 @@
     
     <FormCalendar :form.sync="form" :date="date_clicked" />
 
-    <FullCalendar :options="calendarOptions" />
+    <CalendarWeek :options="calendarOptions" v-if="view_week" ref="calendar" />
+
+    <CalendarDay :options="calendarOptions" v-if="view_day" ref="calendar" />
+
+    <CalendarMonth :options="calendarOptions" v-if="view_month" ref="calendar" />
+
+    <FullCalendar :options="calendarOptions" v-show="false" />
   </v-container>
 </template>
 
@@ -52,19 +58,28 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import Swal from '@/plugins/sweetalert'
 import FormCalendar from '@/components/FormCalendar'
+import CalendarWeek from '@/components/CalendarWeek'
+import CalendarDay from '@/components/CalendarDay'
+import CalendarMonth from '@/components/CalendarMonth'
 
-// import { DataStore } from '@aws-amplify/datastore';
-// import { AgendaObra } from '../../config/models';
+import { Obra, Usuario, Tarefa } from '@/models'
+import Functions from '@/functions/Functions'
 
 export default {
   name: 'CalendarComponent',
   components: {
-    FullCalendar, FormCalendar
+    FormCalendar, CalendarWeek, CalendarDay, CalendarMonth, FullCalendar
   },
   data () {
     return {
-      items: ['Dia', 'Semana', 'Mês'],
+      user: null,
+      select_view: ['Dia', 'Semana', 'Mês'],
       calendar_view: '',
+      clients: ['Nenhum cliente cadastrado'],
+      constructions: ['Nenhuma obra cadastrada'],
+      view_week: true,
+      view_day: false,
+      view_month: false,
       calendarOptions: {
         plugins: [ dayGridPlugin, timeGridPlugin, interactionPlugin ],
         initialView: 'timeGridWeek',
@@ -84,25 +99,6 @@ export default {
         dateClick: this.dateClick,
         // select: this.selectDate,
         events: [
-          {
-              title: 'Reunião com Edu',
-              start: '2021-02-02T10:00:00',
-              end: '2021-02-02T11:00:00',
-          },
-          {
-              title: 'Tijolinho',
-              start: '2021-02-03T18:00:00',
-              end: '2021-02-03T18:20:00',
-          },
-          {
-              title: 'BCH237',
-              start: '2021-02-05T10:30:00',
-              end: '2021-02-05T11:30:00',
-              extendedProps: {
-                  department: 'BioChemistry'
-              },
-              description: 'Lecture'
-          }
         ]
       },
       form: false,
@@ -115,24 +111,49 @@ export default {
       task_observacao: null
     }
   },
-  created () {
+  async created () {
+    this.user = await Functions.isAuth()
+    this.getObras()
+    this.getTasks()
+    // this.getClients()
   },
+  // updated () { this.refreshEvents() },
   methods: {
+    refreshEvents () {
+      console.log('refresh')
+      this.$refs.calendar.$emit('refetch-events')
+    },
+    async getObras () {
+      const response = await Functions.getById(Obra, this.user.username)
+      if (response.status === 'ok') this.constructions = response.data
+    },
+    async getClients () {
+      const response = await Functions.getAll(Usuario)
+      if (response.status === 'ok') this.clients = response.data
+    },
+    async getTasks () {
+      const response = await Functions.getAll(Tarefa)
+      if (response.status === 'ok') this.calendarOptions.events = response.data
+    },
     changeView () {
       switch (this.calendar_view) {
         case 'Mês':
-          // this.calendarOptions.initialView = 'dayGridMonth'
-          // this.fullCalendar('changeView', 'dayGridMonth')
+          this.calendarOptions.initialView = 'dayGridMonth'
+          this.view_week = false
+          this.view_day = false
+          this.view_month = true
           break;
         case 'Dia':
-          // $('#calendar').fullCalendar( 'changeView', 'timeGridDay');
-          // this.calendarOptions.initialView = 'timeGridDay'
-          // this.fullCalendar('changeView', 'timeGridDay')
+          this.calendarOptions.initialView = 'timeGridDay'
+          this.view_week = false
+          this.view_month = false
+          this.view_day = true
           break;
         default:
-          // document.getElementById('calendar').fullCalendar( 'changeView', 'timeGridWeek');
-          // this.calendarOptions.initialView = 'timeGridWeek'
-          // this.fullCalendar('changeView', 'timeGridWeek')
+          this.calendarOptions.initialView = 'timeGridWeek'
+          this.view_day = false
+          this.view_month = false
+          this.view_week = true
           break;
       }
     },
