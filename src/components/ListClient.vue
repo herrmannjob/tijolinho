@@ -2,7 +2,7 @@
   <div class="home">
     <div class="content">
       <div class="components row">
-        <div class="col-9">
+        <div class="col-9" >
           <v-text-field
             solo
             label="Buscar Cliente"
@@ -153,6 +153,7 @@ export default {
         },
       ],
     };
+  
   },
 };
 </script>

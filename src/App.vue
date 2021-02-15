@@ -5,7 +5,7 @@
 </template>
 <style lang="scss">
 html, body{
- overflow-y: auto;
+ overflow-y: auto!important;
  height:100vh;
  width: 100vw !important;
 }
@@ -16,8 +16,8 @@ html, body{
   -moz-osx-font-smoothing: grayscale;
   text-align: left;
   color: #2c3e50;
-  height: 100% !important;
-  width: 100% !important;
+  height: 100vh !important;
+  width: 100vw !important;
 
 }
 

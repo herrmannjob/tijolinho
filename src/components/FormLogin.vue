@@ -33,8 +33,9 @@
                 <p class="button-primario">Entrar</p>
               </v-btn>
               <br />
-              <v-btn class="m2" outlined @click="loginCognito">
-                <p class="button-secundario">LOGIN COM COGNITO</p>
+              <v-btn class="m2" outlined>
+                <p class="button-secundario">PARA FORNECEDORES</p>
+
               </v-btn>
             </div>
           </v-row>

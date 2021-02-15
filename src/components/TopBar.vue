@@ -142,8 +142,10 @@ export default {
 </script>
 <style lang="css">
 html, body {
-  overflow-y: hidden;
-}
+ overflow-y: auto!important;
+ height:100vh;
+ width: 100vw !important;}
+ 
 .top-items {
   min-width: 250px;
   display: flex;

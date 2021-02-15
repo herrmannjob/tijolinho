@@ -54,10 +54,12 @@ export default {
 </script>
 <style lang="css">
 html, body {
-  overflow-y: hidden;
+ overflow-y: auto!important;
+ height:200vh;
+ width: 100vw !important;
 }
 .left-drawer{
-  height: 100%;
+  height: 100vh;
 }
 .v-navigation-drawer {
   background-color: #002b4b !important;
@@ -65,6 +67,7 @@ html, body {
   border-radius: 0 !important;
   max-width: 85px !important;
   align-items: center;
+
 }
 .v-navigation-drawer__content {
   display: flex;

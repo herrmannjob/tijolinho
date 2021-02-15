@@ -26,7 +26,7 @@
           </v-stepper-header>
           <v-stepper-items>
             <v-stepper-content step="1">
-              <v-card class="mb-12" height="380px">
+              <v-card class="mb-12" height="400px">
                 <v-form v-model="valid">
                   <v-container style="padding-bottom:unset">
                     <v-text-field
@@ -87,10 +87,38 @@
               </v-card>
             </v-stepper-content>
             <v-stepper-content step="2">
-              <v-card class="mb-12" color="grey lighten-1" height="350px">
+              <v-card class="mb-12" color="grey lighten-1" height="550px">
                 <v-form v-model="valid">
+
+                  <v-text-field label="Empresa" required></v-text-field>
+                  <v-text-field label="Telefone" required></v-text-field>
+                  <v-text-field
+                    label="Cep"
+                    required
+                    v-model="cep"
+                    @change="searchCep"
+                    @keyup="searchCep()"
+                  ></v-text-field>
+                      <v-text-field
+                    v-model="estado"
+                    label="Estado"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="cidade"
+                    label="Cidade"
+                    required
+                  ></v-text-field>
+                     <v-text-field
+                    v-model="logradouro"
+                    label="Rua"
+                    required
+                  ></v-text-field>
+                 <v-text-field label="Complemento" required></v-text-field>
+
                   <v-text-field label="Empresa" v-model="company" required></v-text-field>
                   <v-text-field label="Telefone" v-model="phone" hint="Apenas números (13 dígitos)" placeholder="+55 84 98765 4321" :rules="phone_rules" required></v-text-field>
+
                 </v-form>
 
                 <v-btn color="primary" @click="e1 = 3">
@@ -102,15 +130,34 @@
               </v-card>
             </v-stepper-content>
             <v-stepper-content step="3">
-              <v-card class="mb-12" color="grey lighten-1" height="350px">
+              <v-card class="mb-12" color="grey lighten-1" height="450px">
                 <v-form v-model="valid">
-                  <v-text-field label="Rua" required></v-text-field>
-                  <v-text-field label="Bairro" required></v-text-field>
-                  <v-select :items="items" label="Estado" dense></v-select>
-                   <v-text-field label="Cidade" required></v-text-field>
+                         <v-text-field
+                    label="Cep"
+                    required
+                    v-model="cep"
+                    @change="searchCep"
+                    @keyup="searchCep()"
+                  ></v-text-field>
+                      <v-text-field
+                    v-model="estado"
+                    label="Estado"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="cidade"
+                    label="Cidade"
+                    required
+                  ></v-text-field>
+                     <v-text-field
+                    v-model="logradouro"
+                    label="Rua"
+                    required
+                  ></v-text-field>
+                 <v-text-field label="Complemento" required></v-text-field>
                 </v-form>
+                <v-btn color="primary" @click="e1 = 1">
 
-                <v-btn color="primary" @click="signUp">
                   SALVAR
                 </v-btn>
                 <v-btn text>
@@ -152,18 +199,23 @@
 </template>
 <script>
 import image from "../assets/register.png";
+import axios from "axios";
 import { Auth  } from 'aws-amplify'
 import { DataStore } from '@aws-amplify/datastore';
 import { Usuario } from '@/models';
 export default {
+  /* eslint-disable no-mixed-spaces-and-tabs */
   data() {
     return {
       user: null,
       e1: 1,
       picker: new Date().toISOString().substr(0, 10),
       menu: false,
-      items: ["AC","AL","AP",	"AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA",	
-        "PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"	],
+      cep: null,
+      estado: null,
+      logradouro: null,
+      cidade: null,
+      data: null,
       image: image,
       valid: false,
       show: false,
@@ -196,6 +248,20 @@ export default {
     save(date) {
       this.$refs.menu.save(date);
     },
+
+    searchCep() {
+      if (this.cep.length == 8) {
+        axios
+          .get(`https://viacep.com.br/ws/${this.cep}/json/`)
+          .then((response) => (this.data = response.data))
+          .catch((error) => console.log(error));
+        console.log("rua", this.data);
+        this.logradouro = this.data.logradouro;
+        this.cidade = this.data.localidade;
+        this.estado = this.data.uf;
+      }
+    },
+
     async signUp () {
       try {
         this.user = await Auth.signUp({
