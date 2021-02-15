@@ -87,10 +87,33 @@
               </v-card>
             </v-stepper-content>
             <v-stepper-content step="2">
-              <v-card class="mb-12" color="grey lighten-1" height="350px">
+              <v-card class="mb-12" color="grey lighten-1" height="550px">
                 <v-form v-model="valid">
                   <v-text-field label="Empresa" required></v-text-field>
                   <v-text-field label="Telefone" required></v-text-field>
+                  <v-text-field
+                    label="Cep"
+                    required
+                    v-model="cep"
+                    @change="searchCep"
+                    @keyup="searchCep()"
+                  ></v-text-field>
+                      <v-text-field
+                    v-model="estado"
+                    label="Estado"
+                    required
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="cidade"
+                    label="Cidade"
+                    required
+                  ></v-text-field>
+                     <v-text-field
+                    v-model="logradouro"
+                    label="Rua"
+                    required
+                  ></v-text-field>
+                 <v-text-field label="Complemento" required></v-text-field>
                 </v-form>
 
                 <v-btn color="primary" @click="e1 = 3">
@@ -104,17 +127,16 @@
             <v-stepper-content step="3">
               <v-card class="mb-12" color="grey lighten-1" height="450px">
                 <v-form v-model="valid">
-                  <v-text-field
+                         <v-text-field
                     label="Cep"
                     required
                     v-model="cep"
                     @change="searchCep"
                     @keyup="searchCep()"
                   ></v-text-field>
-                  <v-text-field label="Complemento" required></v-text-field>
-                  <v-text-field
-                    v-model="logradouro"
-                    label="Rua"
+                      <v-text-field
+                    v-model="estado"
+                    label="Estado"
                     required
                   ></v-text-field>
                   <v-text-field
@@ -122,11 +144,12 @@
                     label="Cidade"
                     required
                   ></v-text-field>
-                  <v-text-field
-                    v-model="estado"
-                    label="Estado"
+                     <v-text-field
+                    v-model="logradouro"
+                    label="Rua"
                     required
                   ></v-text-field>
+                 <v-text-field label="Complemento" required></v-text-field>
                 </v-form>
                 <v-btn color="primary" @click="e1 = 1">
                   SALVAR

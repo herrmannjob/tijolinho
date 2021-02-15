@@ -34,7 +34,7 @@
               </v-btn>
               <br />
               <v-btn class="m2" outlined>
-                <p class="button-secundario">LOGIN COM COGNITO</p>
+                <p class="button-secundario">PARA FORNECEDORES</p>
               </v-btn>
             </div>
           </v-row>

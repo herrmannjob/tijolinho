@@ -224,14 +224,31 @@
                   <v-row>
                     <v-col cols="12" md="6">
                       <v-text-field label="Telefone" required></v-text-field>
-                      <v-text-field label="Cep" required v-model="cep" @change="searchCep" @keyup="searchCep()"></v-text-field>
-                      <v-text-field label="Complemento" required></v-text-field>
+                      <v-text-field
+                        label="Cep"
+                        required
+                        v-model="cep"
+                        @change="searchCep"
+                        @keyup="searchCep()"
+                      ></v-text-field>
+                      <v-text-field
+                        v-model="cidade"
+                        label="Cidade"
+                        required
+                      ></v-text-field>
                     </v-col>
                     <v-col cols="12" md="6">
-                      <v-text-field  v-model="logradouro" label="Rua" required></v-text-field>
-
-                      <v-text-field  v-model="cidade" label="Cidade" required></v-text-field>
-                         <v-text-field  v-model="estado" label="Estado" required></v-text-field>
+                           <v-text-field
+                        v-model="estado"
+                        label="Estado"
+                        required
+                      ></v-text-field>
+                      <v-text-field
+                        v-model="logradouro"
+                        label="Rua"
+                        required
+                      ></v-text-field>
+                      <v-text-field label="Complemento" required></v-text-field>
                     </v-col>
                   </v-row>
                 </v-form>
@@ -260,7 +277,7 @@
 </template>
 <script>
 import image from "../assets/register.png";
-import axios from 'axios'
+import axios from "axios";
 export default {
   data() {
     return {
@@ -270,12 +287,12 @@ export default {
       imageName: "",
       imageUrl: "",
       imageFile: "",
-      cep : null,
-      estado:null,
+      cep: null,
+      estado: null,
       logradouro: null,
-      cidade:null,
-	   	data : null,
-		  messageCep: null ,
+      cidade: null,
+      data: null,
+      messageCep: null,
       date: null,
       dateInit: null,
       dateEnd: null,
@@ -332,17 +349,18 @@ export default {
     },
   },
   methods: {
-    	searchCep(){
-			if(this.cep.length == 8) {
-				axios.get(`https://viacep.com.br/ws/${ this.cep }/json/`)
-				.then( response => this.data = response.data )
-				.catch( error => console.log(error) )
-          console.log("rua",this.data)
-          this.logradouro= this.data.logradouro
-          this.cidade =this.data.localidade
-            this.estado =this.data.uf
-			}
-		},
+    searchCep() {
+      if (this.cep.length == 8) {
+        axios
+          .get(`https://viacep.com.br/ws/${this.cep}/json/`)
+          .then((response) => (this.data = response.data))
+          .catch((error) => console.log(error));
+        console.log("rua", this.data);
+        this.logradouro = this.data.logradouro;
+        this.cidade = this.data.localidade;
+        this.estado = this.data.uf;
+      }
+    },
     save(date) {
       this.$refs.menu.save(date);
     },
