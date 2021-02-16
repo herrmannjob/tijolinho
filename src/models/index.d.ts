@@ -10,7 +10,7 @@ export declare class Empresa {
   readonly cnpj?: string;
   readonly telefone?: string;
   readonly email?: string;
-  readonly usuarioID: (string | null)[];
+  readonly usuarioID?: string[];
   readonly foto?: string;
   readonly Endereco: Endereco;
   constructor(init: ModelInit<Empresa>);

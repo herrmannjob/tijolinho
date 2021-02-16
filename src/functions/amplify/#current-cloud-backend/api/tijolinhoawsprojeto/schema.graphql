@@ -1,0 +1,164 @@
+interface Info {
+  id: ID!
+  nome: String!
+}
+
+interface Tipos {
+  id: ID!
+  nome: String!
+}
+
+interface Agenda {
+  id: ID!
+  titulo: String!
+  descricao: String
+  data_inicio: AWSDate
+  data_fim: AWSDate
+  duracao: String
+}
+
+interface Tarefas {
+  id: ID!
+  nome_tarefa: String!
+  data_inicio: AWSDate
+  data_fim: AWSDate
+}
+
+type Empresa implements Info @model @key(name: "byUsuario", fields: ["usuarioID"]) @auth(rules: [{allow: private}]) {
+  id: ID!
+  nome: String!
+  cnpj: String
+  telefone: AWSPhone
+  email: AWSEmail
+  usuarioID: ID!
+  foto: AWSURL
+  Endereco: Endereco! @connection
+}
+
+type Endereco @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  cep: String
+  bairro: String
+  cidade: String
+  rua: String
+  estado: String
+  pais: String
+  numero: String
+}
+
+type Usuario implements Info @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  nome: String!
+  email: AWSEmail
+  telefone: AWSPhone
+  cpf: String
+  data_nascimento: AWSDate
+  data_nascimento_conjuge: AWSDate
+  nome_conjuge: String
+  foto: AWSURL
+  Empresas: [Empresa] @connection(keyName: "byUsuario", fields: ["id"])
+  Endereco: Endereco @connection
+  TipoUsuario: TipoUsuario! @connection
+  Obra: [Obra] @connection(keyName: "byUsuario", fields: ["id"])
+}
+
+type TipoUsuario implements Tipos @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  nome: String!
+}
+
+type Obra implements Info @model @key(name: "byUsuario", fields: ["usuarioID"]) @auth(rules: [{allow: private}]) {
+  id: ID!
+  nome: String!
+  foto: [AWSURL]
+  Endereco: Endereco! @connection
+  TipoObra: TipoObra! @connection
+  Empresa: Empresa! @connection
+  usuarioID: ID
+  Usuarios: [Usuario] @connection
+}
+
+type TipoObra implements Tipos @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  nome: String!
+  template: String
+}
+
+type CronogramaObra @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  Obra_: Obra! @connection
+  data_inicio: AWSDate!
+  data_fim: AWSDate!
+  tempo_previsto: String
+  gasto_previsto: String
+}
+
+type ControleFinanceiroObra @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  CronogramaObra: CronogramaObra! @connection
+  nome: String!
+  data_pagamento: AWSDate
+  proximo_vencimento: AWSDate
+  fornecedor: String
+  nota_fiscal: String
+  valor: String
+  forma_pagamento: String
+  quantidade_parcelas: String
+}
+
+type Tarefa implements Tarefas @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  CronogramaObra: CronogramaObra! @connection
+  Responsavel: Usuario @connection
+  status: StatusTarefa @connection
+  nome_tarefa: String!
+  data_inicio: AWSDate
+  data_fim: AWSDate
+  TarefaOrigem: Tarefa @connection
+}
+
+type StatusTarefa @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  status: String!
+}
+
+type AgendaObra implements Agenda @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  Obra: Obra! @connection
+  titulo: String!
+  descricao: String
+  data_inicio: AWSDate!
+  data_fim: AWSDate!
+  duracao: String
+}
+
+type AgendaParticular implements Agenda @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  Usuario: Usuario! @connection
+  titulo: String!
+  descricao: String
+  data_inicio: AWSDate!
+  data_fim: AWSDate!
+  duracao: String
+}
+
+type LembreteParticular implements Agenda @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  Usuario: Usuario! @connection
+  titulo: String!
+  descricao: String
+  data_inicio: AWSDate!
+  data_fim: AWSDate!
+  duracao: String
+}
+
+type LembreteObra implements Agenda @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  Obra: Obra! @connection
+  titulo: String!
+  descricao: String
+  data_inicio: AWSDate
+  data_fim: AWSDate
+  duracao: String
+}
+ 
