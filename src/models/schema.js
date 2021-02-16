@@ -40,10 +40,11 @@ export const schema = {
                 },
                 "usuarioID": {
                     "name": "usuarioID",
-                    "isArray": false,
+                    "isArray": true,
                     "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": false
                 },
                 "foto": {
                     "name": "foto",
@@ -250,20 +251,6 @@ export const schema = {
                     "type": "AWSURL",
                     "isRequired": false,
                     "attributes": []
-                },
-                "Empresas": {
-                    "name": "Empresas",
-                    "isArray": true,
-                    "type": {
-                        "model": "Empresa"
-                    },
-                    "isRequired": false,
-                    "attributes": [],
-                    "isArrayNullable": true,
-                    "association": {
-                        "connectionType": "HAS_MANY",
-                        "associatedWith": "usuarioID"
-                    }
                 },
                 "Endereco": {
                     "name": "Endereco",
@@ -1224,5 +1211,5 @@ export const schema = {
     },
     "enums": {},
     "nonModels": {},
-    "version": "52e6024032543b89ce8bec2bd317bc3b"
+    "version": "c10548c61d21c26fc4afcb1e362f0b86"
 };
