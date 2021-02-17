@@ -1,6 +1,7 @@
 <template>
   <v-app-bar>
     <v-spacer class="space"></v-spacer>
+    <Seed v-if="false" />
     <div class="top-items">
       <v-btn icon>
         <v-icon>mdi-bell</v-icon>
@@ -84,9 +85,11 @@ import { Auth  } from 'aws-amplify'
 import Functions from '@/functions/Functions'
 import { DataStore } from 'aws-amplify'
 import { Usuario } from '@/models'
+import Seed from '@/components/Seed'
 export default {
   name: 'TopBar',
   components: {
+    Seed
   },
   data () {
     return {

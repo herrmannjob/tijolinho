@@ -62,7 +62,7 @@ import CalendarWeek from '@/components/CalendarWeek'
 import CalendarDay from '@/components/CalendarDay'
 import CalendarMonth from '@/components/CalendarMonth'
 
-import { Obra, Usuario, Tarefa } from '@/models'
+import { Obra, Usuario, Tarefa, Empresa } from '@/models'
 import Functions from '@/functions/Functions'
 
 export default {
@@ -73,6 +73,7 @@ export default {
   data () {
     return {
       user: null,
+      uid: '',
       select_view: ['Dia', 'Semana', 'Mês'],
       calendar_view: '',
       clients: ['Nenhum cliente cadastrado'],
@@ -113,6 +114,7 @@ export default {
   },
   async created () {
     this.user = await Functions.isAuth()
+    await this.getUserId()
     this.getObras()
     this.getTasks()
     // this.getClients()
@@ -123,17 +125,29 @@ export default {
       console.log('refresh')
       this.$refs.calendar.$emit('refetch-events')
     },
+    async getUserId () {
+      const user_id = await Functions.wichUserId(Usuario, this.user.attributes.email)
+      this.uid = user_id.data
+    },
     async getObras () {
-      const response = await Functions.getById(Obra, this.user.username)
-      if (response.status === 'ok') this.constructions = response.data
+      const response = await Functions.getById(Obra, this.uid)
+      if (response.status === 'ok') {
+        this.constructions = []
+        response.data.map(obra => { this.constructions.push(obra.nome) })
+      }
     },
     async getClients () {
-      const response = await Functions.getAll(Usuario)
-      if (response.status === 'ok') this.clients = response.data
+      const empresas = await Functions.getById(Empresa, this.uid)
+      console.log(empresas)
+      // const response = await Functions.getAll(Usuario)
+      // if (response.status === 'ok') this.clients = response.data
     },
     async getTasks () {
       const response = await Functions.getAll(Tarefa)
-      if (response.status === 'ok') this.calendarOptions.events = response.data
+      console.log(response)
+      if (response.status === 'ok') {
+        response.data.map(item => {this.calendarOptions.events.push({ title: item.nome_tarefa, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })})
+      }
     },
     changeView () {
       switch (this.calendar_view) {

@@ -18,7 +18,7 @@
               :items="tasks"
               label="Obra"
               dense
-              v-model="build"
+              v-model="task"
             ></v-select>
             <v-progress-linear
               v-model="completed"
@@ -116,11 +116,13 @@
 </template>
 
 <script>
-// import { api, urls } from '../services/Api''
 import Gantt from '@/components/Gantt.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 // import moment from '@/plugins/moment'
+import { DataStore } from 'aws-amplify'
+import { Usuario, Tarefa } from '@/models'
+import Functions from '@/functions/Functions'
 
 export default {
   name: 'Schedule',
@@ -130,21 +132,36 @@ export default {
   data () {
     return {
       today: '',
-      username: 'Usuário Teste',
-      tasks: ['Reforma de studio', 'Construção do escritório'],
-      build: '',
+      user: null,
+      user_email: '',
+      username: '',
+      tasks: [],
+      task: '',
       completed: 25
     }
   },
-  created () {
+  async beforeCreate () {
+    this.user = await Functions.isAuth()
+    this.user_email = this.user.attributes.email
+    const user = await DataStore.query(Usuario, data => data.email("eq", this.user_email))
+    if (user.length > 0) this.username = user[0].nome
+  },
+  async created () {
+    await this.getTasks()
   },
   methods: {
+    async getTasks () {
+      const response = await Functions.getAll(Tarefa)
+      if (response.status === 'ok') {
+        response.data.map(item => this.tasks.push(item.nome_tarefa))
+      }
+    },
   }
 }
 </script>
 <style lang="css">
 html, body {
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 .home {
   display: flex;

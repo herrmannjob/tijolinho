@@ -23,8 +23,8 @@
             <v-card
               class="card-right"
               color="primary"
-              v-for="(item,i) in 3"
-              :key="i"
+              v-for="task in tasks"
+              :key="task.id"
             >
               <v-expansion-panels accordion>
                 <v-expansion-panel>
@@ -35,10 +35,13 @@
                     >
                       <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
                     </v-avatar>
-                    <span style="margin-left:5px">{{ username }}</span>
+                    <span style="margin-left:5px">{{ task.title }}</span>
                   </v-expansion-panel-header>
                   <v-expansion-panel-content>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                    <p style="text-align:left">Responsável: {{ task.user }}</p>
+                    <p style="text-align:left">Início: {{ task.start }}</p>
+                    <p style="text-align:left">Fim: {{ task.end }}</p>
+                    <p style="text-align:left">Status: {{ task.status }}</p>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
@@ -59,6 +62,8 @@ import CalendarComponent from '@/components/CalendarComponent.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 import moment from '@/plugins/moment'
+import { Tarefa } from '@/models'
+import Functions from '@/functions/Functions'
 
 export default {
   name: 'Calendar',
@@ -68,13 +73,28 @@ export default {
   data () {
     return {
       today: '',
-      username: 'Usuário Teste'
+      username: 'teste',
+      tasks: []
     }
   },
-  created () {
+  async created () {
     this.today = moment().format('ll')
+    await this.getTasks()
   },
   methods: {
+    async getTasks () {
+      const response = await Functions.getAll(Tarefa)
+      if (response.status === 'ok') {
+        console.log(response.data)
+        response.data.map(item => this.tasks.push({
+          title: item.nome_tarefa,
+          user: item.Responsavel.nome,
+          start: item.data_inicio,
+          end: item.data_fim,
+          status: item.status.status
+        }))
+      }
+    },
   }
 }
 </script>
