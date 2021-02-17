@@ -18,6 +18,18 @@ const functions = {
         return response
     },
 
+    // ID DO USER LOGADO, NO BANCO
+    async wichUserId (table, email) {
+        try {
+            const items = await DataStore.query(table, d => d.email("eq", email))
+            if (items.length > 0) {
+                return { status: 'ok', data: items[0].id }
+            } else return { status: 'empty' }
+        } catch (error) {
+            return { status: 'error', error }
+        }
+    },
+
     //====== TABELAS DO BANCO ======//
 
     //=== LISTAR ===//
@@ -29,12 +41,12 @@ const functions = {
             const items = await DataStore.query(table, d => d.usuarioID("eq", id))
             if (items.length > 0) {
                 items.map(item => {
-                    data.push(item.nome)
+                    data.push(item)
                 })
                 return { status: 'ok', data }
             } else return { status: 'empty' }
         } catch (error) {
-            return { status: "error", error }
+            return { status: 'error', error }
         }
     },
 
@@ -45,13 +57,12 @@ const functions = {
             const items = await DataStore.query(table, Predicates.ALL)
             if (items.length > 0) {
                 items.map(item => {
-                    if (table.name === 'Tarefa') data.push({ title: item.nome_tarefa, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })
-                    else data.push(item.nome)
+                    data.push(item)
                 })
                 return { status: 'ok', data }
             } else return { status: 'empty' }
         } catch (error) {
-            return { status: "error", error }
+            return { status: 'error', error }
         }
     },
 
@@ -64,8 +75,20 @@ const functions = {
             )
             return { status: 'ok' }
         } catch (error) {
-            return { status: "error", error }
+            return { status: 'error', error }
         }
+    },
+
+    //=== DELETAR ===//
+    async deleteData (table, id) {
+        try {
+            const modelToDelete = await DataStore.query(table, id)
+            DataStore.delete(modelToDelete)
+            return { status: 'ok' }
+        } catch (error) {
+            return { status: 'error', error }
+        }
+        
     }
 }
 
