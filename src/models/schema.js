@@ -393,6 +393,13 @@ export const schema = {
                     "attributes": [],
                     "isArrayNullable": true
                 },
+                "cor": {
+                    "name": "cor",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "Endereco": {
                     "name": "Endereco",
                     "isArray": false,
@@ -779,14 +786,14 @@ export const schema = {
                 "data_inicio": {
                     "name": "data_inicio",
                     "isArray": false,
-                    "type": "AWSDate",
+                    "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
                 },
                 "data_fim": {
                     "name": "data_fim",
                     "isArray": false,
-                    "type": "AWSDate",
+                    "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -912,19 +919,26 @@ export const schema = {
                 "data_inicio": {
                     "name": "data_inicio",
                     "isArray": false,
-                    "type": "AWSDate",
+                    "type": "AWSDateTime",
                     "isRequired": true,
                     "attributes": []
                 },
                 "data_fim": {
                     "name": "data_fim",
                     "isArray": false,
-                    "type": "AWSDate",
+                    "type": "AWSDateTime",
                     "isRequired": true,
                     "attributes": []
                 },
                 "duracao": {
                     "name": "duracao",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prioridade": {
+                    "name": "prioridade",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
@@ -996,19 +1010,26 @@ export const schema = {
                 "data_inicio": {
                     "name": "data_inicio",
                     "isArray": false,
-                    "type": "AWSDate",
+                    "type": "AWSDateTime",
                     "isRequired": true,
                     "attributes": []
                 },
                 "data_fim": {
                     "name": "data_fim",
                     "isArray": false,
-                    "type": "AWSDate",
+                    "type": "AWSDateTime",
                     "isRequired": true,
                     "attributes": []
                 },
                 "duracao": {
                     "name": "duracao",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "prioridade": {
+                    "name": "prioridade",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
@@ -1080,14 +1101,14 @@ export const schema = {
                 "data_inicio": {
                     "name": "data_inicio",
                     "isArray": false,
-                    "type": "AWSDate",
+                    "type": "AWSDateTime",
                     "isRequired": true,
                     "attributes": []
                 },
                 "data_fim": {
                     "name": "data_fim",
                     "isArray": false,
-                    "type": "AWSDate",
+                    "type": "AWSDateTime",
                     "isRequired": true,
                     "attributes": []
                 },
@@ -1164,14 +1185,14 @@ export const schema = {
                 "data_inicio": {
                     "name": "data_inicio",
                     "isArray": false,
-                    "type": "AWSDate",
+                    "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
                 },
                 "data_fim": {
                     "name": "data_fim",
                     "isArray": false,
-                    "type": "AWSDate",
+                    "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -1211,5 +1232,5 @@ export const schema = {
     },
     "enums": {},
     "nonModels": {},
-    "version": "c10548c61d21c26fc4afcb1e362f0b86"
+    "version": "e207c37dd977138c6212593df9d4f3fa"
 };

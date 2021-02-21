@@ -59,6 +59,7 @@ export declare class Obra {
   readonly id: string;
   readonly nome: string;
   readonly foto?: (string | null)[];
+  readonly cor?: string;
   readonly Endereco: Endereco;
   readonly TipoObra: TipoObra;
   readonly Empresa: Empresa;
@@ -130,6 +131,7 @@ export declare class AgendaObra {
   readonly data_inicio: string;
   readonly data_fim: string;
   readonly duracao?: string;
+  readonly prioridade?: string;
   constructor(init: ModelInit<AgendaObra>);
   static copyOf(source: AgendaObra, mutator: (draft: MutableModel<AgendaObra>) => MutableModel<AgendaObra> | void): AgendaObra;
 }
@@ -142,6 +144,7 @@ export declare class AgendaParticular {
   readonly data_inicio: string;
   readonly data_fim: string;
   readonly duracao?: string;
+  readonly prioridade?: string;
   constructor(init: ModelInit<AgendaParticular>);
   static copyOf(source: AgendaParticular, mutator: (draft: MutableModel<AgendaParticular>) => MutableModel<AgendaParticular> | void): AgendaParticular;
 }

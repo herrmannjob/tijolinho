@@ -12,16 +12,16 @@ interface Agenda {
   id: ID!
   titulo: String!
   descricao: String
-  data_inicio: AWSDate
-  data_fim: AWSDate
+  data_inicio: AWSDateTime
+  data_fim: AWSDateTime
   duracao: String
 }
 
 interface Tarefas {
   id: ID!
   nome_tarefa: String!
-  data_inicio: AWSDate
-  data_fim: AWSDate
+  data_inicio: AWSDateTime
+  data_fim: AWSDateTime
 }
 
 type Empresa implements Info @model @key(name: "byUsuario", fields: ["usuarioID"]) @auth(rules: [{allow: private}]) {
@@ -71,6 +71,7 @@ type Obra implements Info @model @key(name: "byUsuario", fields: ["usuarioID"]) 
   id: ID!
   nome: String!
   foto: [AWSURL]
+  cor: String
   Endereco: Endereco! @connection
   TipoObra: TipoObra! @connection
   Empresa: Empresa! @connection
@@ -112,8 +113,8 @@ type Tarefa implements Tarefas @model @auth(rules: [{allow: private}]) {
   Responsavel: Usuario @connection
   status: StatusTarefa @connection
   nome_tarefa: String!
-  data_inicio: AWSDate
-  data_fim: AWSDate
+  data_inicio: AWSDateTime
+  data_fim: AWSDateTime
   TarefaOrigem: Tarefa @connection
 }
 
@@ -127,9 +128,10 @@ type AgendaObra implements Agenda @model @auth(rules: [{allow: private}]) {
   Obra: Obra! @connection
   titulo: String!
   descricao: String
-  data_inicio: AWSDate!
-  data_fim: AWSDate!
+  data_inicio: AWSDateTime!
+  data_fim: AWSDateTime!
   duracao: String
+  prioridade: String
 }
 
 type AgendaParticular implements Agenda @model @auth(rules: [{allow: private}]) {
@@ -137,9 +139,10 @@ type AgendaParticular implements Agenda @model @auth(rules: [{allow: private}]) 
   Usuario: Usuario! @connection
   titulo: String!
   descricao: String
-  data_inicio: AWSDate!
-  data_fim: AWSDate!
+  data_inicio: AWSDateTime!
+  data_fim: AWSDateTime!
   duracao: String
+  prioridade: String
 }
 
 type LembreteParticular implements Agenda @model @auth(rules: [{allow: private}]) {
@@ -147,8 +150,8 @@ type LembreteParticular implements Agenda @model @auth(rules: [{allow: private}]
   Usuario: Usuario! @connection
   titulo: String!
   descricao: String
-  data_inicio: AWSDate!
-  data_fim: AWSDate!
+  data_inicio: AWSDateTime!
+  data_fim: AWSDateTime!
   duracao: String
 }
 
@@ -157,8 +160,8 @@ type LembreteObra implements Agenda @model @auth(rules: [{allow: private}]) {
   Obra: Obra! @connection
   titulo: String!
   descricao: String
-  data_inicio: AWSDate
-  data_fim: AWSDate
+  data_inicio: AWSDateTime
+  data_fim: AWSDateTime
   duracao: String
 }
  
