@@ -1407,6 +1407,7 @@ export const getAgendaObra = /* GraphQL */ `
       data_inicio
       data_fim
       duracao
+      prioridade
       _version
       _deleted
       _lastChangedAt
@@ -1483,6 +1484,7 @@ export const listAgendaObras = /* GraphQL */ `
         data_inicio
         data_fim
         duracao
+        prioridade
         _version
         _deleted
         _lastChangedAt
@@ -1525,6 +1527,7 @@ export const syncAgendaObras = /* GraphQL */ `
         data_inicio
         data_fim
         duracao
+        prioridade
         _version
         _deleted
         _lastChangedAt
@@ -1556,6 +1559,7 @@ export const getAgendaParticular = /* GraphQL */ `
       data_inicio
       data_fim
       duracao
+      prioridade
       _version
       _deleted
       _lastChangedAt
@@ -1630,6 +1634,7 @@ export const listAgendaParticulars = /* GraphQL */ `
         data_inicio
         data_fim
         duracao
+        prioridade
         _version
         _deleted
         _lastChangedAt
@@ -1677,6 +1682,7 @@ export const syncAgendaParticulars = /* GraphQL */ `
         data_inicio
         data_fim
         duracao
+        prioridade
         _version
         _deleted
         _lastChangedAt
