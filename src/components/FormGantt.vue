@@ -108,7 +108,7 @@ import { AgendaParticular } from '@/models'
 import Functions from '@/functions/Functions'
 import ResponseModal from '@/components/ResponseModal.vue'
 export default {
-  name: 'FormCalendar',
+  name: 'FormGantt',
   components: { ResponseModal },
   props: {
     form: Boolean,
