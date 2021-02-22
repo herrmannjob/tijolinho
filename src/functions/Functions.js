@@ -1,5 +1,6 @@
 import { Auth } from 'aws-amplify'
 import { DataStore, Predicates } from 'aws-amplify'
+import axios from 'axios'
 
 const functions = {
     // LOGIN
@@ -23,8 +24,18 @@ const functions = {
         try {
             const items = await DataStore.query(table, d => d.email("eq", email))
             if (items.length > 0) {
-                return { status: 'ok', data: items[0].id }
+                return { status: 'ok', data: items[0] }
             } else return { status: 'empty' }
+        } catch (error) {
+            return { status: 'error', error }
+        }
+    },
+
+    //=== BUSCAR ENDEREÇO PELO CEP ===//
+    async searchCep(cep) {
+        try {
+            const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`)
+            return {staus: 'ok', data: response.data}
         } catch (error) {
             return { status: 'error', error }
         }

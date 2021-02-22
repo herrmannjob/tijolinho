@@ -4,7 +4,7 @@
     <div class="content">
       <TopBar />
       <div class="components row">
-        <div class="col-9 calendar">
+        <div class="col-12 col-sm-9 calendar">
           <CalendarComponent />
         </div>
         <div class="col right-col">
@@ -28,20 +28,14 @@
             >
               <v-expansion-panels accordion>
                 <v-expansion-panel>
-                  <v-expansion-panel-header>
-                    <v-avatar
-                      class="avatar"
-                      tile
-                    >
-                      <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
-                    </v-avatar>
-                    <span style="margin-left:5px">{{ task.title }}</span>
+                  <v-expansion-panel-header style="padding-left:unset; padding-right:unset">
+                    <span>{{ task.title }}</span>
                   </v-expansion-panel-header>
                   <v-expansion-panel-content>
-                    <p style="text-align:left">Responsável: {{ task.user }}</p>
+                    <p style="text-align:left">Descrição: {{ task.description }}</p>
                     <p style="text-align:left">Início: {{ task.start }}</p>
                     <p style="text-align:left">Fim: {{ task.end }}</p>
-                    <p style="text-align:left">Status: {{ task.status }}</p>
+                    <p style="text-align:left">Duração: {{ task.time }}</p>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
@@ -62,7 +56,7 @@ import CalendarComponent from '@/components/CalendarComponent.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 import moment from '@/plugins/moment'
-import { Tarefa } from '@/models'
+import { AgendaObra } from '@/models'
 import Functions from '@/functions/Functions'
 
 export default {
@@ -74,7 +68,7 @@ export default {
     return {
       today: '',
       username: 'teste',
-      tasks: []
+      tasks: [{ title: 'Nenhuma atividade' }]
     }
   },
   async created () {
@@ -83,17 +77,22 @@ export default {
   },
   methods: {
     async getTasks () {
-      const response = await Functions.getAll(Tarefa)
+      const response = await Functions.getAll(AgendaObra)
+      // const response = await Functions.getByForeignKey(AgendaParticular, this.user)
       if (response.status === 'ok') {
-        console.log(response.data)
-        response.data.map(item => this.tasks.push({
-          title: item.nome_tarefa,
-          user: item.Responsavel.nome,
-          start: item.data_inicio,
-          end: item.data_fim,
-          status: item.status.status
-        }))
+        this.tasks = []
+        response.data.map(item => {this.tasks.push({ title: item.titulo, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })})
       }
+      // const response = await Functions.getAll(Tarefa)
+      // if (response.status === 'ok') {
+      //   response.data.map(item => this.tasks.push({
+      //     title: item.nome_tarefa,
+      //     user: item.Responsavel.nome,
+      //     start: item.data_inicio,
+      //     end: item.data_fim,
+      //     status: item.status.status
+      //   }))
+      // }
     },
   }
 }
@@ -115,7 +114,15 @@ html, body {
   border-right: lightgray 0.1px solid;
 }
 .components {
-  padding: 20px;
+  height: calc(100vh - 60px) !important;
+  width: calc(100vw - 80px);
+  padding: unset;
+  padding-left: 20px;
+  padding-top: 20px;
+  flex-wrap: unset;
+}
+.right-col {
+  overflow-y: -moz-hidden-unscrollable;
 }
 .right-col > .title {
   margin-top: 20px;
@@ -124,7 +131,7 @@ html, body {
 .card-right {
   margin-top: 10px;
   margin-bottom: 10px;
-  min-height: 60px;
+  min-height: unset !important;
 }
 .group-data {
   align-items: center;
@@ -144,5 +151,14 @@ html, body {
   align-items: center;
   margin-top: 20px;
   margin-bottom: 20px;
+}
+@media only screen and (max-width: 768px) {
+  /* For mobile phones: */
+  .right-col{
+    display: none;
+  }
+  .calendar {
+    border-right: none;
+  }
 }
 </style>

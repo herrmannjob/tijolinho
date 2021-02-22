@@ -15,10 +15,10 @@
 
           <div class="group-data-schedule" data-app>
             <v-select
-              :items="tasks"
+              :items="constructions_names"
               label="Obra"
               dense
-              v-model="task"
+              v-model="construction"
             ></v-select>
             <v-progress-linear
               v-model="completed"
@@ -28,6 +28,7 @@
             </v-progress-linear>
             <v-btn
               color="primary"
+              @click="form = true"
             >
               <v-icon
                 dark
@@ -56,7 +57,7 @@
             <v-card
               elevation="2"
               shaped
-              class="one-card"
+              class="one-card card-passed-time"
             >
               <v-card-text class="text-center">
                 <div><span class="text-primary">Tempo decorrido</span></div>
@@ -69,7 +70,7 @@
             <v-card
               elevation="2"
               shaped
-              class="one-card"
+              class="one-card card-plan-time"
             >
               <v-card-text class="text-center">
                 <div><span class="text-primary">Tempo planejado</span></div>
@@ -82,7 +83,7 @@
             <v-card
               elevation="2"
               shaped
-              class="one-card"
+              class="one-card card-total-plan"
             >
               <v-card-text class="text-center">
                 <div><span class="text-primary">Total planejado</span></div>
@@ -95,7 +96,7 @@
             <v-card
               elevation="2"
               shaped
-              class="one-card"
+              class="one-card card-total-spent"
             >
               <v-card-text class="text-center">
                 <div><span class="text-primary">Total gasto</span></div>
@@ -112,6 +113,7 @@
         </div>
       </div>
     </div>
+    <FormRegisterConstruction :form.sync="form" />
   </div>
 </template>
 
@@ -121,13 +123,14 @@ import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 // import moment from '@/plugins/moment'
 import { DataStore } from 'aws-amplify'
-import { Usuario, Tarefa } from '@/models'
+import { Usuario, Obra } from '@/models'
 import Functions from '@/functions/Functions'
+import FormRegisterConstruction from '@/components/FormRegisterConstruction'
 
 export default {
   name: 'Schedule',
   components: {
-    Drawer, TopBar, Gantt
+    Drawer, TopBar, Gantt, FormRegisterConstruction
   },
   data () {
     return {
@@ -135,25 +138,30 @@ export default {
       user: null,
       user_email: '',
       username: '',
-      tasks: [],
-      task: '',
-      completed: 25
+      constructions_names: [],
+      construction: '',
+      completed: 25,
+      form: false
     }
   },
-  async beforeCreate () {
+  async created () {
     this.user = await Functions.isAuth()
     this.user_email = this.user.attributes.email
     const user = await DataStore.query(Usuario, data => data.email("eq", this.user_email))
     if (user.length > 0) this.username = user[0].nome
-  },
-  async created () {
-    await this.getTasks()
+    await this.getUser()
+    this.getObras()
   },
   methods: {
-    async getTasks () {
-      const response = await Functions.getAll(Tarefa)
+    async getUser () {
+      const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
+      this.user = user.data
+    },
+    async getObras () {
+      const response = await Functions.getById(Obra, this.user.id)
       if (response.status === 'ok') {
-        response.data.map(item => this.tasks.push(item.nome_tarefa))
+        this.constructions_names = []
+        response.data.map(obra => { this.constructions_names.push(obra.nome) })
       }
     },
   }
@@ -220,11 +228,23 @@ html, body {
 .cards-report {
   justify-content: space-around;
   margin-top: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
   max-width: 95%;
 }
 .one-card {
   width: 7em;
   height: 7em;
+}
+.card-passed-time {
+  background-color: #F8F032 !important;
+}
+.card-plan-time {
+  background-color: #FF0BE7 !important;
+}
+.card-total-plan {
+  background-color: #6C63FF !important;
+}
+.card-total-spent {
+  background-color: #3FE306 !important;
 }
 </style>

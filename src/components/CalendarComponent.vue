@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <div class="object_calendar">
     <v-row align="center">
       <v-col
         class="d-flex"
@@ -31,14 +31,14 @@
         sm="4"
       >
         <v-select
-          :items="constructions"
+          :items="constructions_names"
           label="Obra"
           dense
         ></v-select>
       </v-col>
     </v-row>
     
-    <FormCalendar :form.sync="form" :date="date_clicked" />
+    <FormCalendar :form.sync="form" :date="date_clicked" :user="user" />
 
     <CalendarWeek :options="calendarOptions" v-if="view_week" ref="calendar" />
 
@@ -47,7 +47,7 @@
     <CalendarMonth :options="calendarOptions" v-if="view_month" ref="calendar" />
 
     <FullCalendar :options="calendarOptions" v-show="false" />
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -62,7 +62,7 @@ import CalendarWeek from '@/components/CalendarWeek'
 import CalendarDay from '@/components/CalendarDay'
 import CalendarMonth from '@/components/CalendarMonth'
 
-import { Obra, Usuario, Tarefa, Empresa } from '@/models'
+import { Obra, Usuario, Empresa, AgendaParticular, AgendaObra } from '@/models'
 import Functions from '@/functions/Functions'
 
 export default {
@@ -77,7 +77,8 @@ export default {
       select_view: ['Dia', 'Semana', 'Mês'],
       calendar_view: '',
       clients: ['Nenhum cliente cadastrado'],
-      constructions: ['Nenhuma obra cadastrada'],
+      constructions_names: ['Nenhuma obra cadastrada'],
+      constructions: [],
       view_week: true,
       view_day: false,
       view_month: false,
@@ -114,7 +115,7 @@ export default {
   },
   async created () {
     this.user = await Functions.isAuth()
-    await this.getUserId()
+    await this.getUser()
     this.getObras()
     this.getTasks()
     // this.getClients()
@@ -125,28 +126,34 @@ export default {
       console.log('refresh')
       this.$refs.calendar.$emit('refetch-events')
     },
-    async getUserId () {
-      const user_id = await Functions.wichUserId(Usuario, this.user.attributes.email)
-      this.uid = user_id.data
+    async getUser () {
+      const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
+      this.user = user.data
     },
     async getObras () {
-      const response = await Functions.getById(Obra, this.uid)
+      const response = await Functions.getById(Obra, this.user.id)
       if (response.status === 'ok') {
-        this.constructions = []
-        response.data.map(obra => { this.constructions.push(obra.nome) })
+        this.constructions = response.data
+        this.constructions_names = []
+        response.data.map(obra => { this.constructions_names.push(obra.nome) })
       }
     },
     async getClients () {
-      const empresas = await Functions.getById(Empresa, this.uid)
+      const empresas = await Functions.getById(Empresa, this.user.id)
       console.log(empresas)
       // const response = await Functions.getAll(Usuario)
       // if (response.status === 'ok') this.clients = response.data
     },
     async getTasks () {
-      const response = await Functions.getAll(Tarefa)
-      console.log(response)
+      const response_p = await Functions.getAll(AgendaParticular)
+      // const response = await Functions.getByForeignKey(AgendaParticular, this.user)
+      if (response_p.status === 'ok') {
+        response_p.data.map(item => {this.calendarOptions.events.push({ title: item.titulo, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })})
+      }
+      const response = await Functions.getAll(AgendaObra)
+      // const response = await Functions.getByForeignKey(AgendaParticular, this.user)
       if (response.status === 'ok') {
-        response.data.map(item => {this.calendarOptions.events.push({ title: item.nome_tarefa, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })})
+        response.data.map(item => {this.calendarOptions.events.push({ title: item.titulo, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })})
       }
     },
     changeView () {
@@ -181,3 +188,17 @@ export default {
   }
 }
 </script>
+<style lang="css">
+.object_calendar {
+  height: 100%;
+}
+.fc {
+  height: 90%;
+}
+@media only screen and (max-width: 768px) {
+  /* For mobile phones: */
+  .object_calendar {
+    height: unset;
+  }
+}
+</style>

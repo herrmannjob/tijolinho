@@ -1,44 +1,64 @@
 <template>
-  <gantt-elastic :tasks="tasks" :options="options">
-    <!-- <gantt-elastic-header slot="header"></gantt-elastic-header>
-    <gantt-elastic-footer slot="footer"></gantt-elastic-footer> -->
-  </gantt-elastic>
+  <div>
+    <gantt-elastic :tasks="tasks" :options="options">
+      <gantt-elastic-header slot="header"></gantt-elastic-header>
+      <!-- <gantt-elastic-footer slot="footer"></gantt-elastic-footer> -->
+    </gantt-elastic>
+    <FormGantt :form.sync="form" :date="task_clicked" :user="user" />
+  </div>
 </template>
 
 <script>
 import GanttElastic from "gantt-elastic"
-// import Header from "gantt-elastic-header"
+import Header from "gantt-elastic-header"
 import moment from '@/plugins/moment'
 
-import { Tarefa } from '@/models'
+import { Usuario, Tarefa } from '@/models'
 import Functions from '@/functions/Functions'
+import FormGantt from '@/components/FormGantt'
 
 export default {
   name: 'Gantt',
   components: {
-    // ganttElasticHeader: {template: Header},
+    ganttElasticHeader: Header,
     ganttElastic: GanttElastic,
-    // ganttElasticFooter: {template: '<span>your footer</span>'},
+    FormGantt
   },
   data () {
     return {
+      user: null,
       tasks: [],
       options: [],
-      tarefas: []
+      tarefas: [],
+      today: '',
+      form: false,
+      task_clicked: ''
     }
   },
   async created () {
+    this.user = await Functions.isAuth()
+    await this.getUser()
+    this.today = moment().locale('en-ca').format('L')
     await this.getTasks()
     this.getOptions()
+
+    // CHANGE GANTT HEADER
+    const gantt_title = document.getElementsByClassName('gantt-elastic__header-title')
+    for (let value of Object.entries(gantt_title)) { value[1].style.display = 'none' }
+
+    const gantt_now = document.getElementsByClassName('gantt-elastic__header-btn-recenter')
+    for (let value of Object.entries(gantt_now)) { value[1].style.display = 'none' }
+
+    const gantt_options = document.getElementsByClassName('gantt-elastic__header-options')
+    for (let value of Object.entries(gantt_options)) { value[1].style.width = '100%' }
+
+    const gantt_task = document.getElementsByClassName('gantt-elastic__header-label')
+    for (let value of Object.entries(gantt_task)) { if (value[1].innerText === " Task list ") value[1].style.display = 'none' }
   },
   methods: {
-    getDate (hours) {
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear();
-      const currentMonth = currentDate.getMonth();
-      const currentDay = currentDate.getDate();
-      const timeStamp = new Date(currentYear, currentMonth, currentDay, 0, 0, 0).getTime();
-      return new Date(timeStamp + hours * 60 * 60 * 1000).getTime();
+    async getUser () {
+      const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
+      this.user = user.data
     },
     async getTasks () {
       const response = await Functions.getAll(Tarefa)
@@ -55,7 +75,7 @@ export default {
                 `<a href="#" target="_blank" style="color:#0077c0;">${item.Responsavel.nome}</a>`,
               start: item.data_inicio.substr(0, 10),
               duration: duration,
-              progress: 85,
+              progress: ((new Date(this.today) - start) / duration) * 100 > 100 ? 100 : ((new Date(this.today) - start) / duration) * 100,
               type: 'task',
               parentId: item.TarefaOrigem ? item.TarefaOrigem.id : null,
               // dependentOn: null,
@@ -70,10 +90,10 @@ export default {
         maxHeight: 300,
         title: {
           label: 'Your project title as html (link or whatever...)',
-          html: false,
+          html: true,
         },
         row: {
-          height: 24,
+          height: 24
         },
         calendar: {
           hour: {
@@ -82,7 +102,7 @@ export default {
         },
         chart: {
           progress: {
-            bar: true,
+            bar: false,
           },
           expander: {
             display: true,
@@ -90,17 +110,11 @@ export default {
         },
         taskList: {
           expander: {
-            straight: true,
+            straight: false,
           },
           columns: [
-            // {
-            //   id: 1,
-            //   label: 'ID',
-            //   value: 'id',
-            //   width: 35,
-            // },
             {
-              id: 2,
+              id: 1,
               label: 'Description',
               value: 'label',
               width: 120,
@@ -108,49 +122,20 @@ export default {
               html: true,
               events: {
                 click({ data }) {
-                  alert('description clicked!\n' + data.label);
-                },
-              },
-            },
-            {
-              id: 3,
-              label: 'Assigned to',
-              value: 'user',
-              width: 100,
-              html: true,
-            },
-            {
-              id: 3,
-              label: 'Start',
-              value: (task) => moment(task.start).format('YYYY-MM-DD'),
-              width: 78,
-            },
-            // {
-            //   id: 4,
-            //   label: 'Type',
-            //   value: 'type',
-            //   width: 60,
-            // },
-            {
-              id: 5,
-              label: '%',
-              value: 'progress',
-              width: 35,
-              style: {
-                'task-list-header-label': {
-                  'text-align': 'center',
-                  width: '100%',
-                },
-                'task-list-item-value-container': {
-                  'text-align': 'center',
-                  width: '100%',
+                  this.updateTask(data)
                 },
               },
             },
           ],
         }
       }
+    },
+    async updateTask (data) {
+      this.form = true
+      this.task_clicked =  data
     }
   }
 }
 </script>
+<style lang="css">
+</style>

@@ -109,161 +109,15 @@
               <p class="button-primario">SALVAR DADOS</p>
             </v-btn>
           </div>
-          <v-dialog v-model="dialog" persistent max-width="800px">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                color="primary"
-                class="btn-secundario"
-                outlined
-                data-app
-                @click="openDialog"
-                v-bind="attrs"
-                v-on="on"
-              >
-                CADASTRAR OBRA
-              </v-btn>
-            </template>
-            <v-card>
-              <v-card-title>
-                <span class="headline">Cadastrar Obra</span>
-              </v-card-title>
-              <v-card-text>
-                <v-form v-model="valid">
-                  <v-row>
-                    <v-col cols="12" md="6">
-                      <v-text-field
-                        v-model="firstname"
-                        :rules="nameRules"
-                        label="Nome"
-                        :close-on-content-click="false"
-                        required
-                      ></v-text-field>
-                      <v-text-field
-                        v-model="email"
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                        :rules="emailRules"
-                        label="E-mail"
-                        required
-                      ></v-text-field>
-                      <v-select
-                        :items="categoria"
-                        :close-on-content-click="false"
-                        :menu-props="{ top: true, offsetY: true }"
-                        label="Categoria"
-                        required
-                      ></v-select>
-                    </v-col>
-
-                    <v-col cols="12" md="6">
-                      <v-menu
-                        ref="menuInit"
-                        v-model="menuInit"
-                        :close-on-content-click="false"
-                        transition="scale-transition"
-                        offset-y
-                        min-width="auto"
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="dateInit"
-                            label="Data de inicio"
-                            prepend-icon="mdi-calendar"
-                            readonly
-                            required
-                            v-bind="attrs"
-                            v-on="on"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker
-                          ref="pickerInit"
-                          v-model="dateInit"
-                          :max="new Date().toISOString().substr(0, 10)"
-                          min="1950-01-01"
-                          @change="saveInit"
-                        ></v-date-picker>
-                      </v-menu>
-
-                      <v-menu
-                        ref="menuEnd"
-                        v-model="menuEnd"
-                        :close-on-content-click="false"
-                        transition="scale-transition"
-                        offset-y
-                        min-width="auto"
-                      >
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field
-                            v-model="dateEnd"
-                            label="Termino previsto"
-                            prepend-icon="mdi-calendar"
-                            readonly
-                            required
-                            v-bind="attrs"
-                            v-on="on"
-                          ></v-text-field>
-                        </template>
-                        <v-date-picker
-                          ref="pickerEnd"
-                          v-model="dateEnd"
-                          :max="new Date().toISOString().substr(0, 10)"
-                          min="1950-01-01"
-                          @change="saveEnd"
-                        ></v-date-picker>
-                      </v-menu>
-                      <v-text-field
-                        label="Gasto estimado"
-                        required
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </v-col>
-                  </v-row>
-                  <v-row>
-                    <v-col cols="12" md="6">
-                      <v-text-field label="Telefone" required></v-text-field>
-                      <v-text-field
-                        label="Cep"
-                        required
-                        v-model="cep"
-                        @change="searchCep"
-                        @keyup="searchCep()"
-                      ></v-text-field>
-                      <v-text-field
-                        v-model="cidade"
-                        label="Cidade"
-                        required
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" md="6">
-                           <v-text-field
-                        v-model="estado"
-                        label="Estado"
-                        required
-                      ></v-text-field>
-                      <v-text-field
-                        v-model="logradouro"
-                        label="Rua"
-                        required
-                      ></v-text-field>
-                      <v-text-field label="Complemento" required></v-text-field>
-                    </v-col>
-                  </v-row>
-                </v-form>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" text @click="dialog = false">
-                  Cancelar
-                </v-btn>
-                <v-btn color="blue darken-1" text @click="dialog = false">
-                  SALVAR
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
+          <v-btn
+            color="primary"
+            class="btn-secundario"
+            outlined
+            @click="form = true"
+          >
+            CADASTRAR OBRA
+          </v-btn>
+          <FormRegisterConstruction :form.sync="form" />
         </v-row>
       </v-form>
 
@@ -276,14 +130,16 @@
   </div>
 </template>
 <script>
-import image from "../assets/register.png";
-import axios from "axios";
+import image from "../assets/register.png"
+import FormRegisterConstruction from '@/components/FormRegisterConstruction'
 export default {
+  name: 'FormRegisterClient',
+  components: { FormRegisterConstruction },
   data() {
     return {
       /* eslint-disable no-mixed-spaces-and-tabs */
       title: "Image Upload",
-      dialog: false,
+      form: false,
       imageName: "",
       imageUrl: "",
       imageFile: "",
@@ -349,18 +205,6 @@ export default {
     },
   },
   methods: {
-    searchCep() {
-      if (this.cep.length == 8) {
-        axios
-          .get(`https://viacep.com.br/ws/${this.cep}/json/`)
-          .then((response) => (this.data = response.data))
-          .catch((error) => console.log(error));
-        console.log("rua", this.data);
-        this.logradouro = this.data.logradouro;
-        this.cidade = this.data.localidade;
-        this.estado = this.data.uf;
-      }
-    },
     save(date) {
       this.$refs.menu.save(date);
     },
@@ -381,9 +225,6 @@ export default {
     },
     closeMyDialog() {
       this.dialog = false;
-    },
-    openDialog() {
-      this.dialog = true;
     },
     onFilePicked(e) {
       const files = e.target.files;
