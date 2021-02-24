@@ -30,7 +30,7 @@ type Empresa implements Info @model @key(name: "byUsuario", fields: ["usuarioID"
   cnpj: String
   telefone: AWSPhone
   email: AWSEmail
-  usuarioID: [ID!]
+  usuarioID: [ID]
   foto: AWSURL
   Endereco: Endereco! @connection
 }

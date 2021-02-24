@@ -42,7 +42,7 @@ export const schema = {
                     "name": "usuarioID",
                     "isArray": true,
                     "type": "ID",
-                    "isRequired": true,
+                    "isRequired": false,
                     "attributes": [],
                     "isArrayNullable": true
                 },
