@@ -22,7 +22,7 @@ class TarefaWrapper {
 				this.origem.sendToAmplify()
 			}
 		}
-			const response = await Functions.putData(Tarefa, {
+		const response = await Functions.putData(Tarefa, {
 			// "CronogramaObra": /* Provide a CronogramaObra instance here */,
 			// "Responsavel": /* Provide a Usuario instance here */,
 			// "status": /* Provide a StatusTarefa instance here */,
@@ -30,8 +30,8 @@ class TarefaWrapper {
 			"data_inicio": '2021-02-01',
 			"data_fim": '2021-02-01',
 			// "TarefaOrigem": /* Provide a Tarefa instance here */
-			})
-			console.log(response);
+		})
+		console.log(response);
 		
 		// send to amplify
 		// console.log(this.nome);

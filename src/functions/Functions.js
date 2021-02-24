@@ -41,6 +41,12 @@ const functions = {
         }
     },
 
+    //=== CRIAR UMA COR BASEADO NO CPF DO CLIENTE ===//
+    selectColor(number) {
+        const hue = number * 137.508
+        return `hsl(${hue},50%,50%)`
+    },
+
     //====== TABELAS DO BANCO ======//
 
     //=== LISTAR ===//
@@ -81,10 +87,10 @@ const functions = {
 
     async putData (table, data) {
         try {
-            await DataStore.save(
+            const response = await DataStore.save(
                 new table(data)
             )
-            return { status: 'ok' }
+            return { status: 'ok', data: response }
         } catch (error) {
             return { status: 'error', error }
         }

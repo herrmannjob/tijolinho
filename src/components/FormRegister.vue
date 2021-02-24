@@ -17,11 +17,11 @@
             </v-stepper-step>
             <v-divider></v-divider>
             <v-stepper-step :complete="e1 > 2" step="2">
-              <p>Empresa</p>
+              <p>Localização</p>
             </v-stepper-step>
             <v-divider></v-divider>
             <v-stepper-step :complete="e1 > 3" step="3">
-              <p>Localização</p>
+              <p>Empresa</p>
             </v-stepper-step>
           </v-stepper-header>
           <v-stepper-items>
@@ -72,7 +72,6 @@
                         v-model="date"
                         :max="new Date().toISOString().substr(0, 10)"
                         min="1950-01-01"
-                        @change="save"
                       ></v-date-picker>
                     </v-menu>
                   </v-container>
@@ -87,17 +86,14 @@
               </v-card>
             </v-stepper-content>
             <v-stepper-content step="2">
-              <v-card class="mb-12" color="grey lighten-1" height="550px">
+              <v-card class="mb-12" color="grey lighten-1" height="450px">
                 <v-form v-model="valid">
-
-                  <v-text-field label="Empresa" required></v-text-field>
-                  <v-text-field label="Telefone" required></v-text-field>
                   <v-text-field
                     label="Cep"
                     required
                     v-model="cep"
-                    @change="searchCep"
-                    @keyup="searchCep()"
+                    @change="searchCep(cep, true)"
+                    @keyup="searchCep(cep, true)"
                   ></v-text-field>
                       <v-text-field
                     v-model="estado"
@@ -109,20 +105,16 @@
                     label="Cidade"
                     required
                   ></v-text-field>
-                     <v-text-field
+                  <v-text-field
                     v-model="logradouro"
                     label="Rua"
                     required
                   ></v-text-field>
-                 <v-text-field label="Complemento" required></v-text-field>
-
-                  <v-text-field label="Empresa" v-model="company" required></v-text-field>
-                  <v-text-field label="Telefone" v-model="phone" hint="Apenas números (13 dígitos)" placeholder="+55 84 98765 4321" :rules="phone_rules" required></v-text-field>
-
+                 <v-text-field label="Complemento" v-model="complemento" required></v-text-field>
                 </v-form>
+                <v-btn color="primary" @click="addAddress(true)">
 
-                <v-btn color="primary" @click="e1 = 3">
-                  PRÓXIMO
+                  SALVAR
                 </v-btn>
                 <v-btn text>
                   CANCELAR
@@ -130,35 +122,38 @@
               </v-card>
             </v-stepper-content>
             <v-stepper-content step="3">
-              <v-card class="mb-12" color="grey lighten-1" height="450px">
+              <v-card class="mb-12" color="grey lighten-1" height="700px">
                 <v-form v-model="valid">
-                         <v-text-field
+
+                  <v-text-field label="Empresa" v-model="company" required></v-text-field>
+                  <v-text-field label="Telefone" v-model="phone" hint="Apenas números (13 dígitos)" placeholder="+55 84 98765 4321" :rules="phone_rules" required></v-text-field>
+                  <v-text-field
                     label="Cep"
                     required
-                    v-model="cep"
-                    @change="searchCep"
-                    @keyup="searchCep()"
+                    v-model="cep_empresa"
+                    @change="searchCep(cep_empresa, false)"
+                    @keyup="searchCep(cep_empresa, false)"
                   ></v-text-field>
                       <v-text-field
-                    v-model="estado"
+                    v-model="estado_empresa"
                     label="Estado"
                     required
                   ></v-text-field>
                   <v-text-field
-                    v-model="cidade"
+                    v-model="cidade_empresa"
                     label="Cidade"
                     required
                   ></v-text-field>
                      <v-text-field
-                    v-model="logradouro"
+                    v-model="logradouro_empresa"
                     label="Rua"
                     required
                   ></v-text-field>
-                 <v-text-field label="Complemento" required></v-text-field>
+                 <v-text-field label="Complemento" v-model="complemento_empresa" required></v-text-field>
                 </v-form>
-                <v-btn color="primary" @click="e1 = 1">
 
-                  SALVAR
+                <v-btn color="primary" @click="addAddress(false)">
+                  PRÓXIMO
                 </v-btn>
                 <v-btn text>
                   CANCELAR
@@ -198,11 +193,10 @@
   </div>
 </template>
 <script>
-import image from "../assets/register.png";
-import axios from "axios";
+import image from "../assets/register.png"
+import Functions from '@/functions/Functions'
 import { Auth  } from 'aws-amplify'
-import { DataStore } from '@aws-amplify/datastore';
-import { Usuario } from '@/models';
+import { Usuario, TipoUsuario, Endereco, Empresa } from '@/models'
 export default {
   /* eslint-disable no-mixed-spaces-and-tabs */
   data() {
@@ -211,10 +205,19 @@ export default {
       e1: 1,
       picker: new Date().toISOString().substr(0, 10),
       menu: false,
-      cep: null,
-      estado: null,
-      logradouro: null,
-      cidade: null,
+      endereco_empresa: null,
+      cep_empresa: '',
+      estado_empresa: '',
+      logradouro_empresa: '',
+      cidade_empresa: '',
+      complemento_empresa: '',
+      endereco: null,
+      cep: '',
+      estado: '',
+      logradouro: '',
+      cidade: '',
+      complemento: '',
+      
       data: null,
       image: image,
       valid: false,
@@ -236,7 +239,8 @@ export default {
         (v) => v.length === 13 || "Telefone com 13 dígitos - +55 84 98765 4321",
       ],
       error_dialog: false,
-      error: ''
+      error: '',
+      tipo_usuario: null,
     };
   },
   watch: {
@@ -245,20 +249,97 @@ export default {
     },
   },
   methods: {
-    save(date) {
-      this.$refs.menu.save(date);
+    async searchCep(cep, user) {
+      if (cep.length == 8) {
+        const response = await Functions.searchCep(cep)
+        if (user) { 
+          this.logradouro = response.data.logradouro
+          this.cidade = response.data.localidade
+          this.estado = response.data.uf
+        } else {
+          this.logradouro_empresa = response.data.logradouro
+          this.cidade_empresa = response.data.localidade
+          this.estado_empresa = response.data.uf
+        }
+      }
     },
 
-    searchCep() {
-      if (this.cep.length == 8) {
-        axios
-          .get(`https://viacep.com.br/ws/${this.cep}/json/`)
-          .then((response) => (this.data = response.data))
-          .catch((error) => console.log(error));
-        console.log("rua", this.data);
-        this.logradouro = this.data.logradouro;
-        this.cidade = this.data.localidade;
-        this.estado = this.data.uf;
+    async addAddress (user) {
+      const data = user ? 
+      {
+        "cep": this.cep,
+        "estado": this.estado,
+        "cidade": this.cidade,
+        "rua": this.logradouro,
+        "complemento": this.complemento
+      } :
+      {
+        "cep": this.cep_empresa,
+        "estado": this.estado_empresa,
+        "cidade": this.cidade_empresa,
+        "rua": this.logradouro_empresa,
+        "complemento": this.complemento_empresa
+      }
+      const response = await Functions.putData(Endereco, data)
+      if (response.status === 'ok') {
+        console.log("Endereço cadastrado com sucesso!")
+        console.log(response)
+        if (!user) {
+          this.endereco_empresa = response.data
+          this.addEmpresa()
+        } else {
+          this.endereco = response.data
+          this.addTipoUsuario()
+        }
+      } else {
+        console.log("erro: " + response.error.message)
+      }
+    },
+
+    async addTipoUsuario () {
+      const response = await Functions.putData(TipoUsuario, {
+        "nome": "Funcionário",
+      })
+      if (response.status === 'ok') {
+        console.log("TipoUsuario cadastrado com sucesso!")
+        this.tipo_usuario = response.data
+        this.addUser()
+      } else {
+        console.log("erro: " + response.error.message)
+      }
+    },
+
+    async addUser () {
+      this.phone = `+${this.phone.substr(0,2)} ${this.phone.substr(2,2)} ${this.phone.substr(4,5)} ${this.phone.substr(9,4)}`
+      const response = await Functions.putData(Usuario, {
+        "nome": this.firstname,
+        "email": this.email,
+        "data_nascimento": this.date + 'Z',
+        "Endereco": this.endereco,
+        "TipoUsuario": this.tipo_usuario,
+
+      })
+      if (response.status === 'ok') {
+        console.log("Usuário cadastrado com sucesso!")
+        this.user = response.data
+        this.el = this.el + 1
+      } else {
+        console.log("erro: " + response.error.message)
+      }
+    },
+
+    async addEmpresa () {
+      const response = await Functions.putData(Empresa, {
+        "nome": this.company,
+        "telefone": this.phone,
+        "Endereco": this.endereco_empresa,
+        "usuarioID": [this.user.id]
+      })
+      if (response.status === 'ok') {
+        console.log("Empresa cadastrada com sucesso!")
+        this.signUp()
+      } else {
+        console.log("erro: " + response.error.message)
       }
     },
 
@@ -268,9 +349,7 @@ export default {
           username: this.email,          // optional
           password: this.password
         })
-        this.phone = `+${this.phone.substr(0,2)} ${this.phone.substr(2,2)} ${this.phone.substr(4,5)} ${this.phone.substr(9,4)}`
-        this.date += '-00:00'
-        this.addUser()
+        this.$router.push('/')
       } catch (error) {
         this.error = error
         this.error_dialog = true
@@ -286,22 +365,7 @@ export default {
     //     this.error_dialog = true
     //   }
     // },
-    async addUser () {
-      try {
-        await DataStore.save(
-          new Usuario({
-            "nome": this.firstname,
-            "email": this.email,
-            "telefone": this.phone,
-            "data_nascimento": this.date
-          })
-        )
-      } catch (error) {
-        this.error = error
-        this.error_dialog = true
-      }
-      this.$router.push('calendar')
-    }
+    
   },
 };
 </script>

@@ -38,16 +38,13 @@ export default {
     async login () {
     },
     calendar () {
-      console.log('calendar')
       this.$router.push('calendar')
     },
     clients () {
-      console.log('clients')
       this.$router.push('client')
     },
     financial () {
       console.log('financial')
-      this.$router.push('calendar')
     }
   }
 }

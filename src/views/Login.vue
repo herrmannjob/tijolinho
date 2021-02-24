@@ -9,7 +9,7 @@
 import FormLogin from '@/components/FormLogin.vue'
 import { AmplifyEventBus } from 'aws-amplify-vue'
 import Functions from '@/functions/Functions'
-import Tarefas from '@/functions/tarefas'
+// import Tarefas from '@/functions/tarefas'
 export default {
   name: 'Login',
   components: {
@@ -24,8 +24,8 @@ export default {
   },
   async beforeCreate() {
     try {
-      var tarefa = await Tarefas.cadastra()
-      console.log(tarefa)
+      // var tarefa = await Tarefas.cadastra()
+      // console.log(tarefa)
       this.user = await Functions.isAuth()
       this.signedIn = true
       this.$router.push('calendar')

@@ -1,7 +1,7 @@
 <template>
   <v-app-bar>
     <v-spacer class="space"></v-spacer>
-    <Seed v-if="false" />
+    <Seed v-if="true" />
     <div class="top-items">
       <v-btn icon>
         <v-icon>mdi-bell</v-icon>

@@ -33,13 +33,13 @@ export default {
   methods: {
     async seed () {
         try {
-            // await this.getData(Tarefa)
+            // await this.getData(Empresa)
             // await this.updateData(TipoUsuario, '5f46e683-a37b-49d1-95a8-762458142d7f')
             // await this.putEndereco()
             // await this.putTipoUsuario()
             // await this.putUsuario()
             // await this.putEmpresa()
-            // await this.putTipoObra()
+            await this.putTipoObra()
             // await this.putObra()
             // await this.putCronogramaObra()
             // await this.putStatusTarefa()
@@ -52,7 +52,7 @@ export default {
     },
     async getData (table) {
         const data = await Functions.getAll(table)
-        // console.log(data)
+        console.log(data)
         return data
 
         //===DELETE ALL DATA===//
@@ -124,13 +124,13 @@ export default {
             try {
                 const request = await DataStore.save(
                     new Usuario({
-                        "nome": "Cliente 02",
-                        "email": "cliente02@outlook.com",
+                        "nome": "Cliente 01",
+                        "email": "cliente01@outlook.com",
                         "telefone": "+55 84 98126 5062",
                         "cpf": "06292744442",
                         "data_nascimento": "1984-09-12Z",
                         "data_nascimento_conjuge": "1990-04-18Z",
-                        "nome_conjuge": "Esposa 02",
+                        "nome_conjuge": "Esposa 01",
                         "Empresas": [],
                         "Obra": [],
                         "Endereco": this.endereco,
@@ -150,8 +150,8 @@ export default {
         }
     },
     async putEmpresa () {
-        const data = await this.getData(Empresa)
-        if (data.status === 'empty') {
+        // const data = await this.getData(Empresa)
+        // if (data.status === 'empty') {
             try {
                 const request = await DataStore.save(
                     new Empresa({
@@ -159,7 +159,7 @@ export default {
                         "cnpj": "1234567890",
                         "telefone": "+55 84 98126 5062",
                         "email": "teste@empresateste.com",
-                        "usuarioID": ["568c4113-9863-47c0-b864-8e4b7b0560c5", "00b1503c-bec0-42f2-beca-0a1e1b6f4735", "633654da-2aae-467e-9030-f60a717d56e7"],
+                        "usuarioID": ["26787605-76d9-40ec-a5f3-0b0dd4365e9e", "2f3f359c-25b6-4efd-9130-ad006e916bcd", "5ef6893c-b92f-437a-ac22-37a7d34c1ce5"],
                         "Endereco": this.endereco
                     })
                 )
@@ -169,10 +169,10 @@ export default {
                 console.log('error: ' + error)
             }
             
-        } else {
-            this.empresa = data.data[0]
-            console.log(this.empresa)
-        }
+        // } else {
+        //     this.empresa = data.data[0]
+        //     console.log(this.empresa)
+        // }
     },
     async putTipoObra () {
         const data = await this.getData(TipoObra)
