@@ -159,6 +159,48 @@
                   CANCELAR
                 </v-btn>
               </v-card>
+              <v-dialog
+                v-model="confirm_code"
+                persistent
+                max-width="600px"
+              >
+                <v-card>
+                  <v-card-title>
+                    <span class="headline">Confirme o código de acesso:</span>
+                  </v-card-title>
+                  <v-card-text>
+                    <v-container>
+                      <div>
+                        <span>{{ email }}</span>
+                        <br>
+                        <v-text-field
+                          label="Digite o código de acesso"
+                          hint="Enviado para o email cadastrado"
+                          required
+                          v-model="code"
+                        ></v-text-field>
+                      </div>
+                    </v-container>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="blue darken-1"
+                      text
+                      @click="confirm_code = false"
+                    >
+                      Cancelar
+                    </v-btn>
+                    <v-btn
+                      color="blue darken-1"
+                      text
+                      @click="confirmSignUp()"
+                    >
+                      Confirmar
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
             </v-stepper-content>
           </v-stepper-items>
         </v-stepper>
@@ -196,6 +238,7 @@
 import image from "../assets/register.png"
 import Functions from '@/functions/Functions'
 import { Auth  } from 'aws-amplify'
+import { DataStore } from 'aws-amplify'
 import { Usuario, TipoUsuario, Endereco, Empresa } from '@/models'
 export default {
   /* eslint-disable no-mixed-spaces-and-tabs */
@@ -227,6 +270,8 @@ export default {
       firstname: "",
       email: "",
       password: "",
+      code: "",
+      confirm_code: false,
       date: null,
       company: '',
       phone: '',
@@ -265,40 +310,51 @@ export default {
     },
 
     async addAddress (user) {
-      const data = user ? 
-      {
-        "cep": this.cep,
-        "estado": this.estado,
-        "cidade": this.cidade,
-        "rua": this.logradouro,
-        "complemento": this.complemento
-      } :
-      {
-        "cep": this.cep_empresa,
-        "estado": this.estado_empresa,
-        "cidade": this.cidade_empresa,
-        "rua": this.logradouro_empresa,
-        "complemento": this.complemento_empresa
-      }
-      const response = await Functions.putData(Endereco, data)
-      if (response.status === 'ok') {
-        console.log("Endereço cadastrado com sucesso!")
-        console.log(response)
-        if (!user) {
-          this.endereco_empresa = response.data
-          this.addEmpresa()
+      const items = await DataStore.query(Endereco, d => d.cep("eq", this.cep))
+      if (items.length === 0) {
+        const data = user ? 
+        {
+          "cep": this.cep,
+          "estado": this.estado,
+          "cidade": this.cidade,
+          "rua": this.logradouro,
+          "complemento": this.complemento
+        } :
+        {
+          "cep": this.cep_empresa,
+          "estado": this.estado_empresa,
+          "cidade": this.cidade_empresa,
+          "rua": this.logradouro_empresa,
+          "complemento": this.complemento_empresa
+        }
+        const response = await Functions.putData(Endereco, data)
+        if (response.status === 'ok') {
+          console.log("Endereço cadastrado com sucesso!")
+          console.log(response)
+          if (!user) {
+            this.endereco_empresa = response.data
+            this.addEmpresa()
+          } else {
+            this.endereco = response.data
+            this.addTipoUsuario()
+          }
         } else {
-          this.endereco = response.data
-          this.addTipoUsuario()
+          console.log("erro: " + response.error.message)
         }
       } else {
-        console.log("erro: " + response.error.message)
+        if (!user) {
+          this.endereco_empresa = items[0]
+          this.addEmpresa()
+        } else {
+          this.endereco = items[0]
+          this.addTipoUsuario()
+        }
       }
     },
 
     async addTipoUsuario () {
       const response = await Functions.putData(TipoUsuario, {
-        "nome": "Funcionário",
+        "nome": "Arquiteto(a)",
       })
       if (response.status === 'ok') {
         console.log("TipoUsuario cadastrado com sucesso!")
@@ -322,7 +378,7 @@ export default {
       if (response.status === 'ok') {
         console.log("Usuário cadastrado com sucesso!")
         this.user = response.data
-        this.el = this.el + 1
+        this.e1 += 1
       } else {
         console.log("erro: " + response.error.message)
       }
@@ -349,23 +405,21 @@ export default {
           username: this.email,          // optional
           password: this.password
         })
-        this.$router.push('/')
+        this.confirm_code = true
       } catch (error) {
         this.error = error
         this.error_dialog = true
       }
     },
-    // async resendConfirmationCode() {
-    //   try {
-    //     await Auth.resendSignUp(this.email)
-    //     console.log('code resent successfully')
-    //     this.addUser()
-    //   } catch (error) {
-    //     this.error = error
-    //     this.error_dialog = true
-    //   }
-    // },
-    
+
+    async confirmSignUp () {
+      try {
+        await Auth.confirmSignUp(this.email, this.code)
+        this.$router.push('/')
+      } catch (error) {
+          console.log('error confirming sign up', error)
+      }
+    },
   },
 };
 </script>

@@ -33,13 +33,13 @@ export default {
   methods: {
     async seed () {
         try {
-            // await this.getData(Empresa)
+            await this.getData(Empresa)
             // await this.updateData(TipoUsuario, '5f46e683-a37b-49d1-95a8-762458142d7f')
             // await this.putEndereco()
             // await this.putTipoUsuario()
             // await this.putUsuario()
             // await this.putEmpresa()
-            await this.putTipoObra()
+            // await this.putTipoObra()
             // await this.putObra()
             // await this.putCronogramaObra()
             // await this.putStatusTarefa()
@@ -53,7 +53,7 @@ export default {
     async getData (table) {
         const data = await Functions.getAll(table)
         console.log(data)
-        return data
+        // return data
 
         //===DELETE ALL DATA===//
         // data.data.map(d => {
