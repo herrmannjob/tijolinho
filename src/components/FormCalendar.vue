@@ -173,6 +173,7 @@ export default {
   components: { ResponseModal },
   props: {
     form: Boolean,
+    refresh: Boolean,
     date: String,
     user: Object
   },
@@ -193,6 +194,7 @@ export default {
   methods: {
     close () {
       this.$emit('update:form', false)
+      this.$emit('update:refresh', true)
     },
     async save () {
       const start = new Date(this.date)

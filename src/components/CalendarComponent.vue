@@ -38,7 +38,7 @@
       </v-col>
     </v-row>
     
-    <FormCalendar :form.sync="form" :date="date_clicked" :user="user" />
+    <FormCalendar :form.sync="form" :refresh.sync="refresh" :date="date_clicked" :user="user" />
 
     <CalendarWeek :options="calendarOptions" v-if="view_week" ref="calendar" />
 
@@ -114,23 +114,25 @@ export default {
       task_categoria: null,
       task_observacao: null,
       particular_tasks: [],
-      constructions_tasks: []
+      constructions_tasks: [],
+      refresh: false
+    }
+  },
+  async updated () {
+    if (this.refresh) {
+      await this.getTasks()
+      this.refresh = false
     }
   },
   async created () {
     this.user = await Functions.isAuth()
     await this.getUser()
     await this.getObras()
-    this.getParticularTasks()
-    this.getConstructionsTasks()
+    this.getTasks()
     this.getClients()
   },
   // updated () { this.refreshEvents() },
   methods: {
-    refreshEvents () {
-      console.log('refresh')
-      this.$refs.calendar.$emit('refetch-events')
-    },
     async getUser () {
       const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
       this.user = user.data
@@ -167,6 +169,10 @@ export default {
         this.clients.push(response.data)
         this.client_names.push(response.data.nome)
       })
+    },
+    async getTasks () {
+      await this.getParticularTasks()
+      await this.getConstructionsTasks()
     },
     async getParticularTasks () {
       const response = await Functions.getAll(AgendaParticular)
