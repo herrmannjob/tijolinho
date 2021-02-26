@@ -177,6 +177,8 @@ export default {
     async getParticularTasks () {
       const response = await Functions.getAll(AgendaParticular)
       if (response.status === 'ok') {
+        this.particular_tasks = []
+        this.calendarOptions.events = []
         response.data.filter(item => {
           if (item.Usuario.id === this.user.id) {
             this.particular_tasks.push(item)
@@ -196,6 +198,8 @@ export default {
       if (this.constructions.length > 0) {
         const response = await Functions.getAll(AgendaObra)
         if (response.status === 'ok') {
+          this.constructions_tasks = []
+          this.calendarOptions.events = []
           this.constructions.map(construction => {
             response.data.map(item => {
               if (item.Obra.id === construction.id) {
