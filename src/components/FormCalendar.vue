@@ -31,6 +31,13 @@
               </template>
             </v-textarea>
 
+            <v-select
+              :items="priority_list"
+              v-model="priority"
+              label="Prioridade"
+              dense
+            ></v-select>
+
             <v-menu
               ref="menu"
               :close-on-content-click="false"
@@ -40,7 +47,7 @@
             >
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
-                  v-model="date"
+                  v-model="dateStart.date"
                   label="Início"
                   prepend-icon="mdi-calendar"
                   readonly
@@ -50,9 +57,36 @@
               </template>
               <v-date-picker
                 ref="picker"
-                v-model="date"
+                v-model="dateStart.date"
                 min="1950-01-01"
               ></v-date-picker>
+            </v-menu>
+
+            <v-menu
+              ref="menu"
+              :close-on-content-click="false"
+              :nudge-right="40"
+              :return-value.sync="dateStart.time"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="dateStart.time"
+                  label="Horário inicial"
+                  prepend-icon="mdi-clock-time-four-outline"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-time-picker
+                v-model="dateStart.time"
+                @click:minute="$refs.menu.save(dateStart.time)"
+                full-width
+              ></v-time-picker>
             </v-menu>
 
             <v-menu
@@ -64,7 +98,7 @@
             >
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
-                  v-model="end_date"
+                  v-model="date_end"
                   label="Término"
                   prepend-icon="mdi-calendar"
                   readonly
@@ -74,9 +108,36 @@
               </template>
               <v-date-picker
                 ref="picker"
-                v-model="end_date"
+                v-model="date_end"
                 min="1950-01-01"
               ></v-date-picker>
+            </v-menu>
+
+            <v-menu
+              ref="menu"
+              :close-on-content-click="false"
+              :nudge-right="40"
+              :return-value.sync="time_end"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="time_end"
+                  label="Horário final"
+                  prepend-icon="mdi-clock-time-four-outline"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-time-picker
+                v-model="time_end"
+                @click:minute="$refs.menu.save(time_end)"
+                full-width
+              ></v-time-picker>
             </v-menu>
           </v-col>
         </div>
@@ -119,13 +180,15 @@ export default {
     return {
       title: '',
       description: '',
-      end_date: '',
+      date_end: '',
+      time_end: '',
+      priority_list: ['Alta', 'Média', 'Baixa'],
+      priority: '',
       modal: false,
       message: { title: '', code: '', text: '' }
     }
   },
   created () {
-
   },
   methods: {
     close () {
@@ -133,16 +196,18 @@ export default {
     },
     async save () {
       const start = new Date(this.date)
-      const end = new Date(this.end_date)
+      const end = new Date(this.date_end + 'T' + this.time_end + ':00Z')
       const duration = (end - start) / 1000 / 60 / 60 / 24
       const response = await Functions.putData(AgendaParticular, {
         "titulo": this.title,
         "descricao": this.description,
-        "data_inicio": this.date + 'Z',
-        "data_fim": this.end_date + 'Z',
+        "data_inicio": this.dateStart.date + 'T' + this.dateStart.time + ':00.000Z',
+        "data_fim": this.date_end + 'T' + this.time_end + ':00.000Z',
         "duracao": `${duration} dia(s)`,
+        "prioridade": this.priority,
         "Usuario": this.user
       })
+      console.log(response)
       if (response.status === 'ok') {
         this.message.title = "Atividade cadastrada com sucesso!"
       } else {
@@ -151,6 +216,11 @@ export default {
         this.message.text = response.error.message
       }
       this.modal = true
+    }
+  },
+  computed: {
+    dateStart: function () {
+      return { date: this.date.substr(0, 10), time: this.date.substr(11, 5) }
     }
   }
 }

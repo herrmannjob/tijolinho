@@ -31,11 +31,12 @@
                   <v-expansion-panel-header style="padding-left:unset; padding-right:unset">
                     <span>{{ task.title }}</span>
                   </v-expansion-panel-header>
-                  <v-expansion-panel-content>
+                  <v-expansion-panel-content v-if="tasks[0].title !== 'Nenhuma atividade'">
                     <p style="text-align:left">Descrição: {{ task.description }}</p>
                     <p style="text-align:left">Início: {{ task.start }}</p>
                     <p style="text-align:left">Fim: {{ task.end }}</p>
                     <p style="text-align:left">Duração: {{ task.time }}</p>
+                    <p style="text-align:left">Prioridade: {{ task.priority }}</p>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
@@ -56,7 +57,7 @@ import CalendarComponent from '@/components/CalendarComponent.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 import moment from '@/plugins/moment'
-import { AgendaObra } from '@/models'
+import { AgendaObra, Obra } from '@/models'
 import Functions from '@/functions/Functions'
 
 export default {
@@ -68,31 +69,33 @@ export default {
     return {
       today: '',
       username: 'teste',
+      constructions: [],
       tasks: [{ title: 'Nenhuma atividade' }]
     }
   },
   async created () {
     this.today = moment().format('ll')
-    await this.getTasks()
+    await this.getConstructionsTasks()
   },
   methods: {
-    async getTasks () {
-      const response = await Functions.getAll(AgendaObra)
-      // const response = await Functions.getByForeignKey(AgendaParticular, this.user)
-      if (response.status === 'ok') {
-        this.tasks = []
-        response.data.map(item => {this.tasks.push({ title: item.titulo, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })})
+    async getObras () {
+      const response = await Functions.getByUserId(Obra, this.user.id)
+      if (response.status === 'ok') this.constructions = response.data
+    },
+    async getConstructionsTasks () {
+      await this.getObras()
+      if (this.constructions.length > 0) {
+        const response = await Functions.getAll(AgendaObra)
+        if (response.status === 'ok') {
+          this.constructions.map(construction => {
+            response.data.map(item => {
+              if (item.Obra.id === construction.id) {
+                this.tasks.push({ title: item.titulo, description: item.descricao, priority: item.prioridade, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })
+              }
+            })
+          })
+        }
       }
-      // const response = await Functions.getAll(Tarefa)
-      // if (response.status === 'ok') {
-      //   response.data.map(item => this.tasks.push({
-      //     title: item.nome_tarefa,
-      //     user: item.Responsavel.nome,
-      //     start: item.data_inicio,
-      //     end: item.data_fim,
-      //     status: item.status.status
-      //   }))
-      // }
     },
   }
 }

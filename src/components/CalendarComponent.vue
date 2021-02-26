@@ -20,7 +20,7 @@
         sm="4"
       >
         <v-select
-          :items="clients"
+          :items="client_names"
           label="Cliente"
           dense
         ></v-select>
@@ -76,9 +76,11 @@ export default {
       uid: '',
       select_view: ['Dia', 'Semana', 'Mês'],
       calendar_view: '',
-      clients: ['Nenhum cliente cadastrado'],
+      clients: [],
+      client_names: ['Nenhum cliente cadastrado'],
       constructions_names: ['Nenhuma obra cadastrada'],
       constructions: [],
+      companies: [],
       view_week: true,
       view_day: false,
       view_month: false,
@@ -110,15 +112,18 @@ export default {
       task_obra: null,
       task_prioridade: null,
       task_categoria: null,
-      task_observacao: null
+      task_observacao: null,
+      particular_tasks: [],
+      constructions_tasks: []
     }
   },
   async created () {
     this.user = await Functions.isAuth()
     await this.getUser()
-    this.getObras()
-    this.getTasks()
-    // this.getClients()
+    await this.getObras()
+    this.getParticularTasks()
+    this.getConstructionsTasks()
+    this.getClients()
   },
   // updated () { this.refreshEvents() },
   methods: {
@@ -131,29 +136,69 @@ export default {
       this.user = user.data
     },
     async getObras () {
-      const response = await Functions.getById(Obra, this.user.id)
+      const response = await Functions.getByUserId(Obra, this.user.id)
       if (response.status === 'ok') {
         this.constructions = response.data
         this.constructions_names = []
         response.data.map(obra => { this.constructions_names.push(obra.nome) })
       }
     },
-    async getClients () {
-      const empresas = await Functions.getById(Empresa, this.user.id)
-      console.log(empresas)
-      // const response = await Functions.getAll(Usuario)
-      // if (response.status === 'ok') this.clients = response.data
-    },
-    async getTasks () {
-      const response_p = await Functions.getAll(AgendaParticular)
-      // const response = await Functions.getByForeignKey(AgendaParticular, this.user)
-      if (response_p.status === 'ok') {
-        response_p.data.map(item => {this.calendarOptions.events.push({ title: item.titulo, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })})
-      }
-      const response = await Functions.getAll(AgendaObra)
-      // const response = await Functions.getByForeignKey(AgendaParticular, this.user)
+    async getCompanies () {
+      const response = await Functions.getAll(Empresa)
       if (response.status === 'ok') {
-        response.data.map(item => {this.calendarOptions.events.push({ title: item.titulo, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })})
+        response.data.filter(item => {
+          if (item.usuarioID.includes(this.user.id)) this.companies.push(item)
+        })
+      }
+    },
+    async getClients () {
+      await this.getCompanies()
+      const client_ids = []
+      this.companies.map(company => {
+        company.usuarioID.filter(user_id => {
+          if (user_id !== this.user.id) {
+            client_ids.push(user_id)
+            this.client_names = []
+          }
+        })
+      })
+      client_ids.map(async function (id) {
+        const response = await Functions.getById(Usuario, id)
+        this.clients.push(response.data)
+        this.client_names.push(response.data.nome)
+      })
+    },
+    async getParticularTasks () {
+      const response = await Functions.getAll(AgendaParticular)
+      if (response.status === 'ok') {
+        response.data.filter(item => {
+          if (item.Usuario.id === this.user.id) {
+            this.particular_tasks.push(item)
+            this.calendarOptions.events.push(
+              {
+                title: item.titulo,
+                start: item.data_inicio.substr(0, 19) + 'Z',
+                end: item.data_fim.substr(0, 19) + 'Z'
+              }
+            )
+          }
+        })
+      }
+    },
+    async getConstructionsTasks () {
+      await this.getObras()
+      if (this.constructions.length > 0) {
+        const response = await Functions.getAll(AgendaObra)
+        if (response.status === 'ok') {
+          this.constructions.map(construction => {
+            response.data.map(item => {
+              if (item.Obra.id === construction.id) {
+                this.constructions_tasks.push(item)
+                this.calendarOptions.events.push({ title: item.titulo, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })
+              }
+            })
+          })
+        }
       }
     },
     changeView () {

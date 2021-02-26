@@ -353,34 +353,46 @@ export default {
     },
 
     async addTipoUsuario () {
-      const response = await Functions.putData(TipoUsuario, {
-        "nome": "Arquiteto(a)",
-      })
-      if (response.status === 'ok') {
-        console.log("TipoUsuario cadastrado com sucesso!")
-        this.tipo_usuario = response.data
-        this.addUser()
+      const items = await DataStore.query(TipoUsuario, d => d.nome("eq", "Arquiteto(a)"))
+      if (items.length === 0) {
+        const response = await Functions.putData(TipoUsuario, {
+          "nome": "Arquiteto(a)",
+        })
+        if (response.status === 'ok') {
+          console.log("TipoUsuario cadastrado com sucesso!")
+          this.tipo_usuario = response.data
+          this.addUser()
+        } else {
+          console.log("erro: " + response.error.message)
+        }
       } else {
-        console.log("erro: " + response.error.message)
+        this.tipo_usuario = items[0]
+        this.addUser()
       }
     },
 
     async addUser () {
-      this.phone = `+${this.phone.substr(0,2)} ${this.phone.substr(2,2)} ${this.phone.substr(4,5)} ${this.phone.substr(9,4)}`
-      const response = await Functions.putData(Usuario, {
-        "nome": this.firstname,
-        "email": this.email,
-        "data_nascimento": this.date + 'Z',
-        "Endereco": this.endereco,
-        "TipoUsuario": this.tipo_usuario,
+      const items = await DataStore.query(Usuario, d => d.email("eq", this.email))
+      if (items.length === 0) {
+        this.phone = `+${this.phone.substr(0,2)} ${this.phone.substr(2,2)} ${this.phone.substr(4,5)} ${this.phone.substr(9,4)}`
+        const response = await Functions.putData(Usuario, {
+          "nome": this.firstname,
+          "email": this.email,
+          "data_nascimento": this.date + 'Z',
+          "Endereco": this.endereco,
+          "TipoUsuario": this.tipo_usuario,
 
-      })
-      if (response.status === 'ok') {
-        console.log("Usuário cadastrado com sucesso!")
-        this.user = response.data
-        this.e1 += 1
+        })
+        if (response.status === 'ok') {
+          console.log("Usuário cadastrado com sucesso!")
+          this.user = response.data
+          this.e1 += 1
+        } else {
+          console.log("erro: " + response.error.message)
+        }
       } else {
-        console.log("erro: " + response.error.message)
+        this.user = items[0]
+        this.e1 += 1
       }
     },
 
@@ -415,10 +427,15 @@ export default {
     async confirmSignUp () {
       try {
         await Auth.confirmSignUp(this.email, this.code)
-        this.$router.push('/')
+        this.login()
       } catch (error) {
           console.log('error confirming sign up', error)
       }
+    },
+
+    async login () {
+      await Functions.login(this.email, this.password)
+      this.$router.push('/')
     },
   },
 };

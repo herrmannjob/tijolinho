@@ -51,8 +51,8 @@ const functions = {
 
     //=== LISTAR ===//
     
-    //= BASEADO NUM ID ESPECÍFICO =//
-    async getById (table, id) {
+    //= BASEADO NUM USUÁRIO ESPECÍFICO =//
+    async getByUserId (table, id) {
         try {
             let data = []
             const items = await DataStore.query(table, d => d.usuarioID("eq", id))
@@ -62,6 +62,16 @@ const functions = {
                 })
                 return { status: 'ok', data }
             } else return { status: 'empty' }
+        } catch (error) {
+            return { status: 'error', error }
+        }
+    },
+
+    //= BASEADO NUM ID ESPECÍFICO =//
+    async getById (table, id) {
+        try {
+            const data = await DataStore.query(table, id)
+            return { status: 'ok', data }
         } catch (error) {
             return { status: 'error', error }
         }
