@@ -15,13 +15,6 @@
                 :close-on-content-click="false"
                 required
               ></v-text-field>
-              <v-text-field
-                v-model="email"
-                readonly
-                :rules="emailRules"
-                label="E-mail"
-                required
-              ></v-text-field>
               <v-select
                 v-model="category"
                 :items="categoria"
@@ -54,7 +47,6 @@
                 <v-date-picker
                   ref="pickerInit"
                   v-model="dateInit"
-                  :max="new Date().toISOString().substr(0, 10)"
                   min="1950-01-01"
                 ></v-date-picker>
               </v-menu>
@@ -80,7 +72,6 @@
                 <v-date-picker
                   ref="pickerEnd"
                   v-model="dateEnd"
-                  :max="new Date().toISOString().substr(0, 10)"
                   :min="dateInit"
                 ></v-date-picker>
               </v-menu>
@@ -88,15 +79,12 @@
                 label="Gasto estimado"
                 v-model="estimated_spend"
                 required
-                readonly
-                v-bind="attrs"
-                v-on="on"
+                hint="Apenas números"
               ></v-text-field>
             </v-col>
           </v-row>
           <v-row>
             <v-col cols="12" md="6">
-              <v-text-field label="Telefone" required v-model="phone"></v-text-field>
               <v-text-field
                 label="Cep"
                 required
@@ -121,7 +109,7 @@
                 label="Rua"
                 required
               ></v-text-field>
-              <v-text-field label="Complemento" required></v-text-field>
+              <v-text-field label="Complemento" required v-model="complemento"></v-text-field>
             </v-col>
           </v-row>
         </v-form>
@@ -131,7 +119,7 @@
         <v-btn color="blue darken-1" text @click="close">
           Cancelar
         </v-btn>
-        <v-btn color="blue darken-1" text @click="save">
+        <v-btn color="blue darken-1" text @click="addObra()">
           SALVAR
         </v-btn>
       </v-card-actions>
@@ -140,10 +128,15 @@
 </template>
 <script>
 import Functions from '@/functions/Functions'
+import { DataStore } from 'aws-amplify'
+import { TipoObra, Endereco, Obra, CronogramaObra } from '@/models'
 export default {
   name: 'FormRegisterConstruction',
   props: {
     form: Boolean,
+    user_id: String,
+    company: Object,
+    client: Object
   },
   data() {
     return {
@@ -152,6 +145,7 @@ export default {
       estado: null,
       logradouro: null,
       cidade: null,
+      complemento: null,
       data: null,
       messageCep: null,
       date: '',
@@ -164,12 +158,15 @@ export default {
         "Restauração",
         "Criação",
       ],
+      tipo_obra: null,
       firstname: "",
       nameRules: [(v) => !!v || "Nome é obrigatório"],
       email: "",
       phone: "",
       category: "",
-      estimated_spend: ""
+      estimated_spend: "",
+      endereco: null,
+      obra: null,
     };
   },
   methods: {
@@ -182,10 +179,83 @@ export default {
         this.logradouro = response.data.logradouro
         this.cidade = response.data.localidade
         this.estado = response.data.uf
+        this.complemento = response.data.complemento
       }
     },
-    save () {
-      console.log(this.cidade)
+    async addAddress () {
+      const items = await DataStore.query(Endereco, d => d.cep("eq", this.cep))
+      if (items.length === 0) {
+        const data = {
+          "cep": this.cep,
+          "estado": this.estado,
+          "cidade": this.cidade,
+          "rua": this.logradouro,
+          "complemento": this.complemento
+        }
+        const response = await Functions.putData(Endereco, data)
+        if (response.status === 'ok') {
+          console.log("Endereço cadastrado com sucesso!")
+          this.endereco = response.data
+        } else {
+          console.log("erro: " + response.error.message)
+        }
+      } else this.endereco = items[0]
+    },
+    async addTipoObra () {
+      const items = await DataStore.query(TipoObra, d => d.nome("eq", this.category))
+      if (items.length === 0) {
+        const response = await Functions.putData(TipoObra, {
+          "nome": this.category,
+        })
+        if (response.status === 'ok') {
+          console.log("TipoObra cadastrado com sucesso!")
+          this.tipo_obra = response.data
+        } else {
+          console.log("erro: " + response.error.message)
+        }
+      } else {
+        this.tipo_obra = items[0]
+      }
+    },
+    async addObra () {
+      await this.addAddress()
+      await this.addTipoObra()
+      const response = await DataStore.save(
+        new Obra({
+          "nome": this.firstname,
+          "Endereco": this.endereco,
+          "TipoObra": this.tipo_obra,
+          "Empresa": this.company,
+          "usuarioID": this.user_id,
+          "Usuarios": this.client.nome === "empty" ? [] : [this.client]
+        })
+      )
+      if (response.status === 'ok') {
+        console.log("Obra cadastrada com sucesso!")
+        this.obra = response.data
+        this.addCronogramaObra()
+      } else {
+        console.log("erro: " + response.error.message)
+      }
+    },
+    async addCronogramaObra () {
+      const start = new Date(this.dateInit)
+      const end = new Date(this.dateEnd)
+      const duration = end - start
+      const response = await DataStore.save(
+        new CronogramaObra({
+          "Obra_": this.obra,
+          "data_inicio": this.dateInit + 'Z',
+          "data_fim": this.dateEnd + 'Z',
+          "tempo_previsto": duration,
+          "gasto_previsto": this.estimated_spend
+        })
+      )
+      if (response.status === 'ok') {
+        console.log("CronogramaObra cadastrado com sucesso!")
+      } else {
+        console.log("erro: " + response.error.message)
+      }
     },
   },
 }

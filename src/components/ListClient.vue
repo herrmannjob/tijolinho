@@ -27,32 +27,32 @@
           </div>
           <v-card max-width="900" class="mx-auto">
             <v-list-item v-for="item in itemsTitle" :key="item.title">
-              <v-list-item-avatar>
+              <!-- <v-list-item-avatar>
                 <v-list-item-title v-text="item.avatar"></v-list-item-title>
-              </v-list-item-avatar>
+              </v-list-item-avatar> -->
 
               <v-list-item-content>
                 <v-list-item-title v-text="item.title"></v-list-item-title>
               </v-list-item-content>
-              <v-list-item-content>
+              <!-- <v-list-item-content>
                 <v-list-item-title v-text="item.obras"></v-list-item-title>
-              </v-list-item-content>
+              </v-list-item-content> -->
               <v-list-item-icon>
                 <p>Ações</p>
               </v-list-item-icon>
             </v-list-item>
             <v-list>
-              <v-list-item v-for="item in items" :key="item.title">
-                <v-list-item-avatar>
+              <v-list-item v-for="item in clients" :key="item.title">
+                <!-- <v-list-item-avatar>
                   <v-img :src="item.avatar"></v-img>
-                </v-list-item-avatar>
+                </v-list-item-avatar> -->
 
                 <v-list-item-content>
                   <v-list-item-title v-text="item.title"></v-list-item-title>
                 </v-list-item-content>
-                <v-list-item-content>
+                <!-- <v-list-item-content>
                   <v-list-item-title v-text="item.obras"></v-list-item-title>
-                </v-list-item-content>
+                </v-list-item-content> -->
                 <v-list-item-icon>
                   <v-icon>
                     mdi-pencil
@@ -116,7 +116,8 @@
 
 <script>
 // import { api, urls } from '../services/Api'
-
+import { Usuario, Empresa } from '@/models'
+import Functions from '@/functions/Functions'
 export default {
   data() {
     return {
@@ -130,31 +131,51 @@ export default {
           icons: "Ações",
         },
       ],
-      items: [
+      clients: [
         {
-          title: "Jason Oner",
-          avatar: "https://cdn.vuetifyjs.com/images/lists/1.jpg",
-          obras: 2,
-        },
-        {
-          title: "Travis Howard",
-          avatar: "https://cdn.vuetifyjs.com/images/lists/2.jpg",
-          obras: 3,
-        },
-        {
-          title: "Ali Connors",
-          avatar: "https://cdn.vuetifyjs.com/images/lists/3.jpg",
-          obras: 4,
-        },
-        {
-          title: "Cindy Baker",
-          avatar: "https://cdn.vuetifyjs.com/images/lists/4.jpg",
-          obras: 8,
+          title: "Nenhum cliente cadastrado"
         },
       ],
-    };
-  
+      user: null,
+      companies: [],
+    }
   },
+  async created () {
+    this.user = await Functions.isAuth()
+    await this.getUser()
+    this.getClients()
+  },
+  methods: {
+    async getUser () {
+      const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
+      this.user = user.data
+    },
+    async getCompanies () {
+      const response = await Functions.getAll(Empresa)
+      if (response.status === 'ok') {
+        response.data.filter(item => {
+          if (item.usuarioID.includes(this.user.id)) this.companies.push(item)
+        })
+      }
+    },
+    async getClients () {
+      await this.getCompanies()
+      const client_ids = []
+      this.companies.map(company => {
+        company.usuarioID.filter(user_id => {
+          if (user_id !== this.user.id) {
+            client_ids.push(user_id)
+          }
+        })
+      })
+      const clients = []
+      client_ids.map(async function (id) {
+        const response = await Functions.getById(Usuario, id)
+        clients.push({ title: response.data.nome })
+      })
+      this.clients = clients
+    },
+  }
 };
 </script>
 <style lang="css">

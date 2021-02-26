@@ -69,7 +69,7 @@
           </v-col>
 
           <v-col cols="12" md="6">
-            <v-text-field label="Conjuge" required></v-text-field>
+            <v-text-field label="Conjuge" required v-model="firstnameConjuge"></v-text-field>
             <v-menu
               ref="menuNascConj"
               v-model="menuNascConj"
@@ -97,14 +97,14 @@
                 @change="saveNascConj"
               ></v-date-picker>
             </v-menu>
-            <v-text-field label="Telefone" required></v-text-field>
+            <v-text-field label="Telefone" v-model="phone" hint="Apenas números (13 dígitos)" placeholder="+55 84 98765 4321" :rules="phone_rules" required></v-text-field>
           </v-col>
           <div>
             <v-btn
               elevation="2"
               depressed
               class="btn-primario"
-              @click="onSubmit"
+              @click="addUser()"
             >
               <p class="button-primario">SALVAR DADOS</p>
             </v-btn>
@@ -117,7 +117,7 @@
           >
             CADASTRAR OBRA
           </v-btn>
-          <FormRegisterConstruction :form.sync="form" />
+          <FormRegisterConstruction :form.sync="form" :user_id="user.id" :company="company" :client="client" />
         </v-row>
       </v-form>
 
@@ -132,6 +132,9 @@
 <script>
 import image from "../assets/register.png"
 import FormRegisterConstruction from '@/components/FormRegisterConstruction'
+import Functions from '@/functions/Functions'
+import { DataStore } from 'aws-amplify'
+import { Usuario, TipoUsuario, Empresa } from '@/models'
 export default {
   name: 'FormRegisterClient',
   components: { FormRegisterConstruction },
@@ -176,6 +179,12 @@ export default {
       valid: false,
       show: false,
       firstname: "",
+      firstnameConjuge: "",
+      phone: "",
+      phone_rules: [
+        (v) => !!v || "Telefone é obrigatório",
+        (v) => v.length === 13 || "Telefone com 13 dígitos - +55 84 98765 4321",
+      ],
       lastname: "",
       nameRules: [(v) => !!v || "Nome é obrigatório"],
       email: "",
@@ -184,6 +193,10 @@ export default {
         (v) => !!v || "E-mail é obrigatório",
         (v) => /.+@.+/.test(v) || "E-mail precisa ser em um formato válido",
       ],
+      tipo_usuario: null,
+      user: null,
+      company: null,
+      client: {nome: "empty"}
     };
   },
   watch: {
@@ -204,7 +217,79 @@ export default {
         setTimeout(() => (this.$refs.pickerNascConj.activePicker = "YEAR"));
     },
   },
+  async created () {
+    this.user = await Functions.isAuth()
+    await this.getUser()
+    this.getCompany()
+  },
   methods: {
+    async getUser () {
+      const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
+      this.user = user.data
+    },
+    async getCompany () {
+      const response = await Functions.getAll(Empresa)
+      if (response.status === 'ok') {
+        const company = []
+        response.data.filter(item => {
+          if (item.usuarioID.includes(this.user.id)) company.push(item)
+        })
+        this.company = company[0]
+      }
+    },
+    async updateCompany () {
+      const empresa = this.company
+      const empresa_clientes = empresa.usuarioID
+      const response = await DataStore.save(
+        Empresa.copyOf(empresa, updated => {
+          updated.usuarioID = empresa_clientes.concat([this.client.id])
+        })
+      )
+      console.log(response)
+    },
+    async addTipoUsuario () {
+      const items = await DataStore.query(TipoUsuario, d => d.nome("eq", "Cliente"))
+      if (items.length === 0) {
+        const response = await Functions.putData(TipoUsuario, {
+          "nome": "Cliente",
+        })
+        if (response.status === 'ok') {
+          console.log("TipoUsuario cadastrado com sucesso!")
+          this.tipo_usuario = response.data
+        } else {
+          console.log("erro: " + response.error.message)
+        }
+      } else {
+        this.tipo_usuario = items[0]
+      }
+    },
+
+    async addUser () {
+      await this.addTipoUsuario()
+      const items = await DataStore.query(Usuario, d => d.email("eq", this.email))
+      if (items.length === 0) {
+        this.phone = `+${this.phone.substr(0,2)} ${this.phone.substr(2,2)} ${this.phone.substr(4,5)} ${this.phone.substr(9,4)}`
+        const response = await Functions.putData(Usuario, {
+          "nome": this.firstname,
+          "email": this.email,
+          "telefone": this.phone,
+          "data_nascimento": this.dateNasc + 'Z',
+          "nome_conjuge": this.firstnameConjuge,
+          "data_nascimento_conjuge": this.dateNascConj + 'Z',
+          "TipoUsuario": this.tipo_usuario,
+        })
+        if (response.status === 'ok') {
+          console.log("Usuário cadastrado com sucesso!")
+          this.client = response.data
+          this.updateCompany()
+        } else {
+          console.log("erro: " + response.error.message)
+        }
+      } else {
+        console.log('email já cadastrado!')
+        this.client = items[0]
+      }
+    },
     save(date) {
       this.$refs.menu.save(date);
     },

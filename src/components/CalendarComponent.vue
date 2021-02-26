@@ -164,11 +164,15 @@ export default {
           }
         })
       })
+      const clients = []
+      const client_names = []
       client_ids.map(async function (id) {
         const response = await Functions.getById(Usuario, id)
-        this.clients.push(response.data)
-        this.client_names.push(response.data.nome)
+        clients.push(response.data)
+        client_names.push(response.data.nome)
       })
+      this.clients = clients
+      this.client_names = client_names
     },
     async getTasks () {
       await this.getParticularTasks()
