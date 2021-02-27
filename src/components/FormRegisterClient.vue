@@ -1,8 +1,8 @@
 <template>
   <div data-app>
-    <h5 style="margin:1rem">Código do cliente:</h5>
+    <h5 style="margin:1rem">Novo cliente:</h5>
     <div class="form-container-client">
-      <div class="init-client">
+      <!-- <div class="init-client">
         <v-flex
           xs12
           class="text-xs-center text-sm-center text-md-center text-lg-center"
@@ -23,14 +23,14 @@
             />
           </div>
         </v-flex>
-      </div>
-      <v-form v-model="valid">
+      </div> -->
+      <v-form v-model="valid" style="justify-self:center">
         <v-row>
           <v-col cols="12" md="6">
             <v-text-field
               v-model="firstname"
               :rules="nameRules"
-              label="Nome"
+              label="Nome do cliente"
               required
             ></v-text-field>
             <v-text-field
@@ -39,6 +39,7 @@
               label="E-mail"
               required
             ></v-text-field>
+            <v-text-field label="Telefone" v-model="phone" hint="Apenas números (13 dígitos)" placeholder="+55 84 98765 4321" :rules="phone_rules" required></v-text-field>
             <v-menu
               ref="menuNasc"
               v-model="menuNasc"
@@ -69,7 +70,7 @@
           </v-col>
 
           <v-col cols="12" md="6">
-            <v-text-field label="Conjuge" required v-model="firstnameConjuge"></v-text-field>
+            <v-text-field label="Nome do cônjuge" required v-model="firstnameConjuge"></v-text-field>
             <v-menu
               ref="menuNascConj"
               v-model="menuNascConj"
@@ -97,27 +98,57 @@
                 @change="saveNascConj"
               ></v-date-picker>
             </v-menu>
-            <v-text-field label="Telefone" v-model="phone" hint="Apenas números (13 dígitos)" placeholder="+55 84 98765 4321" :rules="phone_rules" required></v-text-field>
           </v-col>
           <div>
             <v-btn
               elevation="2"
               depressed
-              class="btn-primario"
+              class="btn-primario btn-save"
               @click="addUser()"
             >
               <p class="button-primario">SALVAR DADOS</p>
             </v-btn>
+            <v-btn
+              color="primary"
+              text
+              @click="voltar"
+            >
+              Voltar
+            </v-btn>
           </div>
-          <v-btn
-            color="primary"
-            class="btn-secundario"
-            outlined
-            @click="form = true"
+          <v-dialog
+            v-model="confirm"
+            persistent
+            max-width="450"
           >
-            CADASTRAR OBRA
-          </v-btn>
-          <FormRegisterConstruction :form.sync="form" :user_id="user.id" :company="company" :client="client" />
+            <v-card>
+              <v-card-title class="headline">
+                {{ confirm_message }}
+              </v-card-title>
+              <v-card-text>
+                Deseja vincular uma obra a esse cliente?
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="primary"
+                  class="btn-primario"
+                  depressed
+                  @click="form = true"
+                >
+                  CADASTRAR OBRA
+                </v-btn>
+                <v-btn
+                  color="primary"
+                  text
+                  @click="confirm = false"
+                >
+                  Sair
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+          <FormRegisterConstruction :form.sync="form" :confirm.sync="confirm" :user_id="user.id" :company="company" :client="client" />
         </v-row>
       </v-form>
 
@@ -194,9 +225,11 @@ export default {
         (v) => /.+@.+/.test(v) || "E-mail precisa ser em um formato válido",
       ],
       tipo_usuario: null,
-      user: null,
+      user: {},
       company: null,
-      client: {nome: "empty"}
+      client: {nome: "empty"},
+      confirm: false,
+      confirm_message: "Cliente cadastrado com sucesso!"
     };
   },
   watch: {
@@ -223,6 +256,7 @@ export default {
     this.getCompany()
   },
   methods: {
+    voltar () { this.$router.go(-1) },
     async getUser () {
       const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
       this.user = user.data
@@ -282,12 +316,15 @@ export default {
           console.log("Usuário cadastrado com sucesso!")
           this.client = response.data
           this.updateCompany()
+          this.confirm = true
         } else {
           console.log("erro: " + response.error.message)
         }
       } else {
         console.log('email já cadastrado!')
         this.client = items[0]
+        this.confirm_message = "Já existe um usuário para este email!"
+        this.confirm = true
       }
     },
     save(date) {
@@ -346,6 +383,9 @@ export default {
   color: #002b4b;
   font-family: "Comfortaa", cursive;
 }
+.btn-save {
+  margin-top: unset;
+}
 .btn-secundario {
   background: white;
   width: 11rem;
@@ -356,8 +396,7 @@ export default {
   font-family: "Roboto", sans-serif;
 }
 .form-container-client {
-  display: flex;
-  flex-direction: row;
+  display: grid;
   width: 100%;
   color: #002b4b;
   font-family: "Comfortaa", cursive;

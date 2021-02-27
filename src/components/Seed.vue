@@ -33,8 +33,8 @@ export default {
   methods: {
     async seed () {
         try {
-            await this.getData(CronogramaObra)
-            // await this.updateData(TipoUsuario, '5f46e683-a37b-49d1-95a8-762458142d7f')
+            await this.getData(Obra)
+            // await this.updateData(Empresa, 'c9e3c3ac-bc0d-4e4b-9cb4-58b931a1c820')
             // await this.putEndereco()
             // await this.putTipoUsuario()
             // await this.putUsuario()
@@ -65,13 +65,19 @@ export default {
         console.log(del)
         
     },
-    async updateData(table, id, name) {
-        const original = await DataStore.query(table, d => d.id('eq', id))
-        console.log(original)
-        await DataStore.save(table.copyOf(original, item => {
-            item.nome = name
-            // Update the values on {item} variable to update DataStore entry
-        }))
+    async updateData(table, id) {
+        const empresa = await DataStore.query(table, id)
+        const empresa_clientes = []
+        for (let i = 0; i < 6; i++) {
+            empresa_clientes.push(empresa.usuarioID[i])
+        }
+        console.log(empresa_clientes)
+        const response = await DataStore.save(
+            Empresa.copyOf(empresa, updated => {
+                updated.usuarioID = empresa_clientes
+            })
+        )
+        console.log(response)
     },
     async putEndereco () {
         const data = await this.getData(Endereco)

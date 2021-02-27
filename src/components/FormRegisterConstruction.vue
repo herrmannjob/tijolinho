@@ -11,7 +11,7 @@
               <v-text-field
                 v-model="firstname"
                 :rules="nameRules"
-                label="Nome"
+                label="Nome da obra"
                 :close-on-content-click="false"
                 required
               ></v-text-field>
@@ -23,11 +23,10 @@
                 label="Categoria"
                 required
               ></v-select>
-            </v-col>
 
-            <v-col cols="12" md="6">
               <v-menu
                 ref="menuInit"
+                v-model="menuDateInit"
                 :close-on-content-click="false"
                 transition="scale-transition"
                 offset-y
@@ -53,6 +52,7 @@
 
               <v-menu
                 ref="menuEnd"
+                v-model="menuDateEnd"
                 :close-on-content-click="false"
                 transition="scale-transition"
                 offset-y
@@ -82,8 +82,6 @@
                 hint="Apenas números"
               ></v-text-field>
             </v-col>
-          </v-row>
-          <v-row>
             <v-col cols="12" md="6">
               <v-text-field
                 label="Cep"
@@ -97,8 +95,6 @@
                 label="Cidade"
                 required
               ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
               <v-text-field
                 v-model="estado"
                 label="Estado"
@@ -116,11 +112,11 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" text @click="close">
-          Cancelar
-        </v-btn>
-        <v-btn color="blue darken-1" text @click="addObra()">
+        <v-btn color="primary" depressed class="btn-primario" @click="addObra()">
           SALVAR
+        </v-btn>
+        <v-btn color="primary" text @click="close">
+          Cancelar
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -134,6 +130,7 @@ export default {
   name: 'FormRegisterConstruction',
   props: {
     form: Boolean,
+    confirm: Boolean,
     user_id: String,
     company: Object,
     client: Object
@@ -167,6 +164,8 @@ export default {
       estimated_spend: "",
       endereco: null,
       obra: null,
+      menuDateInit: null,
+      menuDateEnd: null,
     };
   },
   methods: {
@@ -220,41 +219,44 @@ export default {
     async addObra () {
       await this.addAddress()
       await this.addTipoObra()
-      const response = await DataStore.save(
-        new Obra({
-          "nome": this.firstname,
-          "Endereco": this.endereco,
-          "TipoObra": this.tipo_obra,
-          "Empresa": this.company,
-          "usuarioID": this.user_id,
-          "Usuarios": this.client.nome === "empty" ? [] : [this.client]
-        })
-      )
-      if (response.status === 'ok') {
-        console.log("Obra cadastrada com sucesso!")
-        this.obra = response.data
+      try {
+        const response = await DataStore.save(
+          new Obra({
+            "nome": this.firstname,
+            "Endereco": this.endereco,
+            "TipoObra": this.tipo_obra,
+            "Empresa": this.company,
+            "usuarioID": this.user_id,
+            "Usuarios": this.client.nome === "empty" ? [] : [this.client]
+          })
+        )
+        console.log('Obra cadastrada')
+        this.obra = response
         this.addCronogramaObra()
-      } else {
-        console.log("erro: " + response.error.message)
+      } catch (error) {
+        console.log(error)
       }
+      
     },
     async addCronogramaObra () {
       const start = new Date(this.dateInit)
       const end = new Date(this.dateEnd)
       const duration = end - start
-      const response = await DataStore.save(
-        new CronogramaObra({
-          "Obra_": this.obra,
-          "data_inicio": this.dateInit + 'Z',
-          "data_fim": this.dateEnd + 'Z',
-          "tempo_previsto": duration,
-          "gasto_previsto": this.estimated_spend
-        })
-      )
-      if (response.status === 'ok') {
-        console.log("CronogramaObra cadastrado com sucesso!")
-      } else {
-        console.log("erro: " + response.error.message)
+      try {
+        await DataStore.save(
+          new CronogramaObra({
+            "Obra_": this.obra,
+            "data_inicio": this.dateInit + 'Z',
+            "data_fim": this.dateEnd + 'Z',
+            "tempo_previsto": `${duration} ms`,
+            "gasto_previsto": this.estimated_spend
+          })
+        )
+        console.log('CronogramaObra cadastrado!')
+        this.$emit('update:form', false)
+        this.$emit('update:confirm', false)
+      } catch (error) {
+        console.log(error)
       }
     },
   },
