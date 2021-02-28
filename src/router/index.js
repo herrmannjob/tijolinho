@@ -7,6 +7,8 @@ import ListClient from'../views/Client.vue'
 import FormRegisterClient from'../views/RegisterClient.vue'
 import Calendar from'../views/Calendar.vue'
 import Schedule from'../views/Schedule.vue'
+import Reset from'../views/ResetLogin.vue'
+
 
 Vue.use(VueRouter)
 
@@ -45,6 +47,11 @@ const routes = [
     path: '/schedule',
     name: 'Schedule',
     component: Schedule
+  },
+  {
+    path: '/reset',
+    name: 'Reset',
+    component: Reset
   },
 ]
 

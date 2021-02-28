@@ -8,7 +8,7 @@
               <v-text-field
                 class="text"
                 style="color:#002B4B"
-                label="Login"
+                label="E-mail"
                 v-model="email"
               ></v-text-field>
               <v-text-field
@@ -19,11 +19,13 @@
                 @click:append="show = !show"
                 :type="show ? 'text' : 'password'"
               ></v-text-field>
-            </v-col>
+            <br/>
+          </v-col>
           </v-row>
 
           <v-row>
             <div class="btn-container">
+                 <router-link class="link-password" to="">Esqueceu sua senha?</router-link>
               <v-btn
                 elevation="2"
                 depressed
@@ -155,6 +157,7 @@ body {
   transform:translate(10%);
   flex-direction: column;
   align-self: flex-start;
+  margin: 0;
 }
 .theme--light.v-btn.v-btn--has-bg {
   background-color: #002b4b !important;
@@ -169,7 +172,7 @@ body {
   width: 4.5rem;
   margin-left: 3rem;
   margin-top: 2rem;
-  margin-right: 1rem;
+  margin-right: 2rem;
 
 }
 .space-end {
@@ -177,12 +180,29 @@ body {
   top: 0px;
   height: 100%;
 }
-
+.recuperar-senha{
+   font-family: "Roboto", sans-serif;
+  font-size: 0.7rem;
+  color: #002b4b;
+  margin-top: 0;
+}
 .link {
   font-family: "Roboto", sans-serif;
 
   font-size: 0.9rem;
   color: #002b4b;
+}
+.link-password {
+  font-family: "Roboto", sans-serif;
+  font-size: 0.7rem;
+  color:gray;
+  margin: 0;
+  align-items: flex-start;
+  transform: translate(5%,10%);
+}
+
+.theme--light.v-messages {
+  display: none!important;
 }
 .img {
   width: auto;

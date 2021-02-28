@@ -29,6 +29,7 @@
     "vue": "^2.6.12",
     "vue-axios": "^3.2.4",
     "vue-router": "^3.2.0",
+    "vuelidate": "^0.7.6",
     "vuetify": "^2.4.0",
     "vuetify-datetime-picker": "^2.1.1"
   },
