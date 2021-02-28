@@ -25,7 +25,7 @@
 
           <v-row>
             <div class="btn-container">
-                 <router-link class="link-password" to="">Esqueceu sua senha?</router-link>
+                 <router-link class="link-password" to="/reset">Esqueceu sua senha?</router-link>
               <v-btn
                 elevation="2"
                 depressed

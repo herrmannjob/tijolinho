@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-<ResetComponent/>
+<ResetLoginComponent/>
   </div>
 </template>
 
@@ -9,13 +9,13 @@
 
 
 // import { api, urls } from '../services/Api'
-import ResetComponent from '@/components/ResetLoginComponent.vue'
+import ResetLoginComponent from '@/components/ResetLoginComponent.vue'
 
 
 export default {
-  name: 'ResetComponent',
+  name: 'ResetLoginComponent',
   components: {
-   ResetComponent
+   ResetLoginComponent
   },
   
   
