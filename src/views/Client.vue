@@ -16,7 +16,7 @@ import TopBar from '@/components/TopBar.vue'
 
 
 export default {
-  name: 'Calendar',
+  name: 'Client',
   components: {
    ListClient, Drawer, TopBar
   },
