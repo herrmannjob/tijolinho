@@ -33,7 +33,8 @@ export default {
   methods: {
     async seed () {
         try {
-            await this.getData(Obra)
+            await this.getData(Usuario)
+            // await this.getUser(Usuario, 'luiz_dev@outlook.com')
             // await this.updateData(Empresa, 'c9e3c3ac-bc0d-4e4b-9cb4-58b931a1c820')
             // await this.putEndereco()
             // await this.putTipoUsuario()
@@ -52,13 +53,17 @@ export default {
     },
     async getData (table) {
         const data = await Functions.getAll(table)
-        console.log(data)
+        console.log(table, data)
         // return data
 
         //===DELETE ALL DATA===//
         // data.data.map(d => {
         //     this.delAllData(table, d.id)
         // })
+    },
+    async getUser (table, email) {
+        const data = await Functions.wichUserId(table, email)
+        console.log(data)
     },
     async delAllData(table, id) {
         const del = await Functions.deleteData(table, id)

@@ -50,10 +50,11 @@
                     <v-text-field
                       class="text"
                       label="Confirme sua senha*"
-                      v-model="password"
+                      v-model="confirm_password"
                       :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
                       @click:append="show = !show"
                       :type="show ? 'text' : 'password'"
+                      :rules="confirmationPasswordRules"
                     ></v-text-field>
                     <v-menu
                       ref="menu"
@@ -113,35 +114,35 @@
                   <v-text-field
                     label="Cep"
                     required
-                    v-model="cep_empresa"
-                    @change="searchCep(cep_empresa, false)"
-                    @keyup="searchCep(cep_empresa, false)"
+                    v-model="cep"
+                    @change="searchCep(cep)"
+                    @keyup="searchCep(cep)"
                   ></v-text-field>
                     <v-select
-                    v-model="estado_empresa"
+                    v-model="estado"
                     :items="items"
                     :error-messages="errors"
                     label="Estado"
                     required
                   ></v-select>
                   <v-text-field
-                    v-model="cidade_empresa"
+                    v-model="cidade"
                     label="Cidade"
                     required
                   ></v-text-field>
                   <v-text-field
-                    v-model="logradouro_empresa"
+                    v-model="logradouro"
                     label="Rua"
                     required
                   ></v-text-field>
                   <v-text-field
                     label="Complemento"
-                    v-model="complemento_empresa"
+                    v-model="complemento"
                     required
                   ></v-text-field>
                 </v-form>
 
-                <v-btn color="primary" @click="addAddress(false),validate" :disabled="!valid">
+                <v-btn color="primary" @click="addUser(),validate" :disabled="!valid">
                 ENVIAR
                 </v-btn>
                 <v-btn text @click="e1 = 1">
@@ -244,7 +245,6 @@ export default {
       e1: 1,
       picker: new Date().toISOString().substr(0, 10),
       menu: false,
-      endereco_empresa: null,
       valid: true,
       name: "",
       nameRules: [
@@ -255,21 +255,20 @@ export default {
         (v) => !!v || "E-mail is required",
         (v) => /.+@.+\..+/.test(v) || "E-mail must be valid",
       ],
-      cep_empresa: "",
-      estado_empresa: "",
-      logradouro_empresa: "",
-      cidade_empresa: "",
-      complemento_empresa: "",
-      endereco: null,
+      confirmationPasswordRules: [
+        (v) => v !== this.email || "Password an confirm password must be the same",
+      ],
       cep: "",
       estado: "",
       logradouro: "",
       cidade: "",
       complemento: "",
+      endereco: null,
       data: null,
       image: image,
       show: false,
       password: "",
+      confirm_password: "",
       code: "",
       items: ["AC","AL","AP",	"AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA",	
         "PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"	],
@@ -316,74 +315,24 @@ export default {
 
   watch: {
     menu(val) {
-      val && setTimeout(() => (this.$refs.picker.activePicker = "YEAR"));
+      val && setTimeout(() => (this.$refs.picker.activePicker = "YEAR"))
     },
   },
   methods: {
     validate() {
       this.$refs.form.validate();
     },
-    async searchCep(cep, user) {
+    async searchCep(cep) {
       if (cep.length == 8) {
-        const response = await Functions.searchCep(cep);
-        if (user) {
-          this.logradouro = response.data.logradouro;
-          this.cidade = response.data.localidade;
-          this.estado = response.data.uf;
-        } else {
-          this.logradouro_empresa = response.data.logradouro;
-          this.cidade_empresa = response.data.localidade;
-          this.estado_empresa = response.data.uf;
-        }
+        const response = await Functions.searchCep(cep)
+        this.logradouro = response.data.logradouro
+        this.cidade = response.data.localidade
+        this.estado = response.data.uf
       }
     },
     null_or_empty(str) {
-      var v = document.getElementById(str).value;
-      return v == null || v == "";
-    },
-    async addAddress(user) {
-      const items = await DataStore.query(Endereco, (d) =>
-        d.cep("eq", this.cep)
-      );
-      if (items.length === 0) {
-        const data = user
-          ? {
-              cep: this.cep,
-              estado: this.estado,
-              cidade: this.cidade,
-              rua: this.logradouro,
-              complemento: this.complemento,
-            }
-          : {
-              cep: this.cep_empresa,
-              estado: this.estado_empresa,
-              cidade: this.cidade_empresa,
-              rua: this.logradouro_empresa,
-              complemento: this.complemento_empresa,
-            };
-        const response = await Functions.putData(Endereco, data);
-        if (response.status === "ok") {
-          console.log("Endereço cadastrado com sucesso!");
-          console.log(response);
-          if (!user) {
-            this.endereco_empresa = response.data;
-            this.addEmpresa();
-          } else {
-            this.endereco = response.data;
-            this.addTipoUsuario();
-          }
-        } else {
-          console.log("erro: " + response.error.message);
-        }
-      } else {
-        if (!user) {
-          this.endereco_empresa = items[0];
-          this.addEmpresa();
-        } else {
-          this.endereco = items[0];
-          this.addTipoUsuario();
-        }
-      }
+      var v = document.getElementById(str).value
+      return v == null || v == ""
     },
 
     async addTipoUsuario() {
@@ -397,42 +346,59 @@ export default {
         if (response.status === "ok") {
           console.log("TipoUsuario cadastrado com sucesso!");
           this.tipo_usuario = response.data;
-          this.addUser();
         } else {
           console.log("erro: " + response.error.message);
         }
       } else {
         this.tipo_usuario = items[0];
-        this.addUser();
       }
     },
 
     async addUser() {
-      const items = await DataStore.query(Usuario, (d) =>
-        d.email("eq", this.email)
-      );
+      await this.addTipoUsuario()
+      const items = await DataStore.query(Usuario, (d) => d.email("eq", this.email))
       if (items.length === 0) {
-        this.phone = `+${this.phone.substr(0, 2)} ${this.phone.substr(
-          2,
-          2
-        )} ${this.phone.substr(4, 5)} ${this.phone.substr(9, 4)}`;
+        this.phone = `+${this.phone.substr(0, 2)} ${this.phone.substr(2, 2)} ${this.phone.substr(4, 5)} ${this.phone.substr(9, 4)}`
         const response = await Functions.putData(Usuario, {
           nome: this.name,
           email: this.email,
           data_nascimento: this.date + "Z",
-          Endereco: this.endereco,
           TipoUsuario: this.tipo_usuario,
-        });
+        })
         if (response.status === "ok") {
-          console.log("Usuário cadastrado com sucesso!");
-          this.user = response.data;
-          this.e1 += 1;
+          console.log("Usuário cadastrado com sucesso!")
+          this.user = response.data
+          this.addAddress()
         } else {
-          console.log("erro: " + response.error.message);
+          console.log("erro: " + response.error.message)
         }
       } else {
-        this.user = items[0];
-        this.e1 += 1;
+        this.user = items[0]
+        this.addAddress()
+      }
+    },
+
+    async addAddress() {
+      const items = await DataStore.query(Endereco, (d) => d.cep("eq", this.cep))
+      if (items.length === 0) {
+        const data = {
+          cep: this.cep,
+          estado: this.estado,
+          cidade: this.cidade,
+          rua: this.logradouro,
+          complemento: this.complemento,
+        }
+        const response = await Functions.putData(Endereco, data)
+        if (response.status === "ok") {
+          console.log("Endereço cadastrado com sucesso!")
+          this.endereco = response.data
+          this.addEmpresa()
+        } else {
+          console.log("erro: " + response.error.message)
+        }
+      } else {
+        this.endereco = items[0]
+        this.addEmpresa()
       }
     },
 
@@ -440,14 +406,14 @@ export default {
       const response = await Functions.putData(Empresa, {
         nome: this.company,
         telefone: this.phone,
-        Endereco: this.endereco_empresa,
+        Endereco: this.endereco,
         usuarioID: [this.user.id],
-      });
+      })
       if (response.status === "ok") {
-        console.log("Empresa cadastrada com sucesso!");
-        this.signUp();
+        console.log("Empresa cadastrada com sucesso!")
+        this.signUp()
       } else {
-        console.log("erro: " + response.error.message);
+        console.log("erro: " + response.error.message)
       }
     },
 

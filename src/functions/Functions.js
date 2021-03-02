@@ -23,6 +23,7 @@ const functions = {
     async wichUserId (table, email) {
         try {
             const items = await DataStore.query(table, d => d.email("eq", email))
+            console.log(items)
             if (items.length > 0) {
                 return { status: 'ok', data: items[0] }
             } else return { status: 'empty' }
