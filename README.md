@@ -9,7 +9,7 @@ yarn install
 ```
 yarn serve
 ```
-
+# aws
 ### Compiles and minifies for production
 ```
 yarn build
