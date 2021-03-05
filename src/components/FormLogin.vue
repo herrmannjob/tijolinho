@@ -62,7 +62,7 @@
 </template>
 <script>
 // import { Auth } from 'aws-amplify'
-import Functions from '@/functions/Functions'
+// import Functions from '@/functions/Functions'
 import ResponseModal from '@/components/ResponseModal.vue'
 export default {
   name: "FormLogin",
@@ -94,14 +94,15 @@ export default {
      
   methods: {
     async login () {
-      const response = await Functions.login(this.email, this.password)
-      if (response.status === 'ok') this.$router.push('/calendar')
-      else {
-        this.message.title = "Ocorreu um erro..."
-        this.message.code = response.error.code
-        this.message.text = response.error.message
-        this.modal = true
-      }
+      this.$router.push('/calendar')
+      // const response = await Functions.login(this.email, this.password)
+      // if (response.status === 'ok') this.$router.push('/calendar')
+      // else {
+      //   this.message.title = "Ocorreu um erro..."
+      //   this.message.code = response.error.code
+      //   this.message.text = response.error.message
+      //   this.modal = true
+      // }
     },
     loginCognito () { this.$router.push('aws') }
   },

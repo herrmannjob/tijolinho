@@ -181,7 +181,7 @@
                     >
                       Cancelar
                     </v-btn>
-                    <v-btn color="blue darken-1" text @click="confirmSignUp()">
+                    <v-btn color="primary" @click="confirmSignUp()">
                       Confirmar
                     </v-btn>
                   </v-card-actions>
@@ -219,10 +219,10 @@
 </template>
 <script>
 import image from "../assets/register.png";
+// import { Auth } from "aws-amplify";
+// import { DataStore } from "aws-amplify";
+// import { Usuario, TipoUsuario, Endereco, Empresa } from "@/models";
 import Functions from "@/functions/Functions";
-import { Auth } from "aws-amplify";
-import { DataStore } from "aws-amplify";
-import { Usuario, TipoUsuario, Endereco, Empresa } from "@/models";
 import { validationMixin } from "vuelidate";
 import { required, email } from "vuelidate/lib/validators";
 export default {
@@ -336,112 +336,112 @@ export default {
     },
 
     async addTipoUsuario() {
-      const items = await DataStore.query(TipoUsuario, (d) =>
-        d.nome("eq", "Arquiteto(a)")
-      );
-      if (items.length === 0) {
-        const response = await Functions.putData(TipoUsuario, {
-          nome: "Arquiteto(a)",
-        });
-        if (response.status === "ok") {
-          console.log("TipoUsuario cadastrado com sucesso!");
-          this.tipo_usuario = response.data;
-        } else {
-          console.log("erro: " + response.error.message);
-        }
-      } else {
-        this.tipo_usuario = items[0];
-      }
+      // const items = await DataStore.query(TipoUsuario, (d) =>
+      //   d.nome("eq", "Arquiteto(a)")
+      // );
+      // if (items.length === 0) {
+      //   const response = await Functions.putData(TipoUsuario, {
+      //     nome: "Arquiteto(a)",
+      //   });
+      //   if (response.status === "ok") {
+      //     console.log("TipoUsuario cadastrado com sucesso!");
+      //     this.tipo_usuario = response.data;
+      //   } else {
+      //     console.log("erro: " + response.error.message);
+      //   }
+      // } else {
+      //   this.tipo_usuario = items[0];
+      // }
     },
 
     async addUser() {
-      await this.addTipoUsuario()
-      const items = await DataStore.query(Usuario, (d) => d.email("eq", this.email))
-      if (items.length === 0) {
-        this.phone = `+${this.phone.substr(0, 2)} ${this.phone.substr(2, 2)} ${this.phone.substr(4, 5)} ${this.phone.substr(9, 4)}`
-        const response = await Functions.putData(Usuario, {
-          nome: this.name,
-          email: this.email,
-          data_nascimento: this.date + "Z",
-          TipoUsuario: this.tipo_usuario,
-        })
-        if (response.status === "ok") {
-          console.log("Usuário cadastrado com sucesso!")
-          this.user = response.data
-          this.addAddress()
-        } else {
-          console.log("erro: " + response.error.message)
-        }
-      } else {
-        this.user = items[0]
-        this.addAddress()
-      }
+      // await this.addTipoUsuario()
+      // const items = await DataStore.query(Usuario, (d) => d.email("eq", this.email))
+      // if (items.length === 0) {
+      //   this.phone = `+${this.phone.substr(0, 2)} ${this.phone.substr(2, 2)} ${this.phone.substr(4, 5)} ${this.phone.substr(9, 4)}`
+      //   const response = await Functions.putData(Usuario, {
+      //     nome: this.name,
+      //     email: this.email,
+      //     data_nascimento: this.date + "Z",
+      //     TipoUsuario: this.tipo_usuario,
+      //   })
+      //   if (response.status === "ok") {
+      //     console.log("Usuário cadastrado com sucesso!")
+      //     this.user = response.data
+      //     this.addAddress()
+      //   } else {
+      //     console.log("erro: " + response.error.message)
+      //   }
+      // } else {
+      //   this.user = items[0]
+      //   this.addAddress()
+      // }
     },
 
     async addAddress() {
-      const items = await DataStore.query(Endereco, (d) => d.cep("eq", this.cep))
-      if (items.length === 0) {
-        const data = {
-          cep: this.cep,
-          estado: this.estado,
-          cidade: this.cidade,
-          rua: this.logradouro,
-          complemento: this.complemento,
-        }
-        const response = await Functions.putData(Endereco, data)
-        if (response.status === "ok") {
-          console.log("Endereço cadastrado com sucesso!")
-          this.endereco = response.data
-          this.addEmpresa()
-        } else {
-          console.log("erro: " + response.error.message)
-        }
-      } else {
-        this.endereco = items[0]
-        this.addEmpresa()
-      }
+      // const items = await DataStore.query(Endereco, (d) => d.cep("eq", this.cep))
+      // if (items.length === 0) {
+      //   const data = {
+      //     cep: this.cep,
+      //     estado: this.estado,
+      //     cidade: this.cidade,
+      //     rua: this.logradouro,
+      //     complemento: this.complemento,
+      //   }
+      //   const response = await Functions.putData(Endereco, data)
+      //   if (response.status === "ok") {
+      //     console.log("Endereço cadastrado com sucesso!")
+      //     this.endereco = response.data
+      //     this.addEmpresa()
+      //   } else {
+      //     console.log("erro: " + response.error.message)
+      //   }
+      // } else {
+      //   this.endereco = items[0]
+      //   this.addEmpresa()
+      // }
     },
 
     async addEmpresa() {
-      const response = await Functions.putData(Empresa, {
-        nome: this.company,
-        telefone: this.phone,
-        Endereco: this.endereco,
-        usuarioID: [this.user.id],
-      })
-      if (response.status === "ok") {
-        console.log("Empresa cadastrada com sucesso!")
-        this.signUp()
-      } else {
-        console.log("erro: " + response.error.message)
-      }
+      // const response = await Functions.putData(Empresa, {
+      //   nome: this.company,
+      //   telefone: this.phone,
+      //   Endereco: this.endereco,
+      //   usuarioID: [this.user.id],
+      // })
+      // if (response.status === "ok") {
+      //   console.log("Empresa cadastrada com sucesso!")
+      //   this.signUp()
+      // } else {
+      //   console.log("erro: " + response.error.message)
+      // }
     },
 
     async signUp() {
-      try {
-        this.user = await Auth.signUp({
-          username: this.email, // optional
-          password: this.password,
-        });
-        this.confirm_code = true;
-      } catch (error) {
-        this.error = error;
-        this.error_dialog = true;
-      }
+      // try {
+      //   this.user = await Auth.signUp({
+      //     username: this.email, // optional
+      //     password: this.password,
+      //   });
+      //   this.confirm_code = true;
+      // } catch (error) {
+      //   this.error = error;
+      //   this.error_dialog = true;
+      // }
     },
 
     async confirmSignUp() {
-      try {
-        await Auth.confirmSignUp(this.email, this.code);
-        this.login();
-      } catch (error) {
-        console.log("error confirming sign up", error);
-      }
+      // try {
+      //   await Auth.confirmSignUp(this.email, this.code);
+      //   this.login();
+      // } catch (error) {
+      //   console.log("error confirming sign up", error);
+      // }
     },
 
     async login() {
-      await Functions.login(this.email, this.password);
-      this.$router.push("/");
+      // await Functions.login(this.email, this.password);
+      // this.$router.push("/");
     },
   },
 };

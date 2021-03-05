@@ -104,8 +104,8 @@
 </template>
 
 <script>
-import { AgendaParticular } from '@/models'
-import Functions from '@/functions/Functions'
+// import { AgendaParticular } from '@/models'
+// import Functions from '@/functions/Functions'
 import ResponseModal from '@/components/ResponseModal.vue'
 export default {
   name: 'FormGantt',
@@ -132,25 +132,25 @@ export default {
       this.$emit('update:form', false)
     },
     async save () {
-      const start = new Date(this.date)
-      const end = new Date(this.end_date)
-      const duration = (end - start) / 1000 / 60 / 60 / 24
-      const response = await Functions.putData(AgendaParticular, {
-        "titulo": this.title,
-        "descricao": this.description,
-        "data_inicio": this.date + 'Z',
-        "data_fim": this.end_date + 'Z',
-        "duracao": `${duration} dia(s)`,
-        "Usuario": this.user
-      })
-      if (response.status === 'ok') {
-        this.message.title = "Atividade cadastrada com sucesso!"
-      } else {
-        this.message.title = "Ocorreu um erro..."
-        this.message.code = response.error.code
-        this.message.text = response.error.message
-      }
-      this.modal = true
+      // const start = new Date(this.date)
+      // const end = new Date(this.end_date)
+      // const duration = (end - start) / 1000 / 60 / 60 / 24
+      // const response = await Functions.putData(AgendaParticular, {
+      //   "titulo": this.title,
+      //   "descricao": this.description,
+      //   "data_inicio": this.date + 'Z',
+      //   "data_fim": this.end_date + 'Z',
+      //   "duracao": `${duration} dia(s)`,
+      //   "Usuario": this.user
+      // })
+      // if (response.status === 'ok') {
+      //   this.message.title = "Atividade cadastrada com sucesso!"
+      // } else {
+      //   this.message.title = "Ocorreu um erro..."
+      //   this.message.code = response.error.code
+      //   this.message.text = response.error.message
+      // }
+      // this.modal = true
     }
   }
 }

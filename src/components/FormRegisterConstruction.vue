@@ -124,8 +124,8 @@
 </template>
 <script>
 import Functions from '@/functions/Functions'
-import { DataStore } from 'aws-amplify'
-import { TipoObra, Endereco, Obra, CronogramaObra } from '@/models'
+// import { DataStore } from 'aws-amplify'
+// import { TipoObra, Endereco, Obra, CronogramaObra } from '@/models'
 export default {
   name: 'FormRegisterConstruction',
   props: {
@@ -182,82 +182,82 @@ export default {
       }
     },
     async addAddress () {
-      const items = await DataStore.query(Endereco, d => d.cep("eq", this.cep))
-      if (items.length === 0) {
-        const data = {
-          "cep": this.cep,
-          "estado": this.estado,
-          "cidade": this.cidade,
-          "rua": this.logradouro,
-          "complemento": this.complemento
-        }
-        const response = await Functions.putData(Endereco, data)
-        if (response.status === 'ok') {
-          console.log("Endereço cadastrado com sucesso!")
-          this.endereco = response.data
-        } else {
-          console.log("erro: " + response.error.message)
-        }
-      } else this.endereco = items[0]
+      // const items = await DataStore.query(Endereco, d => d.cep("eq", this.cep))
+      // if (items.length === 0) {
+      //   const data = {
+      //     "cep": this.cep,
+      //     "estado": this.estado,
+      //     "cidade": this.cidade,
+      //     "rua": this.logradouro,
+      //     "complemento": this.complemento
+      //   }
+      //   const response = await Functions.putData(Endereco, data)
+      //   if (response.status === 'ok') {
+      //     console.log("Endereço cadastrado com sucesso!")
+      //     this.endereco = response.data
+      //   } else {
+      //     console.log("erro: " + response.error.message)
+      //   }
+      // } else this.endereco = items[0]
     },
     async addTipoObra () {
-      const items = await DataStore.query(TipoObra, d => d.nome("eq", this.category))
-      if (items.length === 0) {
-        const response = await Functions.putData(TipoObra, {
-          "nome": this.category,
-        })
-        if (response.status === 'ok') {
-          console.log("TipoObra cadastrado com sucesso!")
-          this.tipo_obra = response.data
-        } else {
-          console.log("erro: " + response.error.message)
-        }
-      } else {
-        this.tipo_obra = items[0]
-      }
+      // const items = await DataStore.query(TipoObra, d => d.nome("eq", this.category))
+      // if (items.length === 0) {
+      //   const response = await Functions.putData(TipoObra, {
+      //     "nome": this.category,
+      //   })
+      //   if (response.status === 'ok') {
+      //     console.log("TipoObra cadastrado com sucesso!")
+      //     this.tipo_obra = response.data
+      //   } else {
+      //     console.log("erro: " + response.error.message)
+      //   }
+      // } else {
+      //   this.tipo_obra = items[0]
+      // }
     },
     async addObra () {
-      await this.addAddress()
-      await this.addTipoObra()
-      try {
-        const response = await DataStore.save(
-          new Obra({
-            "nome": this.firstname,
-            "Endereco": this.endereco,
-            "TipoObra": this.tipo_obra,
-            "Empresa": this.company,
-            "usuarioID": this.user_id,
-            "Usuarios": this.client.nome === "empty" ? [] : [this.client]
-          })
-        )
-        console.log('Obra cadastrada')
-        this.obra = response
-        this.addCronogramaObra()
-      } catch (error) {
-        console.log(error)
-      }
+      // await this.addAddress()
+      // await this.addTipoObra()
+      // try {
+      //   const response = await DataStore.save(
+      //     new Obra({
+      //       "nome": this.firstname,
+      //       "Endereco": this.endereco,
+      //       "TipoObra": this.tipo_obra,
+      //       "Empresa": this.company,
+      //       "usuarioID": this.user_id,
+      //       "Usuarios": this.client.nome === "empty" ? [] : [this.client]
+      //     })
+      //   )
+      //   console.log('Obra cadastrada')
+      //   this.obra = response
+      //   this.addCronogramaObra()
+      // } catch (error) {
+      //   console.log(error)
+      // }
       
     },
     async addCronogramaObra () {
-      const start = new Date(this.dateInit)
-      const end = new Date(this.dateEnd)
-      const duration = end - start
-      try {
-        await DataStore.save(
-          new CronogramaObra({
-            "Obra_": this.obra,
-            "data_inicio": this.dateInit + 'Z',
-            "data_fim": this.dateEnd + 'Z',
-            "tempo_previsto": `${duration} ms`,
-            "gasto_previsto": this.estimated_spend
-          })
-        )
-        console.log('CronogramaObra cadastrado!')
-        this.$emit('update:form', false)
-        this.$emit('update:confirm', false)
-      } catch (error) {
-        console.log(error)
-      }
+      // const start = new Date(this.dateInit)
+      // const end = new Date(this.dateEnd)
+      // const duration = end - start
+      // try {
+      //   await DataStore.save(
+      //     new CronogramaObra({
+      //       "Obra_": this.obra,
+      //       "data_inicio": this.dateInit + 'Z',
+      //       "data_fim": this.dateEnd + 'Z',
+      //       "tempo_previsto": `${duration} ms`,
+      //       "gasto_previsto": this.estimated_spend
+      //     })
+      //   )
+      //   console.log('CronogramaObra cadastrado!')
+      //   this.$emit('update:form', false)
+      //   this.$emit('update:confirm', false)
+      // } catch (error) {
+      //   console.log(error)
+      // }
     },
   },
 }

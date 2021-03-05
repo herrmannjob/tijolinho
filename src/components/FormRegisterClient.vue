@@ -33,13 +33,15 @@
               label="Nome do cliente"
               required
             ></v-text-field>
+
+            <v-text-field label="Telefone" v-model="phone" hint="Apenas números (13 dígitos)" placeholder="+55 84 98765 4321" :rules="phone_rules" required></v-text-field>
+
             <v-text-field
               v-model="email"
               :rules="emailRules"
-              label="E-mail"
-              required
+              label="E-mail (opcioinal)"
             ></v-text-field>
-            <v-text-field label="Telefone" v-model="phone" hint="Apenas números (13 dígitos)" placeholder="+55 84 98765 4321" :rules="phone_rules" required></v-text-field>
+            
             <v-menu
               ref="menuNasc"
               v-model="menuNasc"
@@ -51,10 +53,9 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   v-model="dateNasc"
-                  label="Data de Nascimento"
+                  label="Data de Nascimento (opcioinal)"
                   prepend-icon="mdi-calendar"
                   readonly
-                  required
                   v-bind="attrs"
                   v-on="on"
                 ></v-text-field>
@@ -70,7 +71,7 @@
           </v-col>
 
           <v-col cols="12" md="6">
-            <v-text-field label="Nome do cônjuge" required v-model="firstnameConjuge"></v-text-field>
+            <v-text-field label="Nome do cônjuge (opcioinal)" v-model="firstnameConjuge"></v-text-field>
             <v-menu
               ref="menuNascConj"
               v-model="menuNascConj"
@@ -82,7 +83,7 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   v-model="dateNascConj"
-                  label="Data de Nascimento do Conjuge"
+                  label="Data de Nascimento do Conjuge (opcioinal)"
                   prepend-icon="mdi-calendar"
                   readonly
                   required
@@ -164,8 +165,8 @@
 import image from "../assets/register.png"
 import FormRegisterConstruction from '@/components/FormRegisterConstruction'
 import Functions from '@/functions/Functions'
-import { DataStore } from 'aws-amplify'
-import { Usuario, TipoUsuario, Empresa } from '@/models'
+// import { DataStore } from 'aws-amplify'
+// import { Usuario, TipoUsuario, Empresa } from '@/models'
 export default {
   name: 'FormRegisterClient',
   components: { FormRegisterConstruction },
@@ -221,7 +222,6 @@ export default {
       email: "",
       password: "",
       emailRules: [
-        (v) => !!v || "E-mail é obrigatório",
         (v) => /.+@.+/.test(v) || "E-mail precisa ser em um formato válido",
       ],
       tipo_usuario: null,
@@ -252,80 +252,80 @@ export default {
   },
   async created () {
     this.user = await Functions.isAuth()
-    await this.getUser()
-    this.getCompany()
+    // await this.getUser()
+    // this.getCompany()
   },
   methods: {
     voltar () { this.$router.go(-1) },
     async getUser () {
-      const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
-      this.user = user.data
+      // const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
+      // this.user = user.data
     },
     async getCompany () {
-      const response = await Functions.getAll(Empresa)
-      if (response.status === 'ok') {
-        const company = []
-        response.data.filter(item => {
-          if (item.usuarioID.includes(this.user.id)) company.push(item)
-        })
-        this.company = company[0]
-      }
+      // const response = await Functions.getAll(Empresa)
+      // if (response.status === 'ok') {
+      //   const company = []
+      //   response.data.filter(item => {
+      //     if (item.usuarioID.includes(this.user.id)) company.push(item)
+      //   })
+      //   this.company = company[0]
+      // }
     },
     async updateCompany () {
-      const empresa = this.company
-      const empresa_clientes = empresa.usuarioID
-      const response = await DataStore.save(
-        Empresa.copyOf(empresa, updated => {
-          updated.usuarioID = empresa_clientes.concat([this.client.id])
-        })
-      )
-      console.log(response)
+      // const empresa = this.company
+      // const empresa_clientes = empresa.usuarioID
+      // const response = await DataStore.save(
+      //   Empresa.copyOf(empresa, updated => {
+      //     updated.usuarioID = empresa_clientes.concat([this.client.id])
+      //   })
+      // )
+      // console.log(response)
     },
     async addTipoUsuario () {
-      const items = await DataStore.query(TipoUsuario, d => d.nome("eq", "Cliente"))
-      if (items.length === 0) {
-        const response = await Functions.putData(TipoUsuario, {
-          "nome": "Cliente",
-        })
-        if (response.status === 'ok') {
-          console.log("TipoUsuario cadastrado com sucesso!")
-          this.tipo_usuario = response.data
-        } else {
-          console.log("erro: " + response.error.message)
-        }
-      } else {
-        this.tipo_usuario = items[0]
-      }
+      // const items = await DataStore.query(TipoUsuario, d => d.nome("eq", "Cliente"))
+      // if (items.length === 0) {
+      //   const response = await Functions.putData(TipoUsuario, {
+      //     "nome": "Cliente",
+      //   })
+      //   if (response.status === 'ok') {
+      //     console.log("TipoUsuario cadastrado com sucesso!")
+      //     this.tipo_usuario = response.data
+      //   } else {
+      //     console.log("erro: " + response.error.message)
+      //   }
+      // } else {
+      //   this.tipo_usuario = items[0]
+      // }
     },
 
     async addUser () {
-      await this.addTipoUsuario()
-      const items = await DataStore.query(Usuario, d => d.email("eq", this.email))
-      if (items.length === 0) {
-        this.phone = `+${this.phone.substr(0,2)} ${this.phone.substr(2,2)} ${this.phone.substr(4,5)} ${this.phone.substr(9,4)}`
-        const response = await Functions.putData(Usuario, {
-          "nome": this.firstname,
-          "email": this.email,
-          "telefone": this.phone,
-          "data_nascimento": this.dateNasc + 'Z',
-          "nome_conjuge": this.firstnameConjuge,
-          "data_nascimento_conjuge": this.dateNascConj + 'Z',
-          "TipoUsuario": this.tipo_usuario,
-        })
-        if (response.status === 'ok') {
-          console.log("Usuário cadastrado com sucesso!")
-          this.client = response.data
-          this.updateCompany()
-          this.confirm = true
-        } else {
-          console.log("erro: " + response.error.message)
-        }
-      } else {
-        console.log('email já cadastrado!')
-        this.client = items[0]
-        this.confirm_message = "Já existe um usuário para este email!"
-        this.confirm = true
-      }
+      // await this.addTipoUsuario()
+      // const items = await DataStore.query(Usuario, d => d.email("eq", this.email))
+      // if (items.length === 0) {
+      //   this.phone = `+${this.phone.substr(0,2)} ${this.phone.substr(2,2)} ${this.phone.substr(4,5)} ${this.phone.substr(9,4)}`
+      //   const response = await Functions.putData(Usuario, {
+      //     "nome": this.firstname,
+      //     "email": this.email,
+      //     "telefone": this.phone,
+      //     "data_nascimento": this.dateNasc + 'Z',
+      //     "nome_conjuge": this.firstnameConjuge,
+      //     "data_nascimento_conjuge": this.dateNascConj + 'Z',
+      //     "TipoUsuario": this.tipo_usuario,
+      //   })
+      //   if (response.status === 'ok') {
+      //     console.log("Usuário cadastrado com sucesso!")
+      //     this.client = response.data
+      //     this.updateCompany()
+      //     this.confirm = true
+      //   } else {
+      //     console.log("erro: " + response.error.message)
+      //   }
+      // } else {
+      //   console.log('email já cadastrado!')
+      //   this.client = items[0]
+      //   this.confirm_message = "Já existe um usuário para este email!"
+      //   this.confirm = true
+      // }
     },
     save(date) {
       this.$refs.menu.save(date);

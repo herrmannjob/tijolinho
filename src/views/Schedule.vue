@@ -122,8 +122,8 @@ import Gantt from '@/components/Gantt.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 // import moment from '@/plugins/moment'
-import { DataStore } from 'aws-amplify'
-import { Usuario, Obra } from '@/models'
+// import { DataStore } from 'aws-amplify'
+// import { Usuario, Obra } from '@/models'
 import Functions from '@/functions/Functions'
 import FormRegisterConstruction from '@/components/FormRegisterConstruction'
 
@@ -147,22 +147,22 @@ export default {
   async created () {
     this.user = await Functions.isAuth()
     this.user_email = this.user.attributes.email
-    const user = await DataStore.query(Usuario, data => data.email("eq", this.user_email))
-    if (user.length > 0) this.username = user[0].nome
-    await this.getUser()
-    this.getObras()
+    // const user = await DataStore.query(Usuario, data => data.email("eq", this.user_email))
+    // if (user.length > 0) this.username = user[0].nome
+    // await this.getUser()
+    // this.getObras()
   },
   methods: {
     async getUser () {
-      const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
-      this.user = user.data
+      // const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
+      // this.user = user.data
     },
     async getObras () {
-      const response = await Functions.getById(Obra, this.user.id)
-      if (response.status === 'ok') {
-        this.constructions_names = []
-        response.data.map(obra => { this.constructions_names.push(obra.nome) })
-      }
+      // const response = await Functions.getById(Obra, this.user.id)
+      // if (response.status === 'ok') {
+      //   this.constructions_names = []
+      //   response.data.map(obra => { this.constructions_names.push(obra.nome) })
+      // }
     },
   }
 }

@@ -109,7 +109,7 @@
 
 <script>
 // import { api, urls } from '../services/Api'
-import { Usuario, Empresa } from '@/models'
+// import { Usuario, Empresa } from '@/models'
 import Functions from '@/functions/Functions'
 export default {
   data() {
@@ -135,38 +135,38 @@ export default {
   },
   async created () {
     this.user = await Functions.isAuth()
-    await this.getUser()
-    this.getClients()
+    // await this.getUser()
+    // this.getClients()
   },
   methods: {
     async getUser () {
-      const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
-      this.user = user.data
+      // const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
+      // this.user = user.data
     },
     async getCompanies () {
-      const response = await Functions.getAll(Empresa)
-      if (response.status === 'ok') {
-        response.data.filter(item => {
-          if (item.usuarioID.includes(this.user.id)) this.companies.push(item)
-        })
-      }
+      // const response = await Functions.getAll(Empresa)
+      // if (response.status === 'ok') {
+      //   response.data.filter(item => {
+      //     if (item.usuarioID.includes(this.user.id)) this.companies.push(item)
+      //   })
+      // }
     },
     async getClients () {
-      await this.getCompanies()
-      const client_ids = []
-      this.companies.map(company => {
-        company.usuarioID.filter(user_id => {
-          if (user_id !== this.user.id) {
-            client_ids.push(user_id)
-          }
-        })
-      })
-      const clients = []
-      client_ids.map(async function (id) {
-        const response = await Functions.getById(Usuario, id)
-        clients.push({ title: response.data.nome })
-      })
-      this.clients = clients
+      // await this.getCompanies()
+      // const client_ids = []
+      // this.companies.map(company => {
+      //   company.usuarioID.filter(user_id => {
+      //     if (user_id !== this.user.id) {
+      //       client_ids.push(user_id)
+      //     }
+      //   })
+      // })
+      // const clients = []
+      // client_ids.map(async function (id) {
+      //   const response = await Functions.getById(Usuario, id)
+      //   clients.push({ title: response.data.nome })
+      // })
+      // this.clients = clients
     },
   }
 };

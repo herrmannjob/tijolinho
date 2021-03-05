@@ -62,8 +62,8 @@ import CalendarWeek from '@/components/CalendarWeek'
 import CalendarDay from '@/components/CalendarDay'
 import CalendarMonth from '@/components/CalendarMonth'
 
-import { Obra, Usuario, Empresa, AgendaParticular, AgendaObra } from '@/models'
-import Functions from '@/functions/Functions'
+// import { Obra, Usuario, Empresa, AgendaParticular, AgendaObra } from '@/models'
+// import Functions from '@/functions/Functions'
 
 export default {
   name: 'CalendarComponent',
@@ -125,96 +125,96 @@ export default {
     }
   },
   async created () {
-    this.user = await Functions.isAuth()
-    await this.getUser()
-    await this.getObras()
-    this.getTasks()
-    this.getClients()
+    // this.user = await Functions.isAuth()
+    // await this.getUser()
+    // await this.getObras()
+    // this.getTasks()
+    // this.getClients()
   },
   // updated () { this.refreshEvents() },
   methods: {
-    async getUser () {
-      const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
-      this.user = user.data
-    },
-    async getObras () {
-      const response = await Functions.getByUserId(Obra, this.user.id)
-      if (response.status === 'ok') {
-        this.constructions = response.data
-        this.constructions_names = []
-        response.data.map(obra => { this.constructions_names.push(obra.nome) })
-      }
-    },
-    async getCompanies () {
-      const response = await Functions.getAll(Empresa)
-      if (response.status === 'ok') {
-        response.data.filter(item => {
-          if (item.usuarioID.includes(this.user.id)) this.companies.push(item)
-        })
-      }
-    },
-    async getClients () {
-      await this.getCompanies()
-      const client_ids = []
-      this.companies.map(company => {
-        company.usuarioID.filter(user_id => {
-          if (user_id !== this.user.id) {
-            client_ids.push(user_id)
-            this.client_names = []
-          }
-        })
-      })
-      const clients = []
-      const client_names = []
-      client_ids.map(async function (id) {
-        const response = await Functions.getById(Usuario, id)
-        clients.push(response.data)
-        client_names.push(response.data.nome)
-      })
-      this.clients = clients
-      this.client_names = client_names
-    },
-    async getTasks () {
-      await this.getParticularTasks()
-      await this.getConstructionsTasks()
-    },
-    async getParticularTasks () {
-      const response = await Functions.getAll(AgendaParticular)
-      if (response.status === 'ok') {
-        this.particular_tasks = []
-        this.calendarOptions.events = []
-        response.data.filter(item => {
-          if (item.Usuario.id === this.user.id) {
-            this.particular_tasks.push(item)
-            this.calendarOptions.events.push(
-              {
-                title: item.titulo,
-                start: item.data_inicio.substr(0, 19) + 'Z',
-                end: item.data_fim.substr(0, 19) + 'Z'
-              }
-            )
-          }
-        })
-      }
-    },
-    async getConstructionsTasks () {
-      await this.getObras()
-      if (this.constructions.length > 0) {
-        const response = await Functions.getAll(AgendaObra)
-        if (response.status === 'ok') {
-          this.constructions_tasks = []
-          this.calendarOptions.events = []
-          this.constructions.map(construction => {
-            response.data.map(item => {
-              if (item.Obra.id === construction.id) {
-                this.constructions_tasks.push(item)
-                this.calendarOptions.events.push({ title: item.titulo, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })
-              }
-            })
-          })
-        }
-      }
-    },
+    // async getUser () {
+    //   const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
+    //   this.user = user.data
+    // },
+    // async getObras () {
+    //   const response = await Functions.getByUserId(Obra, this.user.id)
+    //   if (response.status === 'ok') {
+    //     this.constructions = response.data
+    //     this.constructions_names = []
+    //     response.data.map(obra => { this.constructions_names.push(obra.nome) })
+    //   }
+    // },
+    // async getCompanies () {
+    //   const response = await Functions.getAll(Empresa)
+    //   if (response.status === 'ok') {
+    //     response.data.filter(item => {
+    //       if (item.usuarioID.includes(this.user.id)) this.companies.push(item)
+    //     })
+    //   }
+    // },
+    // async getClients () {
+    //   await this.getCompanies()
+    //   const client_ids = []
+    //   this.companies.map(company => {
+    //     company.usuarioID.filter(user_id => {
+    //       if (user_id !== this.user.id) {
+    //         client_ids.push(user_id)
+    //         this.client_names = []
+    //       }
+    //     })
+    //   })
+    //   const clients = []
+    //   const client_names = []
+    //   client_ids.map(async function (id) {
+    //     const response = await Functions.getById(Usuario, id)
+    //     clients.push(response.data)
+    //     client_names.push(response.data.nome)
+    //   })
+    //   this.clients = clients
+    //   this.client_names = client_names
+    // },
+    // async getTasks () {
+    //   await this.getParticularTasks()
+    //   await this.getConstructionsTasks()
+    // },
+    // async getParticularTasks () {
+    //   const response = await Functions.getAll(AgendaParticular)
+    //   if (response.status === 'ok') {
+    //     this.particular_tasks = []
+    //     this.calendarOptions.events = []
+    //     response.data.filter(item => {
+    //       if (item.Usuario.id === this.user.id) {
+    //         this.particular_tasks.push(item)
+    //         this.calendarOptions.events.push(
+    //           {
+    //             title: item.titulo,
+    //             start: item.data_inicio.substr(0, 19) + 'Z',
+    //             end: item.data_fim.substr(0, 19) + 'Z'
+    //           }
+    //         )
+    //       }
+    //     })
+    //   }
+    // },
+    // async getConstructionsTasks () {
+    //   await this.getObras()
+    //   if (this.constructions.length > 0) {
+    //     const response = await Functions.getAll(AgendaObra)
+    //     if (response.status === 'ok') {
+    //       this.constructions_tasks = []
+    //       this.calendarOptions.events = []
+    //       this.constructions.map(construction => {
+    //         response.data.map(item => {
+    //           if (item.Obra.id === construction.id) {
+    //             this.constructions_tasks.push(item)
+    //             this.calendarOptions.events.push({ title: item.titulo, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })
+    //           }
+    //         })
+    //       })
+    //     }
+    //   }
+    // },
     changeView () {
       switch (this.calendar_view) {
         case 'Mês':

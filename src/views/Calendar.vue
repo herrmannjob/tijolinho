@@ -57,7 +57,7 @@ import CalendarComponent from '@/components/CalendarComponent.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 import moment from '@/plugins/moment'
-import { AgendaObra, Obra, Usuario } from '@/models'
+// import { AgendaObra, Obra, Usuario } from '@/models'
 import Functions from '@/functions/Functions'
 
 export default {
@@ -76,33 +76,33 @@ export default {
   },
   async created () {
     this.user = await Functions.isAuth()
-    await this.getUser()
     this.today = moment().format('ll')
-    await this.getConstructionsTasks()
+    // await this.getUser()
+    // await this.getConstructionsTasks()
   },
   methods: {
     async getUser () {
-      const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
-      this.user = user.data
+      // const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
+      // this.user = user.data
     },
     async getObras () {
-      const response = await Functions.getByUserId(Obra, this.user.id)
-      if (response.status === 'ok') this.constructions = response.data
+      // const response = await Functions.getByUserId(Obra, this.user.id)
+      // if (response.status === 'ok') this.constructions = response.data
     },
     async getConstructionsTasks () {
-      await this.getObras()
-      if (this.constructions.length > 0) {
-        const response = await Functions.getAll(AgendaObra)
-        if (response.status === 'ok') {
-          this.constructions.map(construction => {
-            response.data.map(item => {
-              if (item.Obra.id === construction.id) {
-                this.tasks.push({ title: item.titulo, description: item.descricao, priority: item.prioridade, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })
-              }
-            })
-          })
-        }
-      }
+      // await this.getObras()
+      // if (this.constructions.length > 0) {
+      //   const response = await Functions.getAll(AgendaObra)
+      //   if (response.status === 'ok') {
+      //     this.constructions.map(construction => {
+      //       response.data.map(item => {
+      //         if (item.Obra.id === construction.id) {
+      //           this.tasks.push({ title: item.titulo, description: item.descricao, priority: item.prioridade, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })
+      //         }
+      //       })
+      //     })
+      //   }
+      // }
     },
   }
 }
