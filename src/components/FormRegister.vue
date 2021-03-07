@@ -142,51 +142,13 @@
                   ></v-text-field>
                 </v-form>
 
-                <v-btn color="primary" @click="addUser(),validate" :disabled="!valid">
+                <v-btn color="primary" @click="signUp(),validate" :disabled="!valid">
                 ENVIAR
                 </v-btn>
                 <v-btn text @click="e1 = 1">
                 ANTERIOR
                 </v-btn>
               </v-card>
-
-              <v-dialog v-model="confirm_code" persistent max-width="600px">
-                <v-card>
-                  <v-card-title>
-                    <span class="headline">Confirme o código de acesso:</span>
-                  </v-card-title>
-                  <v-card-text>
-                    <span>
-                      Enviamos um código de verificação em seu e-mail para confirmar sua conta.  Insira o código abaixo para continuar
-                    </span>
-                    <v-container>
-                      <div>
-                        <span>{{ email }}</span>
-                        <br />
-                        <v-text-field
-                          label="Digite o código de acesso"
-                          hint="Enviado para o email cadastrado"
-                          required
-                          v-model="code"
-                        ></v-text-field>
-                      </div>
-                    </v-container>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                      color="blue darken-1"
-                      text
-                      @click="confirm_code = false"
-                    >
-                      Cancelar
-                    </v-btn>
-                    <v-btn color="primary" @click="confirmSignUp()">
-                      Confirmar
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </v-dialog>
             </v-stepper-content>
           </v-stepper-items>
         </v-stepper>
@@ -219,15 +181,14 @@
 </template>
 <script>
 import image from "../assets/register.png";
-// import { Auth } from "aws-amplify";
-// import { DataStore } from "aws-amplify";
-// import { Usuario, TipoUsuario, Endereco, Empresa } from "@/models";
 import Functions from "@/functions/Functions";
+import Firebase from "@/services/Firebase"
+import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 import { validationMixin } from "vuelidate";
 import { required, email } from "vuelidate/lib/validators";
 export default {
   /* eslint-disable no-mixed-spaces-and-tabs */
-  mixins: [validationMixin],
+  mixins: [validationMixin, FirebaseMixin],
 
   validations: {
     name: { required },
@@ -241,7 +202,6 @@ export default {
   },
   data() {
     return {
-      user: null,
       e1: 1,
       picker: new Date().toISOString().substr(0, 10),
       menu: false,
@@ -282,7 +242,7 @@ export default {
       ],
       error_dialog: false,
       error: "",
-      tipo_usuario: null,
+      tipo_usuario: '',
     };
   },
   computed: {
@@ -336,112 +296,72 @@ export default {
     },
 
     async addTipoUsuario() {
-      // const items = await DataStore.query(TipoUsuario, (d) =>
-      //   d.nome("eq", "Arquiteto(a)")
-      // );
-      // if (items.length === 0) {
-      //   const response = await Functions.putData(TipoUsuario, {
-      //     nome: "Arquiteto(a)",
-      //   });
-      //   if (response.status === "ok") {
-      //     console.log("TipoUsuario cadastrado com sucesso!");
-      //     this.tipo_usuario = response.data;
-      //   } else {
-      //     console.log("erro: " + response.error.message);
-      //   }
-      // } else {
-      //   this.tipo_usuario = items[0];
-      // }
+      await this.firebaseCreate(Firebase.firestore(), 'TipoUsuario', 'arquiteto', { id: "arquiteto", nome: 'Arquiteto(a)' })
+      const response = await this.getDocument(Firebase.firestore(), 'TipoUsuario', 'id', 'arquiteto')
+      if (response.status === 'empty') await this.firebaseCreate(Firebase.firestore(), 'TipoUsuario', 'arquiteto', { id: "arquiteto", nome: 'Arquiteto(a)' })
+      this.tipo_usuario = 'arquiteto'
     },
 
     async addUser() {
-      // await this.addTipoUsuario()
-      // const items = await DataStore.query(Usuario, (d) => d.email("eq", this.email))
-      // if (items.length === 0) {
-      //   this.phone = `+${this.phone.substr(0, 2)} ${this.phone.substr(2, 2)} ${this.phone.substr(4, 5)} ${this.phone.substr(9, 4)}`
-      //   const response = await Functions.putData(Usuario, {
-      //     nome: this.name,
-      //     email: this.email,
-      //     data_nascimento: this.date + "Z",
-      //     TipoUsuario: this.tipo_usuario,
-      //   })
-      //   if (response.status === "ok") {
-      //     console.log("Usuário cadastrado com sucesso!")
-      //     this.user = response.data
-      //     this.addAddress()
-      //   } else {
-      //     console.log("erro: " + response.error.message)
-      //   }
-      // } else {
-      //   this.user = items[0]
-      //   this.addAddress()
-      // }
+      await this.addTipoUsuario()
+      const response = await this.getDocument(Firebase.firestore(), 'Usuario', 'email', this.email)
+      if (response.status === 'empty') {
+        const data = {
+          id: this.email,
+          nome: this.name,
+          email: this.email,
+          data_nascimento: this.date,
+          TipoUsuario: this.tipo_usuario,
+        }
+        await this.firebaseCreate(Firebase.firestore(), 'Usuario', this.email, data)
+      }
     },
 
     async addAddress() {
-      // const items = await DataStore.query(Endereco, (d) => d.cep("eq", this.cep))
-      // if (items.length === 0) {
-      //   const data = {
-      //     cep: this.cep,
-      //     estado: this.estado,
-      //     cidade: this.cidade,
-      //     rua: this.logradouro,
-      //     complemento: this.complemento,
-      //   }
-      //   const response = await Functions.putData(Endereco, data)
-      //   if (response.status === "ok") {
-      //     console.log("Endereço cadastrado com sucesso!")
-      //     this.endereco = response.data
-      //     this.addEmpresa()
-      //   } else {
-      //     console.log("erro: " + response.error.message)
-      //   }
-      // } else {
-      //   this.endereco = items[0]
-      //   this.addEmpresa()
-      // }
+      const response = await this.getDocument(Firebase.firestore(), 'Endereco', 'cep', this.cep)
+      if (response.status === 'empty') {
+        const data = {
+          id: this.cep,
+          cep: this.cep,
+          estado: this.estado,
+          cidade: this.cidade,
+          rua: this.logradouro,
+          complemento: this.complemento,
+        }
+        await this.firebaseCreate(Firebase.firestore(), 'Endereco', this.cep, data)
+      }
     },
 
     async addEmpresa() {
-      // const response = await Functions.putData(Empresa, {
-      //   nome: this.company,
-      //   telefone: this.phone,
-      //   Endereco: this.endereco,
-      //   usuarioID: [this.user.id],
-      // })
-      // if (response.status === "ok") {
-      //   console.log("Empresa cadastrada com sucesso!")
-      //   this.signUp()
-      // } else {
-      //   console.log("erro: " + response.error.message)
-      // }
+      const id = this.company + this.cep
+      const response = await this.getDocument(Firebase.firestore(), 'Empresa', 'id', id)
+      if (response.status === 'empty') {
+        const data = {
+          id: id,
+          nome: this.company,
+          telefone: this.phone,
+          enderecoID: this.cep,
+          usuarioID: this.email,
+        }
+        await this.firebaseCreate(Firebase.firestore(), 'Empresa', id, data)
+      }
     },
 
     async signUp() {
-      // try {
-      //   this.user = await Auth.signUp({
-      //     username: this.email, // optional
-      //     password: this.password,
-      //   });
-      //   this.confirm_code = true;
-      // } catch (error) {
-      //   this.error = error;
-      //   this.error_dialog = true;
-      // }
-    },
-
-    async confirmSignUp() {
-      // try {
-      //   await Auth.confirmSignUp(this.email, this.code);
-      //   this.login();
-      // } catch (error) {
-      //   console.log("error confirming sign up", error);
-      // }
-    },
-
-    async login() {
-      // await Functions.login(this.email, this.password);
-      // this.$router.push("/");
+      try {
+        Firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+        await this.addUser()
+        if (this.company.length > 0) {
+          await this.addAddress()
+          await this.addEmpresa()
+        }
+        console.log('Usuário criado com sucesso!')
+        // this.$router.push("/")
+      } catch (error) {
+        console.log('error: ', error)
+        this.error = error.message
+        this.error_dialog = true
+      }
     },
   },
 };
