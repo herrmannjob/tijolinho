@@ -6,7 +6,7 @@
     >
       <v-card>
            <div class="header-dialog">
-    <img  class="icone" src="@/assets/warning.svg" width="50px" height="50px" alt="warning">
+    <!-- <img  class="icone" src="@/assets/warning.svg" width="50px" height="50px" alt="warning"> -->
     </div>
         <v-card-title class="headline">
           {{ message.title }}
