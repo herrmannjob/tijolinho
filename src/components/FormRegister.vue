@@ -42,13 +42,15 @@
                       class="text"
                       label="Senha*"
                       v-model="password"
+                      :rules="passwordRules"
+                      required
                       :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
                       @click:append="show = !show"
                       :type="show ? 'text' : 'password'"
-                      required
                     ></v-text-field>
                     <v-text-field
                       class="text"
+                      required
                       label="Confirme sua senha*"
                       v-model="confirm_password"
                       :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
@@ -72,6 +74,7 @@
                           aria-required="true"
                           readonly
                           required
+                         :rules="passwordRules"
                           v-bind="attrs"
                           v-on="on"
                         ></v-text-field>
@@ -79,6 +82,7 @@
                       <v-date-picker
                         ref="picker"
                         v-model="date"
+                        required
                         :max="new Date().toISOString().substr(0, 10)"
                         min="1950-01-01"
                       ></v-date-picker>
@@ -88,8 +92,9 @@
 
                 <v-btn
                   color="primary"
-                  @click="(e1 = 2), validate"
                   :disabled="!valid"
+                  v-on="validate ? { click: () => [(e1 = 2)] } : { disabled}"
+             
                 >
                   PRÓXIMO
                 </v-btn>
@@ -245,18 +250,25 @@ export default {
       e1: 1,
       picker: new Date().toISOString().substr(0, 10),
       menu: false,
-      valid: true,
+      valid: false,
+      disabled: false,
       name: "",
       nameRules: [
-        (v) => !!v || "Name is required",
+        (v) => !!v || "Nome é obrigatório",
+      ],
+       passwordRules: [
+        (v) => !!v || "Campo obrigatório",
       ],
       email: "",
+        dateRules: [
+        (v) => !!v || "Campo obrigatório",
+      ],
       emailRules: [
-        (v) => !!v || "E-mail is required",
-        (v) => /.+@.+\..+/.test(v) || "E-mail must be valid",
+        (v) => !!v || "E-mail é obrigatório",
+        (v) => /.+@.+\..+/.test(v) || "E-mail precisa ser um formato válido"
       ],
       confirmationPasswordRules: [
-        (v) => v !== this.email || "Password an confirm password must be the same",
+        (v) => v !== this.email || "A confirmação de senha precisa ser igual com a senha informada",
       ],
       cep: "",
       estado: "",
