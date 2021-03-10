@@ -2,14 +2,31 @@
   <div class="home">
     <Drawer />
     <div class="content">
-      <TopBar />
+      <TopBar :email="user_email" />
       <div class="components row">
         <div class="col-12 col-sm-9 calendar">
           <CalendarComponent />
         </div>
+        <FormAgendaObra :form.sync="form" :constructions="constructions" :constructions_names="constructions_names" />
         <div class="col right-col">
-          <p class="title">Compromissos:</p>
-          <div class="row date">
+          <p class="title">
+            Compromissos:
+            <v-btn
+              icon
+              color="primary"
+              @click="getConstructionsTasks()"
+            >
+              <v-icon>mdi-refresh-circle</v-icon>
+            </v-btn>
+          </p>
+          <v-btn
+            color="primary"
+            class="col"
+            @click="form = true"
+          >
+            Nova atividade da Obra
+          </v-btn>
+          <!-- <div class="row date">
             <p class="col">{{ today }}</p>
             <v-btn
               text
@@ -18,8 +35,8 @@
             >
               Ver todos
             </v-btn>
-          </div>
-          <div>
+          </div> -->
+          <div style="margin-top: 40px">
             <v-card
               class="card-right"
               color="primary"
@@ -29,14 +46,13 @@
               <v-expansion-panels accordion>
                 <v-expansion-panel>
                   <v-expansion-panel-header style="padding-left:unset; padding-right:unset">
-                    <span>{{ task.title }}</span>
+                    <span>{{ task.titulo }}</span>
                   </v-expansion-panel-header>
-                  <v-expansion-panel-content v-if="tasks[0].title !== 'Nenhuma atividade'">
-                    <p style="text-align:left">Descrição: {{ task.description }}</p>
-                    <p style="text-align:left">Início: {{ task.start }}</p>
-                    <p style="text-align:left">Fim: {{ task.end }}</p>
-                    <p style="text-align:left">Duração: {{ task.time }}</p>
-                    <p style="text-align:left">Prioridade: {{ task.priority }}</p>
+                  <v-expansion-panel-content v-if="tasks[0].titulo !== 'Nenhuma atividade'">
+                    <p style="text-align:left">Descrição: {{ task.descricao }}</p>
+                    <p style="text-align:left; margin-top: 10px">Início: {{ task.data_inicio }}</p>
+                    <p style="text-align:left; margin-top: 10px">Fim: {{ task.data_fim }}</p>
+                    <p style="text-align:left; margin-top: 10px">Prioridade: {{ task.prioridade }}</p>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
@@ -51,58 +67,68 @@
 <script>
 /* eslint-disable no-unused-vars */
 
-
-// import { api, urls } from '../services/Api'
 import CalendarComponent from '@/components/CalendarComponent.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
+import FormAgendaObra from '@/components/FormAgendaObra'
 import moment from '@/plugins/moment'
-// import { AgendaObra, Obra, Usuario } from '@/models'
-import Functions from '@/functions/Functions'
+import Firebase from "@/services/Firebase"
+import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 
 export default {
   name: 'Calendar',
+  mixins: [FirebaseMixin],
   components: {
-    CalendarComponent, Drawer, TopBar
+    CalendarComponent, Drawer, TopBar, FormAgendaObra
   },
   data () {
     return {
       today: '',
-      user: null,
-      username: 'teste',
+      user_email: '',
+      username: '',
       constructions: [],
-      tasks: [{ title: 'Nenhuma atividade' }]
+      constructions_names: [],
+      tasks: [{ titulo: 'Nenhuma atividade' }],
+      form: false,
     }
   },
-  async created () {
-    this.user = await Functions.isAuth()
+  async mounted () {
+    await Firebase.auth().onAuthStateChanged(async user => {
+      if (user) {
+        this.user_email = user.email
+        await this.getUser()
+        await this.getObras()
+      } else this.$router.push("/")
+    })
     this.today = moment().format('ll')
-    // await this.getUser()
-    // await this.getConstructionsTasks()
   },
   methods: {
     async getUser () {
-      // const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
-      // this.user = user.data
+      const response = await this.getDocument(Firebase.firestore(), 'Usuario', 'email', this.user_email)
+      this.username = response.documents[0].data.nome
     },
     async getObras () {
-      // const response = await Functions.getByUserId(Obra, this.user.id)
-      // if (response.status === 'ok') this.constructions = response.data
+      const response = await this.getDocument(Firebase.firestore(), 'Obra', 'usuarioID', this.user_email)
+      if (response.status === 'ok') {
+        this.constructions = []
+        this.constructions_names = []
+        response.documents.map(item => {
+          this.constructions.push(item.data)
+          this.constructions_names.push(item.data.nome)
+        })
+        this.getConstructionsTasks()
+      }
     },
     async getConstructionsTasks () {
-      // await this.getObras()
-      // if (this.constructions.length > 0) {
-      //   const response = await Functions.getAll(AgendaObra)
-      //   if (response.status === 'ok') {
-      //     this.constructions.map(construction => {
-      //       response.data.map(item => {
-      //         if (item.Obra.id === construction.id) {
-      //           this.tasks.push({ title: item.titulo, description: item.descricao, priority: item.prioridade, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })
-      //         }
-      //       })
-      //     })
-      //   }
-      // }
+      this.tasks = []
+      this.constructions.map(async c => {
+        const response = await this.getDocument(Firebase.firestore(), 'AgendaObra', 'obraID', c.id)
+        if (response.status === 'ok') {
+          response.documents.map(item => {
+            this.tasks.push(item.data)
+          })
+        }
+      })
     },
   }
 }
@@ -136,6 +162,7 @@ html, body {
 }
 .right-col > .title {
   margin-top: 20px;
+  margin-bottom: 20px;
   text-align: left;
 }
 .card-right {

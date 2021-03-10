@@ -13,6 +13,13 @@
           cols="12"
         >
 
+          <v-select
+            :items="constructions_names"
+            v-model="selected"
+            label="Obra"
+            dense
+          ></v-select>
+
           <v-text-field
             label="Atividade*"
             :rules="[rules.required]"
@@ -46,7 +53,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
-                v-model="dateStart.date"
+                v-model="date_start"
                 label="Início"
                 prepend-icon="mdi-calendar"
                 readonly
@@ -56,36 +63,9 @@
             </template>
             <v-date-picker
               ref="picker"
-              v-model="dateStart.date"
+              v-model="date_start"
               min="1950-01-01"
             ></v-date-picker>
-          </v-menu>
-
-          <v-menu
-            ref="menu"
-            :close-on-content-click="false"
-            :nudge-right="40"
-            :return-value.sync="dateStart.time"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-model="dateStart.time"
-                label="Horário inicial"
-                prepend-icon="mdi-clock-time-four-outline"
-                readonly
-                v-bind="attrs"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-time-picker
-              v-model="dateStart.time"
-              @click:minute="$refs.menu.save(dateStart.time)"
-              full-width
-            ></v-time-picker>
           </v-menu>
 
           <v-menu
@@ -97,7 +77,7 @@
           >
             <template v-slot:activator="{ on, attrs }">
               <v-text-field
-                v-model="dateEnd.date"
+                v-model="date_end"
                 label="Término"
                 prepend-icon="mdi-calendar"
                 readonly
@@ -107,36 +87,9 @@
             </template>
             <v-date-picker
               ref="picker"
-              v-model="dateEnd.date"
-              min="1950-01-01"
+              v-model="date_end"
+              :min="date_start"
             ></v-date-picker>
-          </v-menu>
-
-          <v-menu
-            ref="menu"
-            :close-on-content-click="false"
-            :nudge-right="40"
-            :return-value.sync="time_end"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-model="dateEnd.time"
-                label="Horário final"
-                prepend-icon="mdi-clock-time-four-outline"
-                readonly
-                v-bind="attrs"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-time-picker
-              v-model="dateEnd.time"
-              @click:minute="$refs.menu.save(dateEnd.time)"
-              full-width
-            ></v-time-picker>
           </v-menu>
         </v-col>
       </v-card-text>
@@ -162,27 +115,24 @@
 </template>
 
 <script>
-// import { AgendaParticular } from '@/models'
-// import Functions from '@/functions/Functions'
 import ResponseModal from '@/components/ResponseModal.vue'
 import Firebase from "@/services/Firebase"
 import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 export default {
-  name: 'FormCalendar',
+  name: 'FormAgendaObra',
   components: { ResponseModal },
   mixins: [FirebaseMixin],
   props: {
     form: Boolean,
-    refresh: Boolean,
-    date: String,
-    user: String
+    constructions: Array,
+    constructions_names: Array
   },
   data () {
     return {
       title: '',
       description: '',
+      date_start: '',
       date_end: '',
-      time_end: '',
       priority_list: ['Alta', 'Média', 'Baixa'],
       priority: '',
       modal: false,
@@ -195,58 +145,53 @@ export default {
           return pattern.test(value) || 'Invalid e-mail.'
         },
       },
+      selected: ''
     }
-  },
-  mounted () {
   },
   methods: {
     close () {
       this.title = ''
       this.description = ''
+      this.date_start = ''
       this.date_end = ''
-      this.time_end = ''
       this.priority = ''
+      this.selected = ''
       this.$emit('update:form', false)
       this.$emit('update:refresh', true)
     },
     async save () {
-      const start = new Date(this.date)
-      const end = new Date(this.dateEnd.date + 'T' + this.dateEnd.time + ':00Z')
-      const duration = (end - start) / 1000 / 60 / 60 / 24
-      const data = {
-        titulo: this.title,
-        descricao: this.description,
-        data_inicio: this.dateStart.date + 'T' + this.dateStart.time + ':00.000Z',
-        data_fim: this.dateEnd.date + 'T' + this.dateEnd.time + ':00.000Z',
-        duracao: `${duration} dia(s)`,
-        prioridade: this.priority,
-        usuarioID: this.user
-      }
-      const response = await this.firebaseCreate(Firebase.firestore(), 'AgendaParticular', null, data)
-      console.log(response)
-      if (response.status === 'ok') {
-        this.$emit('update:form', false)
-        this.$emit('update:refresh', true)
-        this.message.title = "Atividade cadastrada com sucesso!"
+      if (this.selected.length > 0) {
+        const i = this.constructions_names.indexOf(this.selected)
+        const id = this.constructions[i].id
+        const start = new Date(this.date_start + 'Z')
+        const end = new Date(this.date_end + 'Z')
+        const duration = (end - start) / 1000 / 60 / 60 / 24
+        const data = {
+          titulo: this.title,
+          descricao: this.description,
+          data_inicio: this.date_start,
+          data_fim: this.date_end,
+          duracao: `${duration} dia(s)`,
+          prioridade: this.priority,
+          obraID: id
+        }
+        const response = await this.firebaseCreate(Firebase.firestore(), 'AgendaObra', null, data)
+        await this.firebaseUpdate(Firebase.firestore(), 'AgendaObra', response.created_id, {id: response.created_id})
+        if (response.status === 'ok') {
+          this.$emit('update:form', false)
+          this.message.title = "Atividade cadastrada com sucesso!"
+        } else {
+          this.message.title = "Ocorreu um erro..."
+          this.message.code = response.message.code
+          this.message.text = response.message
+        }
       } else {
         this.message.title = "Ocorreu um erro..."
-        this.message.code = response.message.code
-        this.message.text = response.message
+        this.message.text = "Você esqueceu de escolher a obra"
       }
       this.modal = true
     }
   },
-  computed: {
-    dateStart: function () {
-      return { date: this.date.substr(0, 10), time: this.date.substr(11, 5) }
-    },
-    dateEnd: function () {
-      const time = this.date.substr(11, 5)
-      let day = (parseInt(time.substr(0, 2)) + 1).toString()
-      if (day.length === 1) day = '0' + day
-      return { date: this.date.substr(0, 10), time: day + time.substr(2) }
-    }
-  }
 }
 </script>
 <style lang="css">

@@ -148,10 +148,10 @@
                 </v-form>
 
                 <v-btn color="primary" @click="signUp(),validate" :disabled="!valid">
-                ENVIAR
+                  ENVIAR
                 </v-btn>
                 <v-btn text @click="e1 = 1">
-                ANTERIOR
+                  ANTERIOR
                 </v-btn>
               </v-card>
             </v-stepper-content>
@@ -185,12 +185,12 @@
   </div>
 </template>
 <script>
-import image from "../assets/register.png";
-import Functions from "@/functions/Functions";
+import image from "../assets/register.png"
+import Functions from "@/functions/Functions"
 import Firebase from "@/services/Firebase"
 import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 import { validationMixin } from "vuelidate";
-import { required, email } from "vuelidate/lib/validators";
+import { required, email } from "vuelidate/lib/validators"
 export default {
   /* eslint-disable no-mixed-spaces-and-tabs */
   mixins: [validationMixin, FirebaseMixin],
@@ -255,7 +255,12 @@ export default {
       error_dialog: false,
       error: "",
       tipo_usuario: '',
-    };
+    }
+  },
+  mounted () {
+    Firebase.auth().onAuthStateChanged(user => {
+      if (user) this.$router.push("/calendar")
+    })
   },
   computed: {
     checkboxErrors() {
@@ -308,7 +313,6 @@ export default {
     },
 
     async addTipoUsuario() {
-      await this.firebaseCreate(Firebase.firestore(), 'TipoUsuario', 'arquiteto', { id: "arquiteto", nome: 'Arquiteto(a)' })
       const response = await this.getDocument(Firebase.firestore(), 'TipoUsuario', 'id', 'arquiteto')
       if (response.status === 'empty') await this.firebaseCreate(Firebase.firestore(), 'TipoUsuario', 'arquiteto', { id: "arquiteto", nome: 'Arquiteto(a)' })
       this.tipo_usuario = 'arquiteto'
@@ -353,7 +357,7 @@ export default {
           nome: this.company,
           telefone: this.phone,
           enderecoID: this.cep,
-          usuarioID: this.email,
+          usuarioID: [this.email],
         }
         await this.firebaseCreate(Firebase.firestore(), 'Empresa', id, data)
       }

@@ -120,21 +120,25 @@
         </v-btn>
       </v-card-actions>
     </v-card>
+    <ResponseModal :modal.sync="modal" :message="message" />
   </v-dialog>
 </template>
 <script>
 import Functions from '@/functions/Functions'
-// import { DataStore } from 'aws-amplify'
-// import { TipoObra, Endereco, Obra, CronogramaObra } from '@/models'
+import ResponseModal from '@/components/ResponseModal.vue'
+import Firebase from "@/services/Firebase"
+import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 export default {
   name: 'FormRegisterConstruction',
+  components: { ResponseModal },
   props: {
     form: Boolean,
     confirm: Boolean,
     user_id: String,
-    company: Object,
-    client: Object
+    company: String,
+    client: String
   },
+  mixins: [FirebaseMixin],
   data() {
     return {
       /* eslint-disable no-mixed-spaces-and-tabs */
@@ -166,7 +170,9 @@ export default {
       obra: null,
       menuDateInit: null,
       menuDateEnd: null,
-    };
+      modal: false,
+      message: { title: '', text: '' }
+    }
   },
   methods: {
     close () {
@@ -182,82 +188,70 @@ export default {
       }
     },
     async addAddress () {
-      // const items = await DataStore.query(Endereco, d => d.cep("eq", this.cep))
-      // if (items.length === 0) {
-      //   const data = {
-      //     "cep": this.cep,
-      //     "estado": this.estado,
-      //     "cidade": this.cidade,
-      //     "rua": this.logradouro,
-      //     "complemento": this.complemento
-      //   }
-      //   const response = await Functions.putData(Endereco, data)
-      //   if (response.status === 'ok') {
-      //     console.log("Endereço cadastrado com sucesso!")
-      //     this.endereco = response.data
-      //   } else {
-      //     console.log("erro: " + response.error.message)
-      //   }
-      // } else this.endereco = items[0]
+      const response = await this.getDocument(Firebase.firestore(), 'Endereco', 'cep', this.cep)
+      if (response.status === 'empty') {
+        const data = {
+          id: this.cep,
+          cep: this.cep,
+          estado: this.estado,
+          cidade: this.cidade,
+          rua: this.logradouro,
+          complemento: this.complemento,
+        }
+        await this.firebaseCreate(Firebase.firestore(), 'Endereco', this.cep, data)
+      }
     },
     async addTipoObra () {
-      // const items = await DataStore.query(TipoObra, d => d.nome("eq", this.category))
-      // if (items.length === 0) {
-      //   const response = await Functions.putData(TipoObra, {
-      //     "nome": this.category,
-      //   })
-      //   if (response.status === 'ok') {
-      //     console.log("TipoObra cadastrado com sucesso!")
-      //     this.tipo_obra = response.data
-      //   } else {
-      //     console.log("erro: " + response.error.message)
-      //   }
-      // } else {
-      //   this.tipo_obra = items[0]
-      // }
+      this.tipo_obra = this.category.toLowerCase()
+      const response = await this.getDocument(Firebase.firestore(), 'TipoObra', 'id', this.tipo_obra)
+      if (response.status === 'empty') {
+        const data = {
+          nome: this.category
+        }
+        await this.firebaseCreate(Firebase.firestore(), 'TipoObra', this.tipo_obra, data)
+      }
     },
     async addObra () {
-      // await this.addAddress()
-      // await this.addTipoObra()
-      // try {
-      //   const response = await DataStore.save(
-      //     new Obra({
-      //       "nome": this.firstname,
-      //       "Endereco": this.endereco,
-      //       "TipoObra": this.tipo_obra,
-      //       "Empresa": this.company,
-      //       "usuarioID": this.user_id,
-      //       "Usuarios": this.client.nome === "empty" ? [] : [this.client]
-      //     })
-      //   )
-      //   console.log('Obra cadastrada')
-      //   this.obra = response
-      //   this.addCronogramaObra()
-      // } catch (error) {
-      //   console.log(error)
-      // }
-      
+      await this.addAddress()
+      await this.addTipoObra()
+      const data = {
+        nome: this.firstname,
+        enderecoID: this.cep,
+        tipoObra: this.tipo_obra,
+        empresaID: this.company,
+        usuarioID: this.user_id,
+        usuarios: this.client
+      }
+      const response = await this.firebaseCreate(Firebase.firestore(), 'Obra', null, data)
+      await this.firebaseUpdate(Firebase.firestore(), 'Obra', response.created_id, {id: response.created_id})
+      if (response.status === 'ok') {
+        this.obra = response.created_id
+        this.addCronogramaObra()
+      }
     },
     async addCronogramaObra () {
-      // const start = new Date(this.dateInit)
-      // const end = new Date(this.dateEnd)
-      // const duration = end - start
-      // try {
-      //   await DataStore.save(
-      //     new CronogramaObra({
-      //       "Obra_": this.obra,
-      //       "data_inicio": this.dateInit + 'Z',
-      //       "data_fim": this.dateEnd + 'Z',
-      //       "tempo_previsto": `${duration} ms`,
-      //       "gasto_previsto": this.estimated_spend
-      //     })
-      //   )
-      //   console.log('CronogramaObra cadastrado!')
-      //   this.$emit('update:form', false)
-      //   this.$emit('update:confirm', false)
-      // } catch (error) {
-      //   console.log(error)
-      // }
+      const start = new Date(this.dateInit)
+      const end = new Date(this.dateEnd)
+      const duration = end - start
+      const data = {
+        obraID: this.obra,
+        data_inicio: this.dateInit,
+        data_fim: this.dateEnd,
+        tempo_previsto: `${duration} ms`,
+        gasto_previsto: this.estimated_spend
+      }
+      const response = await this.firebaseCreate(Firebase.firestore(), 'CronogramaObra', null, data)
+      await this.firebaseUpdate(Firebase.firestore(), 'CronogramaObra', response.created_id, {id: response.created_id})
+      if (response.status === 'ok') {
+        this.message.title = "Atividade cadastrada com sucesso!"
+      } else {
+        this.message.title = "Ocorreu um erro..."
+        this.message.text = response.error
+      }
+      this.modal = true
+      this.$emit('update:form', false)
+      this.$emit('update:confirm', false)
+      this.$emit('update:refresh', true)
     },
   },
 }

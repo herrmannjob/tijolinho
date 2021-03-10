@@ -7,6 +7,23 @@ export const FirebaseMixin = {
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
+            documents.push({id: doc.id, data: doc.data()})
+          })
+        })
+        .catch((error) => {
+          console.log("Error getting documents: ", error)
+        })
+      if (documents.length > 0) return { status: 'ok', documents }
+      else return { status: 'empty', documents }
+    },
+
+    // BUSCA OS DOCUMENTOS DE UMA COLECAO DE ACORDO COM O PARAMETRO ESPECIFICADO, QUANDO ESTE É UM ARRAY
+    async getDocumentList (db, collection, param, param_content) {
+      let documents = []
+      await db.collection(collection).where(param, "array-contains", param_content)
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
             documents.push(doc.data())
           })
         })
@@ -24,7 +41,6 @@ export const FirebaseMixin = {
         try {
           await db.collection(collection).doc(document).set(data)
           const message = `${collection} salvo(a)(s) com sucesso!`
-          console.log(message)
           return { status: 'ok', message }
         } catch (error) {
           console.log('error: ', error)
@@ -32,10 +48,9 @@ export const FirebaseMixin = {
         }
       } else {
         try {
-          db.collection(collection).add(data)
+          const created = await db.collection(collection).add(data)
           const message = `${collection} salvo(a)(s) com sucesso!`
-          console.log(message)
-          return { status: 'ok', message }
+          return { status: 'ok', message, created_id: created.d_.S_.path.segments[1] }
         } catch (error) {
           console.log('error: ', error)
           return { status: 'error', message: error }
@@ -46,9 +61,7 @@ export const FirebaseMixin = {
     // INSERE UM DADO ADICIONAL A UM DOCUMENTO ESPECIFICADO, MANTENDO AS INFORMACOES JÁ EXISTENTES
     async firebaseUpdate (db, collection, document, data) {
       const doc = await db.collection(collection).doc(document)
-      doc.set({
-        data
-      }, { merge: true })
+      doc.set(data, { merge: true })
     }
   }
 }

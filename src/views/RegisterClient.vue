@@ -2,7 +2,7 @@
   <div class="home">
     <Drawer />
     <div class="content">
-      <TopBar />
+      <TopBar :email="email" />
       <FormRegisterClient/>
     </div>
   </div>
@@ -13,6 +13,7 @@
 import FormRegisterClient from '@/components/FormRegisterClient.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
+import Firebase from "@/services/Firebase"
 
 
 export default {
@@ -20,7 +21,19 @@ export default {
   components: {
     FormRegisterClient, Drawer, TopBar
   },
-  
+  data () {
+    return {
+      email: '',
+    }
+  },
+  async mounted () {
+    await Firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.email = user.email
+      }
+      else this.$router.push("/")
+    })
+  },
 }
 </script>
 <style lang="css">

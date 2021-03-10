@@ -1,174 +1,164 @@
 <template>
-  <div class="components row">
-    <div class="col-9" >
-      <v-text-field
-        solo
-        label="Buscar Cliente"
-        prepend-inner-icon="mdi-magnify"
-      ></v-text-field>
-      <div style="align-items:flex-start;width:1rem">
+  <div class="components row list-clients">
+    <div class="btn-list">
+      <v-btn
+        color="primary"
+        class="btn-primario"
+        @click="openDialog()"
+        style="margin-bottom:0.5rem; margin-left:0; margin-top:0"
+      >
+        <v-icon>mdi-plus</v-icon>
+        <router-link class="link-client" to="/register-client">NOVO CLIENTE</router-link>
+      </v-btn>
+      <v-btn text>
+        Histórico
+      </v-btn>
+    </div>
+    <v-data-table
+      v-model="selected"
+      :single-select="singleSelect"
+      show-select
+      :headers="headers"
+      :items="clients"
+      item-key="id"
+      class="elevation-1"
+      :search="search"
+      :custom-filter="filter"
+    >
+      <template v-slot:top>
+        <v-text-field
+          v-model="search"
+          label="Buscar cliente"
+          class="mx-4"
+        ></v-text-field>
+      </template>
+      
+    </v-data-table>
+
+    <v-speed-dial
+      v-if="selected.length"
+      v-model="fab"
+      bottom
+      right
+      direction="top"
+      transition="slide-y-reverse-transition"
+    >
+      <template v-slot:activator>
         <v-btn
+          v-model="fab"
           color="primary"
-          class="btn-primario"
-          @click="openDialog()"
-          style="margin-bottom:0.5rem; margin-left:0; margin-top:0"
+          fab
         >
-          <v-icon>mdi-plus</v-icon>
-
-          <router-link class="link-client" to="/register-client"
-            >NOVO CLIENTE</router-link
-          >
+          <v-icon v-if="fab">
+            mdi-close
+          </v-icon>
+          <v-icon v-else>
+            mdi-dots-vertical
+          </v-icon>
         </v-btn>
-      </div>
-      <v-card max-width="900" class="mx-auto">
-        <v-list-item v-for="item in itemsTitle" :key="item.title">
-          <!-- <v-list-item-avatar>
-            <v-list-item-title v-text="item.avatar"></v-list-item-title>
-          </v-list-item-avatar> -->
-
-          <v-list-item-content>
-            <v-list-item-title v-text="item.title"></v-list-item-title>
-          </v-list-item-content>
-          <!-- <v-list-item-content>
-            <v-list-item-title v-text="item.obras"></v-list-item-title>
-          </v-list-item-content> -->
-          <v-list-item-icon>
-            <p>Ações</p>
-          </v-list-item-icon>
-        </v-list-item>
-        <v-list>
-          <v-list-item v-for="item in clients" :key="item.title">
-            <!-- <v-list-item-avatar>
-              <v-img :src="item.avatar"></v-img>
-            </v-list-item-avatar> -->
-
-            <v-list-item-content>
-              <v-list-item-title v-text="item.title"></v-list-item-title>
-            </v-list-item-content>
-            <!-- <v-list-item-content>
-              <v-list-item-title v-text="item.obras"></v-list-item-title>
-            </v-list-item-content> -->
-            <v-list-item-icon>
-              <v-icon>
-                mdi-pencil
-              </v-icon>
-            </v-list-item-icon>
-            <v-list-item-icon>
-              <v-icon>
-                mdi-delete
-              </v-icon>
-            </v-list-item-icon>
-            <v-list-item-icon>
-              <v-icon>
-                mdi-eye
-              </v-icon>
-            </v-list-item-icon>
-          </v-list-item>
-        </v-list>
-      </v-card>
-    </div>
-    <v-divider vertical></v-divider>
-    <!--Ultimos vizualizados ----- -->
-    <div class="col right-col">
-      <div class="row group-data">
-        <p class="title">Ultimos Vizualizados:</p>
-        <v-btn text color="primary" class="col">
-          Ver todos
-        </v-btn>
-      </div>
-      <div>
-        <v-card
-          class="card-right"
-          color="primary"
-          v-for="(item, i) in 3"
-          :key="i"
-        >
-          <v-expansion-panels accordion>
-            <v-expansion-panel>
-              <v-expansion-panel-header>
-                <v-avatar class="avatar" tile>
-                  <v-img
-                    src="https://randomuser.me/api/portraits/women/85.jpg"
-                  ></v-img>
-                </v-avatar>
-                <span style="margin-left:5px">{{ username }}</span>
-              </v-expansion-panel-header>
-              <v-expansion-panel-content>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                do eiusmod tempor incididunt ut labore et dolore magna
-                aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-                ullamco laboris nisi ut aliquip ex ea commodo consequat.
-              </v-expansion-panel-content>
-            </v-expansion-panel>
-          </v-expansion-panels>
-        </v-card>
-      </div>
-    </div>
+      </template>
+      <v-btn
+        fab
+        dark
+        small
+        color="green"
+      >
+        <v-icon>mdi-pencil</v-icon>
+      </v-btn>
+      <v-btn
+        fab
+        dark
+        small
+        color="red"
+      >
+        <v-icon>mdi-delete</v-icon>
+      </v-btn>
+    </v-speed-dial>
   </div>
 </template>
 
 <script>
-// import { api, urls } from '../services/Api'
-// import { Usuario, Empresa } from '@/models'
-import Functions from '@/functions/Functions'
+import Firebase from "@/services/Firebase"
+import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 export default {
+  mixins: [FirebaseMixin],
   data() {
     return {
       today: "",
-      username: "Usuário Teste",
-      itemsTitle: [
-        {
-          title: "Nome",
-          avatar: "Foto",
-          obras: "Obras ativas",
-          icons: "Ações",
-        },
-      ],
+      search: '',
       clients: [
         {
           title: "Nenhum cliente cadastrado"
         },
       ],
-      user: null,
+      singleSelect: true,
+      selected: [],
+      user_email: '',
       companies: [],
     }
   },
-  async created () {
-    this.user = await Functions.isAuth()
-    // await this.getUser()
-    // this.getClients()
+  async mounted () {
+    await Firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.user_email = user.email
+        this.getClients()
+      }
+      else this.$router.push("/")
+    })
   },
+  
   methods: {
-    async getUser () {
-      // const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
-      // this.user = user.data
+    filter (value, search) {
+      return value != null &&
+        search != null &&
+        typeof value === 'string' &&
+        value.toString().toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1
     },
     async getCompanies () {
-      // const response = await Functions.getAll(Empresa)
-      // if (response.status === 'ok') {
-      //   response.data.filter(item => {
-      //     if (item.usuarioID.includes(this.user.id)) this.companies.push(item)
-      //   })
-      // }
+      const response = await this.getDocumentList(Firebase.firestore(), 'Empresa', 'usuarioID', this.user_email)
+      if (response.status === 'ok') {
+        this.companies = response.documents
+      }
     },
     async getClients () {
-      // await this.getCompanies()
-      // const client_ids = []
-      // this.companies.map(company => {
-      //   company.usuarioID.filter(user_id => {
-      //     if (user_id !== this.user.id) {
-      //       client_ids.push(user_id)
-      //     }
-      //   })
-      // })
-      // const clients = []
-      // client_ids.map(async function (id) {
-      //   const response = await Functions.getById(Usuario, id)
-      //   clients.push({ title: response.data.nome })
-      // })
-      // this.clients = clients
+      await this.getCompanies()
+      if (this.companies.length > 0) {
+        let client_ids = []
+        this.companies.map(company => {
+          company.usuarioID.map(client => {
+            if (client !== this.user_email) client_ids.push(client)
+          })
+        })
+        if (client_ids.length > 0) {
+          this.clients = []
+          client_ids.map(async (item) => {
+            const response = await this.getDocument(Firebase.firestore(), 'Usuario', 'id', item)
+            this.clients.push(response.documents[0].data)
+          })
+        }
+      }
     },
-  }
+  },
+
+  computed: {
+    headers () {
+      return [
+        {
+          text: 'Nome',
+          align: 'start',
+          value: 'nome',
+        },
+        {
+          text: 'Telefone',
+          value: 'telefone',
+        },
+        {
+          text: 'Email',
+          value: 'email'
+        }
+      ]
+    },
+  },
 };
 </script>
 <style lang="css">
@@ -213,5 +203,17 @@ body {
   display: flex;
   width: 65px !important;
   height: 65px !important;
+}
+.btn-list {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+.list-clients {
+  flex-direction: column !important;
+}
+.v-speed-dial {
+  position: absolute !important;
 }
 </style>

@@ -41,7 +41,7 @@
               </v-btn>
               <div class="extend_name_email">
                 <strong>{{ username }}</strong>
-                <span style="color:gray">{{ user_email }}</span>
+                <span style="color:gray">{{ email }}</span>
               </div>
             </div>
           </v-list>
@@ -98,23 +98,22 @@
 </template>
 
 <script>
-// import { api, urls } from '../services/Api'
-// import { AmplifyEventBus } from 'aws-amplify-vue'
-// import { Auth  } from 'aws-amplify'
-// import Functions from '@/functions/Functions'
-// import { DataStore } from 'aws-amplify'
-// import { Usuario } from '@/models'
 import Seed from '@/components/Seed'
+import Firebase from "@/services/Firebase"
+import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 export default {
   name: 'TopBar',
   components: {
     Seed
   },
+  props: {
+    email: String,
+  },
+  mixins: [FirebaseMixin],
   data () {
     return {
       user: null,
-      username: 'Usuário Teste',
-      user_email: 'usuario@teste.com',
+      username: '',
       user_options: [
         {
           title: 'Conta',
@@ -125,8 +124,12 @@ export default {
       ],
       signedIn: false,
       error_dialog: false,
-      error: ''
+      error: '',
     }
+  },
+  async updated () {
+    const response = await this.getDocument(Firebase.firestore(), 'Usuario', 'email', this.email)
+    this.username = response.documents[0].data.nome
   },
   computed: {
     name: function () {
@@ -137,37 +140,14 @@ export default {
       return initials.substr(0, 2)
     }
   },
-  async beforeCreate() {
-    // try {
-    //   this.user = await Functions.isAuth()
-    //   this.signedIn = true
-    //   this.user_email = this.user.attributes.email
-    //   // const user = await DataStore.query(Usuario, data => data.email("eq", this.user_email))
-    //   // if (user.length > 0) this.username = user[0].nome
-    // } catch (error) {
-    //   this.signedIn = false
-    //   this.user = null
-    //   this.$router.push('/')
-    // }
-    // AmplifyEventBus.$on('authState', info => {
-    //   console.log('info: ', info)
-    //   if (info === 'signedIn') {
-    //     this.signedIn = true
-    //   } else {
-    //     this.signedIn = false
-    //   }
-    // });
-  },
   methods: {
-    // async logout () {
-    //   try {
-    //     await Auth.signOut()
-    //     this.$router.push('/')
-    //   } catch (error) {
-    //     this.error = error
-    //     this.error_dialog = true
-    //   }
-    // }
+    async logout () {
+      Firebase.auth().signOut().then(() => {
+        this.$router.push("/")
+      }).catch((error) => {
+        console.log('error: ', error)
+      })
+    }
   }
 }
 </script>
@@ -187,7 +167,7 @@ html, body {
   align-items: center;
 }
 .v-menu__content {
-  width: 200px;
+  width: 15em !important;
   top: 48px;
   left: 750px;
   transform-origin: left top 0px;

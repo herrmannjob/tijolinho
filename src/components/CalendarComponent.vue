@@ -38,7 +38,7 @@
       </v-col>
     </v-row>
     
-    <FormCalendar :form.sync="form" :refresh.sync="refresh" :date="date_clicked" :user="user" />
+    <FormCalendar :form.sync="form" :refresh.sync="refresh" :date="date_clicked" :user="user_email" />
 
     <CalendarWeek :options="calendarOptions" v-if="view_week" ref="calendar" />
 
@@ -61,15 +61,15 @@ import FormCalendar from '@/components/FormCalendar'
 import CalendarWeek from '@/components/CalendarWeek'
 import CalendarDay from '@/components/CalendarDay'
 import CalendarMonth from '@/components/CalendarMonth'
-
-// import { Obra, Usuario, Empresa, AgendaParticular, AgendaObra } from '@/models'
-// import Functions from '@/functions/Functions'
+import Firebase from "@/services/Firebase"
+import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 
 export default {
   name: 'CalendarComponent',
   components: {
     FormCalendar, CalendarWeek, CalendarDay, CalendarMonth, FullCalendar
   },
+  mixins: [FirebaseMixin],
   data () {
     return {
       user: null,
@@ -115,8 +115,20 @@ export default {
       task_observacao: null,
       particular_tasks: [],
       constructions_tasks: [],
-      refresh: false
+      refresh: false,
+      user_email: ''
     }
+  },
+  async mounted () {
+    await Firebase.auth().onAuthStateChanged(async user => {
+      if (user) {
+        this.user_email = user.email
+        await this.getUser()
+        await this.getObras()
+        await this.getClients()
+        await this.getTasks()
+      }
+    })
   },
   async updated () {
     if (this.refresh) {
@@ -124,97 +136,88 @@ export default {
       this.refresh = false
     }
   },
-  async created () {
-    // this.user = await Functions.isAuth()
-    // await this.getUser()
-    // await this.getObras()
-    // this.getTasks()
-    // this.getClients()
-  },
-  // updated () { this.refreshEvents() },
   methods: {
-    // async getUser () {
-    //   const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
-    //   this.user = user.data
-    // },
-    // async getObras () {
-    //   const response = await Functions.getByUserId(Obra, this.user.id)
-    //   if (response.status === 'ok') {
-    //     this.constructions = response.data
-    //     this.constructions_names = []
-    //     response.data.map(obra => { this.constructions_names.push(obra.nome) })
-    //   }
-    // },
-    // async getCompanies () {
-    //   const response = await Functions.getAll(Empresa)
-    //   if (response.status === 'ok') {
-    //     response.data.filter(item => {
-    //       if (item.usuarioID.includes(this.user.id)) this.companies.push(item)
-    //     })
-    //   }
-    // },
-    // async getClients () {
-    //   await this.getCompanies()
-    //   const client_ids = []
-    //   this.companies.map(company => {
-    //     company.usuarioID.filter(user_id => {
-    //       if (user_id !== this.user.id) {
-    //         client_ids.push(user_id)
-    //         this.client_names = []
-    //       }
-    //     })
-    //   })
-    //   const clients = []
-    //   const client_names = []
-    //   client_ids.map(async function (id) {
-    //     const response = await Functions.getById(Usuario, id)
-    //     clients.push(response.data)
-    //     client_names.push(response.data.nome)
-    //   })
-    //   this.clients = clients
-    //   this.client_names = client_names
-    // },
-    // async getTasks () {
-    //   await this.getParticularTasks()
-    //   await this.getConstructionsTasks()
-    // },
-    // async getParticularTasks () {
-    //   const response = await Functions.getAll(AgendaParticular)
-    //   if (response.status === 'ok') {
-    //     this.particular_tasks = []
-    //     this.calendarOptions.events = []
-    //     response.data.filter(item => {
-    //       if (item.Usuario.id === this.user.id) {
-    //         this.particular_tasks.push(item)
-    //         this.calendarOptions.events.push(
-    //           {
-    //             title: item.titulo,
-    //             start: item.data_inicio.substr(0, 19) + 'Z',
-    //             end: item.data_fim.substr(0, 19) + 'Z'
-    //           }
-    //         )
-    //       }
-    //     })
-    //   }
-    // },
-    // async getConstructionsTasks () {
-    //   await this.getObras()
-    //   if (this.constructions.length > 0) {
-    //     const response = await Functions.getAll(AgendaObra)
-    //     if (response.status === 'ok') {
-    //       this.constructions_tasks = []
-    //       this.calendarOptions.events = []
-    //       this.constructions.map(construction => {
-    //         response.data.map(item => {
-    //           if (item.Obra.id === construction.id) {
-    //             this.constructions_tasks.push(item)
-    //             this.calendarOptions.events.push({ title: item.titulo, start: item.data_inicio.substr(0, 10), end: item.data_fim.substr(0, 10) })
-    //           }
-    //         })
-    //       })
-    //     }
-    //   }
-    // },
+    async getUser () {
+      const response = await this.getDocument(Firebase.firestore(), 'Usuario', 'email', this.user_email)
+      this.username = response.documents[0].data.nome
+    },
+    async getObras () {
+      const response = await this.getDocument(Firebase.firestore(), 'Obra', 'usuarioID', this.user_email)
+      if (response.status === 'ok') {
+        this.constructions = []
+        this.constructions_names = []
+        response.documents.map(item => {
+          this.constructions.push(item.data)
+          this.constructions_names.push(item.data.nome)
+        })
+      }
+    },
+    async getCompanies () {
+      const response = await this.getDocumentList(Firebase.firestore(), 'Empresa', 'usuarioID', this.user_email)
+      if (response.status === 'ok') {
+        this.companies = response.documents
+      }
+    },
+    async getClients () {
+      await this.getCompanies()
+      if (this.companies.length > 0) {
+        let client_ids = []
+        this.companies.map(company => {
+          company.usuarioID.map(client => {
+            if (client !== this.user_email) client_ids.push(client)
+          })
+        })
+        if (client_ids.length > 0) {
+          this.clients = []
+          this.client_names = []
+          client_ids.map(async (item) => {
+            const response = await this.getDocument(Firebase.firestore(), 'Usuario', 'id', item)
+            this.clients.push(response.documents[0].data)
+            this.client_names.push(response.documents[0].data.nome)
+          })
+        }
+      }
+    },
+    async getTasks () {
+      await this.getParticularTasks()
+      await this.getConstructionsTasks()
+    },
+    async getParticularTasks () {
+      const response = await this.getDocument(Firebase.firestore(), 'AgendaParticular', 'usuarioID', this.user_email)
+      if (response.status === 'ok') {
+        this.particular_tasks = []
+        this.calendarOptions.events = []
+        response.documents.map(item => {
+          this.particular_tasks.push(item.data)
+          this.calendarOptions.events.push(
+            {
+              title: item.data.titulo,
+              start: item.data.data_inicio.substr(0, 19) + 'Z',
+              end: item.data.data_fim.substr(0, 19) + 'Z'
+            }
+          )
+        })
+      }
+    },
+    async getConstructionsTasks () {
+      this.constructions_tasks = []
+      this.constructions.map(async c => {
+        const response = await this.getDocument(Firebase.firestore(), 'AgendaObra', 'obraID', c.id)
+        console.log(response)
+        if (response.status === 'ok') {
+          response.documents.map(item => {
+            this.constructions_tasks.push(item.data)
+            this.calendarOptions.events.push(
+              {
+                title: item.data.titulo,
+                start: item.data.data_inicio,
+                end: item.data.data_fim
+              }
+            )
+          })
+        }
+      })
+    },
     changeView () {
       switch (this.calendar_view) {
         case 'Mês':

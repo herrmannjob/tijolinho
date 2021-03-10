@@ -38,8 +38,8 @@
 
             <v-text-field
               v-model="email"
-              :rules="emailRules"
-              label="E-mail (opcioinal)"
+              :rules="email.length > 0 ? emailRules : ''"
+              label="E-mail (opcional)"
             ></v-text-field>
             
             <v-menu
@@ -53,7 +53,7 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   v-model="dateNasc"
-                  label="Data de Nascimento (opcioinal)"
+                  label="Data de Nascimento (opcional)"
                   prepend-icon="mdi-calendar"
                   readonly
                   v-bind="attrs"
@@ -71,7 +71,7 @@
           </v-col>
 
           <v-col cols="12" md="6">
-            <v-text-field label="Nome do cônjuge (opcioinal)" v-model="firstnameConjuge"></v-text-field>
+            <v-text-field label="Nome do cônjuge (opcional)" v-model="firstnameConjuge"></v-text-field>
             <v-menu
               ref="menuNascConj"
               v-model="menuNascConj"
@@ -83,7 +83,7 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   v-model="dateNascConj"
-                  label="Data de Nascimento do Conjuge (opcioinal)"
+                  label="Data de Nascimento do Conjuge (opcional)"
                   prepend-icon="mdi-calendar"
                   readonly
                   required
@@ -144,12 +144,12 @@
                   text
                   @click="confirm = false"
                 >
-                  Sair
+                  Agora não
                 </v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
-          <FormRegisterConstruction :form.sync="form" :confirm.sync="confirm" :user_id="user.id" :company="company" :client="client" />
+          <FormRegisterConstruction :form.sync="form" :confirm.sync="confirm" :refresh.sync="refresh" :user_id="user_email" :company="company.id" :client="client_id" />
         </v-row>
       </v-form>
 
@@ -164,12 +164,12 @@
 <script>
 import image from "../assets/register.png"
 import FormRegisterConstruction from '@/components/FormRegisterConstruction'
-import Functions from '@/functions/Functions'
-// import { DataStore } from 'aws-amplify'
-// import { Usuario, TipoUsuario, Empresa } from '@/models'
+import Firebase from "@/services/Firebase"
+import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 export default {
   name: 'FormRegisterClient',
   components: { FormRegisterConstruction },
+  mixins: [FirebaseMixin],
   data() {
     return {
       /* eslint-disable no-mixed-spaces-and-tabs */
@@ -229,8 +229,11 @@ export default {
       company: null,
       client: {nome: "empty"},
       confirm: false,
-      confirm_message: "Cliente cadastrado com sucesso!"
-    };
+      confirm_message: "Cliente cadastrado com sucesso!",
+      user_email: '',
+      client_id: '',
+      refresh: false
+    }
   },
   watch: {
     menu(val) {
@@ -250,82 +253,77 @@ export default {
         setTimeout(() => (this.$refs.pickerNascConj.activePicker = "YEAR"));
     },
   },
-  async created () {
-    this.user = await Functions.isAuth()
-    // await this.getUser()
-    // this.getCompany()
+  updated () {
+    if (this.refresh) {
+      this.firstname = ''
+      this.email = '',
+      this.phone = '',
+      this.dateNasc = null,
+      this.firstnameConjuge = '',
+      this.dateNascConj = null,
+      this.refresh = false
+    }
+  },
+  async mounted () {
+    await Firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.user_email = user.email
+        this.getCompany()
+      }
+      else this.$router.push("/")
+    })
   },
   methods: {
     voltar () { this.$router.go(-1) },
-    async getUser () {
-      // const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
-      // this.user = user.data
-    },
     async getCompany () {
-      // const response = await Functions.getAll(Empresa)
-      // if (response.status === 'ok') {
-      //   const company = []
-      //   response.data.filter(item => {
-      //     if (item.usuarioID.includes(this.user.id)) company.push(item)
-      //   })
-      //   this.company = company[0]
-      // }
+      const response = await this.getDocumentList(Firebase.firestore(), 'Empresa', 'usuarioID', this.user_email)
+      if (response.status === 'ok') {
+        this.company = response.documents[0]
+      }
     },
     async updateCompany () {
-      // const empresa = this.company
-      // const empresa_clientes = empresa.usuarioID
-      // const response = await DataStore.save(
-      //   Empresa.copyOf(empresa, updated => {
-      //     updated.usuarioID = empresa_clientes.concat([this.client.id])
-      //   })
-      // )
-      // console.log(response)
+      if (!this.company.usuarioID.includes(this.client_id)) {
+        this.company.usuarioID.push(this.client_id)
+        const data = {
+          enderecoID: this.company.enderecoID,
+          id: this.company.id,
+          nome: this.company.nome,
+          telefone: this.company.telefone,
+          usuarioID: this.company.usuarioID
+        }
+        const response = await this.firebaseCreate(Firebase.firestore(), 'Empresa', data.id, data)
+        if (response.status === 'ok') this.company = data
+      }
     },
     async addTipoUsuario () {
-      // const items = await DataStore.query(TipoUsuario, d => d.nome("eq", "Cliente"))
-      // if (items.length === 0) {
-      //   const response = await Functions.putData(TipoUsuario, {
-      //     "nome": "Cliente",
-      //   })
-      //   if (response.status === 'ok') {
-      //     console.log("TipoUsuario cadastrado com sucesso!")
-      //     this.tipo_usuario = response.data
-      //   } else {
-      //     console.log("erro: " + response.error.message)
-      //   }
-      // } else {
-      //   this.tipo_usuario = items[0]
-      // }
+      const response = await this.getDocument(Firebase.firestore(), 'TipoUsuario', 'id', 'cliente')
+      if (response.status === 'empty') await this.firebaseCreate(Firebase.firestore(), 'TipoUsuario', 'cliente', { id: "cliente", nome: 'Cliente' })
+      this.tipo_usuario = 'cliente'
     },
 
     async addUser () {
-      // await this.addTipoUsuario()
-      // const items = await DataStore.query(Usuario, d => d.email("eq", this.email))
-      // if (items.length === 0) {
-      //   this.phone = `+${this.phone.substr(0,2)} ${this.phone.substr(2,2)} ${this.phone.substr(4,5)} ${this.phone.substr(9,4)}`
-      //   const response = await Functions.putData(Usuario, {
-      //     "nome": this.firstname,
-      //     "email": this.email,
-      //     "telefone": this.phone,
-      //     "data_nascimento": this.dateNasc + 'Z',
-      //     "nome_conjuge": this.firstnameConjuge,
-      //     "data_nascimento_conjuge": this.dateNascConj + 'Z',
-      //     "TipoUsuario": this.tipo_usuario,
-      //   })
-      //   if (response.status === 'ok') {
-      //     console.log("Usuário cadastrado com sucesso!")
-      //     this.client = response.data
-      //     this.updateCompany()
-      //     this.confirm = true
-      //   } else {
-      //     console.log("erro: " + response.error.message)
-      //   }
-      // } else {
-      //   console.log('email já cadastrado!')
-      //   this.client = items[0]
-      //   this.confirm_message = "Já existe um usuário para este email!"
-      //   this.confirm = true
-      // }
+      await this.addTipoUsuario()
+      const response = await this.getDocument(Firebase.firestore(), 'Usuario', 'email', this.email)
+      if (response.status === 'empty') {
+        const data = {
+          nome: this.firstname,
+          email: this.email,
+          telefone: this.phone,
+          data_nascimento: this.dateNasc,
+          nome_conjuge: this.firstnameConjuge,
+          data_nascimento_conjuge: this.dateNascConj,
+          TipoUsuario: this.tipo_usuario,
+        }
+        const client = await this.firebaseCreate(Firebase.firestore(), 'Usuario', null, data)
+        await this.firebaseUpdate(Firebase.firestore(), 'Usuario', client.created_id, {id: client.created_id})
+        this.client_id = client.created_id
+        this.confirm = true
+      } else {
+        this.client_id = response.documents[0].id
+        this.confirm_message = `Já existe um usuário com este email ${this.email}!`
+        this.confirm = true
+      }
+      this.updateCompany()
     },
     save(date) {
       this.$refs.menu.save(date);
