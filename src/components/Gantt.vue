@@ -5,42 +5,23 @@
 </template>
 
 <script>
-import Gantt from 'frappe-gantt';
+import Gantt from 'frappe-gantt'
+// import Firebase from "@/services/Firebase"
+// import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 
 export default {
     name: 'Gantt',
+    props: {
+        tarefas: Array,
+    },
+    // mixins: [FirebaseMixin],
     data () {
         return {
             gantt: {},
             viewModeOptions: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
             viewMode: 'Day',
-            tasks: [
-              {
-                id: 'Task 1',
-                name: 'Atividade 01',
-                start: '2021-03-01',
-                end: '2021-03-20',
-                progress: 20,
-                dependencies: null
-              },
-              {
-                id: 'Task 2',
-                name: 'Atividade 02',
-                start: '2021-03-05',
-                end: '2021-03-10',
-                progress: 20,
-                dependencies: 'Task 1'
-              },
-              {
-                id: 'Task 3',
-                name: 'Atividade 03',
-                start: '2021-03-08',
-                end: '2021-03-20',
-                progress: 20,
-                dependencies: 'Task 2'
-              },
-            ]
-        };
+            tasks: this.tarefas
+        }
     },
     watch: {
         viewMode () {
@@ -84,7 +65,7 @@ export default {
         },
 
         updateTasks () {
-            this.gantt.refresh(this.tasks);
+            this.gantt.refresh(this.tasks)
         }
     }
 };

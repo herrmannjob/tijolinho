@@ -29,6 +29,7 @@ export default {
       items: [
         { icon: 'mdi-calendar-month', method: this.calendar },
         { icon: 'mdi-account-group', method: this.clients },
+        { icon: 'mdi-chart-gantt', method: this.schedule },
         { icon: 'mdi-cash-100', method: this.financial },
       ],
       mini: true,
@@ -42,6 +43,9 @@ export default {
     },
     clients () {
       this.$router.push('client')
+    },
+    schedule () {
+      this.$router.push('schedule')
     },
     financial () {
       console.log('financial')

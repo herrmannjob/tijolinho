@@ -2,27 +2,29 @@
   <div class="home">
     <Drawer />
     <div class="content">
-      <TopBar />
+      <TopBar :email="user_email" />
       <div class="components row">
-        <div class="col-12 col-sm-6 col-md-4 col-lg-3 left-col">
-          <v-avatar
+        <div class="col-12 col-sm-5 col-md-3 left-col">
+          <!-- <v-avatar
             class="avatar"
             tile
           >
             <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
           </v-avatar>
-          <p class="username">{{ username }}</p>
+          <p class="username">{{ username }}</p> -->
 
           <div class="group-data-schedule" data-app>
             <v-select
               :items="constructions_names"
               label="Obra"
               dense
-              v-model="construction"
+              v-model="selected"
+              :onselect="getConstructionData()"
             ></v-select>
             <v-progress-linear
               v-model="completed"
               height="25"
+              v-if="selected.length"
             >
               <strong class="percentage">{{ Math.ceil(completed) }}%</strong>
             </v-progress-linear>
@@ -52,7 +54,7 @@
             </v-btn>
           </div>
         </div>
-        <div class="col-12 col-sm-6 col-md-8 col-lg-9">
+        <div class="col-12 col-sm-7 col-md-9">
           <div class="row cards-report">
             <v-card
               elevation="2"
@@ -62,7 +64,7 @@
               <v-card-text class="text-center">
                 <div><span class="text-primary">Tempo decorrido</span></div>
                 <p class="display-1 text--primary">
-                  87 dias
+                  {{ elapsed_time }} dias
                 </p>
                 <div>adjective</div>
               </v-card-text>
@@ -75,7 +77,7 @@
               <v-card-text class="text-center">
                 <div><span class="text-primary">Tempo planejado</span></div>
                 <p class="display-1 text--primary">
-                  87 dias
+                  {{ planned_time }} dias
                 </p>
                 <div>adjective</div>
               </v-card-text>
@@ -88,7 +90,7 @@
               <v-card-text class="text-center">
                 <div><span class="text-primary">Total planejado</span></div>
                 <p class="display-1 text--primary">
-                  87 dias
+                  R$ {{ planned_money }}
                 </p>
                 <div>adjective</div>
               </v-card-text>
@@ -101,19 +103,36 @@
               <v-card-text class="text-center">
                 <div><span class="text-primary">Total gasto</span></div>
                 <p class="display-1 text--primary">
-                  87 dias
+                  R$ {{ spent_money }}
                 </p>
                 <div>adjective</div>
               </v-card-text>
             </v-card>
           </div>
-          <div class="row">
-            <Gantt />
+          <div class="row" style="padding: 10px">
+            <v-btn
+              color="primary"
+              style="margin-bottom: 10px"
+              @click="showGantt()"
+            >
+              Adicionar tarefa
+            </v-btn>
+            <v-btn
+              icon
+              color="primary"
+              @click="reload()"
+            >
+              <v-icon>mdi-refresh-circle</v-icon>
+            </v-btn>
+            <template v-if="tasks.length">
+              <Gantt :tarefas="tasks" />
+            </template>
           </div>
         </div>
       </div>
     </div>
-    <FormRegisterConstruction :form.sync="form" />
+    <FormRegisterConstruction :form.sync="form" :refresh.sync="refresh" :user_id="user_email" :company="company.id" client="" />
+    <FormRegisterTask :form.sync="form_task" :tasks="tasks" :task_names="task_names" :user="user_email" :cronograma_obra="cronograma_obra.id" />
   </div>
 </template>
 
@@ -121,50 +140,126 @@
 import Gantt from '@/components/Gantt.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
-// import moment from '@/plugins/moment'
-// import { DataStore } from 'aws-amplify'
-// import { Usuario, Obra } from '@/models'
-import Functions from '@/functions/Functions'
 import FormRegisterConstruction from '@/components/FormRegisterConstruction'
+import FormRegisterTask from '@/components/FormRegisterTask'
+import Firebase from "@/services/Firebase"
+import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 
 export default {
   name: 'Schedule',
   components: {
-    Drawer, TopBar, Gantt, FormRegisterConstruction
+    Drawer, TopBar, Gantt, FormRegisterConstruction, FormRegisterTask
   },
+  mixins: [FirebaseMixin],
   data () {
     return {
-      today: '',
+      today: new Date(),
       user: null,
       user_email: '',
       username: '',
+      constructions: [],
       constructions_names: [],
-      construction: '',
-      completed: 25,
-      form: false
+      construction: {},
+      cronograma_obra: {},
+      tasks: [],
+      task_names: [],
+      selected: '',
+      company: {},
+      completed: 0,
+      form: false,
+      form_task: false,
+      refresh: false,
+      elapsed_time: '',
+      planned_time: '',
+      planned_money: '',
+      spent_money: '',
+      count: true
     }
   },
-  async created () {
-    this.user = await Functions.isAuth()
-    this.user_email = this.user.attributes.email
-    // const user = await DataStore.query(Usuario, data => data.email("eq", this.user_email))
-    // if (user.length > 0) this.username = user[0].nome
-    // await this.getUser()
-    // this.getObras()
+  async updated () {
+    if (this.refresh) {
+      await this.getObras()
+      await this.getConstructionData()
+      this.refresh = false
+    }
+  },
+  async mounted () {
+    await Firebase.auth().onAuthStateChanged(async user => {
+      if (user) {
+        this.user_email = user.email
+        await this.getUser()
+        await this.getCompany()
+        this.getObras()
+      } else this.$router.push("/")
+    })
   },
   methods: {
+    reload () {
+      window.location.reload()
+    },
     async getUser () {
-      // const user = await Functions.wichUserId(Usuario, this.user.attributes.email)
-      // this.user = user.data
+      const response = await this.getDocument(Firebase.firestore(), 'Usuario', 'email', this.user_email)
+      this.username = response.documents[0].data.nome
+    },
+    async getCompany () {
+      const response = await this.getDocumentList(Firebase.firestore(), 'Empresa', 'usuarioID', this.user_email)
+      if (response.status === 'ok') {
+        this.company = response.documents[0]
+      }
     },
     async getObras () {
-      // const response = await Functions.getById(Obra, this.user.id)
-      // if (response.status === 'ok') {
-      //   this.constructions_names = []
-      //   response.data.map(obra => { this.constructions_names.push(obra.nome) })
-      // }
+      const response = await this.getDocument(Firebase.firestore(), 'Obra', 'usuarioID', this.user_email)
+      if (response.status === 'ok') {
+        this.constructions = []
+        this.constructions_names = []
+        response.documents.map(item => {
+          this.constructions.push(item.data)
+          this.constructions_names.push(item.data.nome)
+        })
+      }
     },
-  }
+    async getConstructionData () {
+      if (this.selected.length && this.count) {
+        const i = this.constructions_names.indexOf(this.selected)
+        this.construction = this.constructions[i]
+        const cronogramas = await this.getDocument(Firebase.firestore(), 'CronogramaObra', 'obraID', this.construction.id)
+        const start = new Date(this.cronograma_obra.data_inicio + 'T00:00:00')
+        const end = new Date(this.cronograma_obra.data_fim + 'T00:00:00')
+        this.cronograma_obra = cronogramas.documents[0].data
+        this.elapsed_time = ((this.today - start) / 86400000) | 0
+        this.planned_time = (end - start) / 86400000 // miliseconds => day
+        this.planned_money = this.cronograma_obra.gasto_previsto
+        this.completed = (this.elapsed_time / this.planned_time) * 100
+        await this.getTasks()
+        this.count = false
+      }
+    },
+    async getTasks () {
+      const tasks = await this.getDocument(Firebase.firestore(), 'Tarefa', 'cronograma_obra', this.cronograma_obra.id)
+      if (tasks.status === 'ok') {
+        this.tasks = []
+        tasks.documents.map(item => {
+          this.tasks.push(item.data)
+          this.task_names.push(item.data.name)
+        })
+      }
+    },
+    async showGantt () {
+      await this.getTasks()
+      this.form_task = true
+    }
+  },
+  // computed: {
+  //   tarefas: function () {
+  //     if (this.tasks.length) {
+  //       let tasks = []
+  //       this.tasks.map(item => {
+  //         tasks.push(item)
+  //       })
+  //       return tasks
+  //     } else return []
+  //   }
+  // }
 }
 </script>
 <style lang="css">
