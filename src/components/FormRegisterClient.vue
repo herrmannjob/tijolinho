@@ -34,11 +34,17 @@
               required
             ></v-text-field>
 
-            <v-text-field label="Telefone" v-model="phone" hint="Apenas números (13 dígitos)" placeholder="+55 84 98765 4321" :rules="phone_rules" required></v-text-field>
+            <v-text-field
+              label="Telefone"
+              v-model="phone"
+              placeholder="+55 84 98765 4321"
+              :rules="phone_rules"
+              required>
+            </v-text-field>
 
             <v-text-field
               v-model="email"
-              :rules="email.length > 0 ? emailRules : ''"
+              :rules="email.length > 0 ? emailRules : []"
               label="E-mail (opcional)"
             ></v-text-field>
             
@@ -216,6 +222,7 @@ export default {
       phone_rules: [
         (v) => !!v || "Telefone é obrigatório",
         (v) => v.length === 13 || "Telefone com 13 dígitos - +55 84 98765 4321",
+        (v) => !isNaN(Number(v)) || "Telefone com 13 dígitos - +55 84 98765 4321",
       ],
       lastname: "",
       nameRules: [(v) => !!v || "Nome é obrigatório"],
@@ -226,7 +233,7 @@ export default {
       ],
       tipo_usuario: null,
       user: {},
-      company: null,
+      company: {},
       client: {nome: "empty"},
       confirm: false,
       confirm_message: "Cliente cadastrado com sucesso!",

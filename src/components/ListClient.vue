@@ -122,14 +122,14 @@ export default {
     },
     async getClients () {
       await this.getCompanies()
-      if (this.companies.length > 0) {
+      if (this.companies.length) {
         let client_ids = []
         this.companies.map(company => {
           company.usuarioID.map(client => {
             if (client !== this.user_email) client_ids.push(client)
           })
         })
-        if (client_ids.length > 0) {
+        if (client_ids.length) {
           this.clients = []
           client_ids.map(async (item) => {
             const response = await this.getDocument(Firebase.firestore(), 'Usuario', 'id', item)

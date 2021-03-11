@@ -203,7 +203,6 @@ export default {
       this.constructions_tasks = []
       this.constructions.map(async c => {
         const response = await this.getDocument(Firebase.firestore(), 'AgendaObra', 'obraID', c.id)
-        console.log(response)
         if (response.status === 'ok') {
           response.documents.map(item => {
             this.constructions_tasks.push(item.data)
