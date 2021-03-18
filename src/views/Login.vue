@@ -1,19 +1,19 @@
 <template>
   <div >
-    <FormLogin/>
+    <ModalLogin/>
   </div>
 </template>
 
 <script>
 
-import FormLogin from '@/components/FormLogin.vue'
+import ModalLogin from '@/components/ModalLogin.vue'
 import { AmplifyEventBus } from 'aws-amplify-vue'
 import Functions from '@/functions/Functions'
 import Tarefas from '@/functions/tarefas'
 export default {
   name: 'Login',
   components: {
-    FormLogin
+    ModalLogin
   },
   data () {
     return {
@@ -28,7 +28,7 @@ export default {
       console.log(tarefa)
       this.user = await Functions.isAuth()
       this.signedIn = true
-      this.$router.push('calendar')
+      this.$router.push('calendario')
     } catch (error) {
       console.log('erro: ', error)
       this.signedIn = false

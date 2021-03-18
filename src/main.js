@@ -1,21 +1,24 @@
-import Vue from 'vue'
-import App from './App.vue'
-import './registerServiceWorker'
-import router from './router'
-import vuetify from './plugins/vuetify';
-//Amplify
-// import Amplify, * as AmplifyModules from 'aws-amplify';
-// import { AmplifyPlugin } from 'aws-amplify-vue';
-// import aws_exports from './aws-exports';
-// Amplify.configure(aws_exports);
-// Vue.prototype.$Amplify = Amplify;
-// Vue.use(AmplifyPlugin, AmplifyModules);
+import Vue from "vue";
+import App from "./App.vue";
+import "./registerServiceWorker";
+import router from "./router";
+import vuetify from "./plugins/vuetify";
+import SchedulerComponent from "./components/SchedulerComponent.vue";
+import VueFlexLayout from "@jporto/vue-flex-layout";
+import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
+import "bootstrap/dist/css/bootstrap.css";
+import "bootstrap-vue/dist/bootstrap-vue.css";
 
-//FIM Amplify
-Vue.config.productionTip = false
+Vue.use(BootstrapVue);
+Vue.use(IconsPlugin);
+Vue.use(VueFlexLayout);
+
+export { SchedulerComponent };
+Vue.config.productionTip = false;
+
 
 new Vue({
   router,
   vuetify,
-  render: h => h(App)
-}).$mount('#app')
+  render: (h) => h(App),
+}).$mount("#app");

@@ -1,3 +1,176 @@
+<script>
+import Functions from "@/functions/Functions";
+import ResponseModal from "@/components/ResponseModal.vue";
+import Firebase from "@/services/Firebase";
+import { FirebaseMixin } from "@/mixins/FirebaseMixin";
+export default {
+  name: "ModalRegisterConstruction",
+  components: { ResponseModal },
+  props: {
+    form: Boolean,
+    confirm: Boolean,
+    user_id: String,
+    company: String,
+    client: String,
+  },
+  mixins: [FirebaseMixin],
+  data() {
+    return {
+      /* eslint-disable no-mixed-spaces-and-tabs */
+      cep: null,
+      estado: null,
+      logradouro: null,
+      cidade: null,
+      complemento: null,
+      data: null,
+      messageCep: null,
+      date: "",
+      dateInit: "",
+      dateEnd: "",
+      categoria: [
+        "Residencial",
+        "Reforma",
+        "Comercial",
+        "Restauração",
+        "Criação",
+      ],
+      tipo_obra: null,
+      firstname: "",
+      nameRules: [(v) => !!v || "Nome é obrigatório"],
+      email: "",
+      phone: "",
+      category: "",
+      estimated_spend: "",
+      endereco: null,
+      obra: null,
+      menuDateInit: null,
+      menuDateEnd: null,
+      modal: false,
+      message: { title: "", text: "" },
+    };
+  },
+  methods: {
+    close() {
+      this.$emit("update:form", false);
+    },
+    async searchCep() {
+      if (this.cep.length == 8) {
+        const response = await Functions.searchCep(this.cep);
+        this.logradouro = response.data.logradouro;
+        this.cidade = response.data.localidade;
+        this.estado = response.data.uf;
+        this.complemento = response.data.complemento;
+      }
+    },
+    async addAddress() {
+      const response = await this.getDocument(
+        Firebase.firestore(),
+        "Endereco",
+        "cep",
+        this.cep
+      );
+      if (response.status === "empty") {
+        const data = {
+          id: this.cep,
+          cep: this.cep,
+          estado: this.estado,
+          cidade: this.cidade,
+          rua: this.logradouro,
+          complemento: this.complemento,
+        };
+        await this.firebaseCreate(
+          Firebase.firestore(),
+          "Endereco",
+          this.cep,
+          data
+        );
+      }
+    },
+    async addTipoObra() {
+      this.tipo_obra = this.category.toLowerCase();
+      const response = await this.getDocument(
+        Firebase.firestore(),
+        "TipoObra",
+        "id",
+        this.tipo_obra
+      );
+      if (response.status === "empty") {
+        const data = {
+          nome: this.category,
+        };
+        await this.firebaseCreate(
+          Firebase.firestore(),
+          "TipoObra",
+          this.tipo_obra,
+          data
+        );
+      }
+    },
+    async addObra() {
+      await this.addAddress();
+      await this.addTipoObra();
+      const data = {
+        nome: this.firstname,
+        enderecoID: this.cep,
+        tipoObra: this.tipo_obra,
+        empresaID: this.company,
+        usuarioID: this.user_id,
+        usuarios: this.client,
+      };
+      const response = await this.firebaseCreate(
+        Firebase.firestore(),
+        "Obra",
+        null,
+        data
+      );
+      await this.firebaseUpdate(
+        Firebase.firestore(),
+        "Obra",
+        response.created_id,
+        { id: response.created_id }
+      );
+      if (response.status === "ok") {
+        this.obra = response.created_id;
+        this.addCronogramaObra();
+      }
+    },
+    async addCronogramaObra() {
+      const start = new Date(this.dateInit);
+      const end = new Date(this.dateEnd);
+      const duration = end - start;
+      const data = {
+        obraID: this.obra,
+        data_inicio: this.dateInit,
+        data_fim: this.dateEnd,
+        tempo_previsto: `${duration} ms`,
+        gasto_previsto: this.estimated_spend,
+      };
+      const response = await this.firebaseCreate(
+        Firebase.firestore(),
+        "CronogramaObra",
+        null,
+        data
+      );
+      await this.firebaseUpdate(
+        Firebase.firestore(),
+        "CronogramaObra",
+        response.created_id,
+        { id: response.created_id }
+      );
+      if (response.status === "ok") {
+        this.message.title = "Obra cadastrada com sucesso!";
+      } else {
+        this.message.title = "Ocorreu um erro...";
+        this.message.text = response.error;
+      }
+      this.modal = true;
+      this.$emit("update:form", false);
+      this.$emit("update:confirm", false);
+      this.$emit("update:refresh", true);
+    },
+  },
+};
+</script>
 <template>
   <v-dialog v-model="form" persistent max-width="800px">
     <v-card>
@@ -105,14 +278,23 @@
                 label="Rua"
                 required
               ></v-text-field>
-              <v-text-field label="Complemento" required v-model="complemento"></v-text-field>
+              <v-text-field
+                label="Complemento"
+                required
+                v-model="complemento"
+              ></v-text-field>
             </v-col>
           </v-row>
         </v-form>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" depressed class="btn-primario" @click="addObra()">
+        <v-btn
+          color="primary"
+          depressed
+          class="btn-primario"
+          @click="addObra()"
+        >
           SALVAR
         </v-btn>
         <v-btn color="primary" text @click="close">
@@ -123,139 +305,7 @@
     <ResponseModal :modal.sync="modal" :message="message" />
   </v-dialog>
 </template>
-<script>
-import Functions from '@/functions/Functions'
-import ResponseModal from '@/components/ResponseModal.vue'
-import Firebase from "@/services/Firebase"
-import { FirebaseMixin } from "@/mixins/FirebaseMixin"
-export default {
-  name: 'FormRegisterConstruction',
-  components: { ResponseModal },
-  props: {
-    form: Boolean,
-    confirm: Boolean,
-    user_id: String,
-    company: String,
-    client: String
-  },
-  mixins: [FirebaseMixin],
-  data() {
-    return {
-      /* eslint-disable no-mixed-spaces-and-tabs */
-      cep: null,
-      estado: null,
-      logradouro: null,
-      cidade: null,
-      complemento: null,
-      data: null,
-      messageCep: null,
-      date: '',
-      dateInit: '',
-      dateEnd: '',
-      categoria: [
-        "Residencial",
-        "Reforma",
-        "Comercial",
-        "Restauração",
-        "Criação",
-      ],
-      tipo_obra: null,
-      firstname: "",
-      nameRules: [(v) => !!v || "Nome é obrigatório"],
-      email: "",
-      phone: "",
-      category: "",
-      estimated_spend: "",
-      endereco: null,
-      obra: null,
-      menuDateInit: null,
-      menuDateEnd: null,
-      modal: false,
-      message: { title: '', text: '' }
-    }
-  },
-  methods: {
-    close () {
-      this.$emit('update:form', false)
-    },
-    async searchCep() {
-      if (this.cep.length == 8) {
-        const response = await Functions.searchCep(this.cep)
-        this.logradouro = response.data.logradouro
-        this.cidade = response.data.localidade
-        this.estado = response.data.uf
-        this.complemento = response.data.complemento
-      }
-    },
-    async addAddress () {
-      const response = await this.getDocument(Firebase.firestore(), 'Endereco', 'cep', this.cep)
-      if (response.status === 'empty') {
-        const data = {
-          id: this.cep,
-          cep: this.cep,
-          estado: this.estado,
-          cidade: this.cidade,
-          rua: this.logradouro,
-          complemento: this.complemento,
-        }
-        await this.firebaseCreate(Firebase.firestore(), 'Endereco', this.cep, data)
-      }
-    },
-    async addTipoObra () {
-      this.tipo_obra = this.category.toLowerCase()
-      const response = await this.getDocument(Firebase.firestore(), 'TipoObra', 'id', this.tipo_obra)
-      if (response.status === 'empty') {
-        const data = {
-          nome: this.category
-        }
-        await this.firebaseCreate(Firebase.firestore(), 'TipoObra', this.tipo_obra, data)
-      }
-    },
-    async addObra () {
-      await this.addAddress()
-      await this.addTipoObra()
-      const data = {
-        nome: this.firstname,
-        enderecoID: this.cep,
-        tipoObra: this.tipo_obra,
-        empresaID: this.company,
-        usuarioID: this.user_id,
-        usuarios: this.client
-      }
-      const response = await this.firebaseCreate(Firebase.firestore(), 'Obra', null, data)
-      await this.firebaseUpdate(Firebase.firestore(), 'Obra', response.created_id, {id: response.created_id})
-      if (response.status === 'ok') {
-        this.obra = response.created_id
-        this.addCronogramaObra()
-      }
-    },
-    async addCronogramaObra () {
-      const start = new Date(this.dateInit)
-      const end = new Date(this.dateEnd)
-      const duration = end - start
-      const data = {
-        obraID: this.obra,
-        data_inicio: this.dateInit,
-        data_fim: this.dateEnd,
-        tempo_previsto: `${duration} ms`,
-        gasto_previsto: this.estimated_spend
-      }
-      const response = await this.firebaseCreate(Firebase.firestore(), 'CronogramaObra', null, data)
-      await this.firebaseUpdate(Firebase.firestore(), 'CronogramaObra', response.created_id, {id: response.created_id})
-      if (response.status === 'ok') {
-        this.message.title = "Obra cadastrada com sucesso!"
-      } else {
-        this.message.title = "Ocorreu um erro..."
-        this.message.text = response.error
-      }
-      this.modal = true
-      this.$emit('update:form', false)
-      this.$emit('update:confirm', false)
-      this.$emit('update:refresh', true)
-    },
-  },
-}
-</script>
+
 <style lang="css">
 .btn-container-client {
   width: 11rem;

@@ -1,3 +1,105 @@
+<script>
+import ResponseModal from "@/components/ResponseModal.vue";
+import Firebase from "@/services/Firebase";
+import { FirebaseMixin } from "@/mixins/FirebaseMixin";
+export default {
+  name: "ModalRegisterTask",
+  components: { ResponseModal },
+  props: {
+    form: Boolean,
+    user: String,
+    cronograma_obra: String,
+    tasks: Array,
+    task_names: Array,
+  },
+  mixins: [FirebaseMixin],
+  data() {
+    return {
+      /* eslint-disable no-mixed-spaces-and-tabs */
+      name: "",
+      nameRules: [(v) => !!v || "Nome é obrigatório"],
+      dateInit: "",
+      dateEnd: "",
+      today: new Date(),
+      estimated_spend: "",
+      menuDateInit: null,
+      menuDateEnd: null,
+      modal: false,
+      message: { title: "", text: "" },
+      // tasks: [],
+      selected_task: "",
+      status: ["A iniciar", "Em andamento", "Parado", "Finalizado"],
+      selected_status: "A iniciar",
+    };
+  },
+  methods: {
+    close() {
+      this.name = "";
+      this.dateInit = "";
+      this.dateEnd = "";
+      this.estimated_spend = "";
+      this.$emit("update:form", false);
+    },
+
+    async addStatusTarefa() {
+      const response = await this.getDocument(
+        Firebase.firestore(),
+        "StatusTarefa",
+        "nome",
+        this.selected_status
+      );
+      if (response.status === "empty")
+        await this.firebaseCreate(
+          Firebase.firestore(),
+          "StatusTarefa",
+          this.selected_status,
+          { nome: this.selected_status }
+        );
+    },
+
+    async addTarefa() {
+      await this.addStatusTarefa();
+      const i = this.task_names.indexOf(this.selected_task);
+      const start = new Date(this.dateInit + "T00:00:00");
+      const end = new Date(this.dateEnd + "T00:00:00");
+      const planned = (end - start) / 86400000;
+      const elapsed = ((this.today - start) / 86400000) | 0;
+      const data = {
+        name: this.name,
+        usuarioID: this.user, // responsavel => Para manter o padrão
+        start: this.dateInit,
+        end: this.dateEnd,
+        progress: (elapsed / planned) * 100,
+        dependencies: this.selected_task.length ? this.tasks[i].id : null,
+        status: this.selected_status,
+        cronograma_obra: this.cronograma_obra,
+        gasto_previsto: this.estimated_spend,
+      };
+      const response = await this.firebaseCreate(
+        Firebase.firestore(),
+        "Tarefa",
+        null,
+        data
+      );
+      await this.firebaseUpdate(
+        Firebase.firestore(),
+        "Tarefa",
+        response.created_id,
+        { id: response.created_id }
+      );
+      if (response.status === "ok") {
+        this.message.title = "Tarefa cadastrada com sucesso!";
+      } else {
+        this.message.title = "Ocorreu um erro...";
+        this.message.text = response.error;
+      }
+      this.modal = true;
+      this.$emit("update:form", false);
+      this.$emit("update:refresh", true);
+    },
+  },
+};
+</script>
 <template>
   <v-dialog v-model="form" persistent max-width="800px">
     <v-card>
@@ -28,7 +130,6 @@
                   <v-text-field
                     v-model="dateInit"
                     label="Data de inicio"
-                    prepend-icon="mdi-calendar"
                     readonly
                     required
                     v-bind="attrs"
@@ -54,7 +155,6 @@
                   <v-text-field
                     v-model="dateEnd"
                     label="Termino previsto"
-                    prepend-icon="mdi-calendar"
                     readonly
                     required
                     v-bind="attrs"
@@ -98,7 +198,12 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" depressed class="btn-primario" @click="addTarefa()">
+        <v-btn
+          color="primary"
+          depressed
+          class="btn-primario"
+          @click="addTarefa()"
+        >
           SALVAR
         </v-btn>
         <v-btn color="primary" text @click="close">
@@ -109,92 +214,7 @@
     <ResponseModal :modal.sync="modal" :message="message" />
   </v-dialog>
 </template>
-<script>
-import ResponseModal from '@/components/ResponseModal.vue'
-import Firebase from "@/services/Firebase"
-import { FirebaseMixin } from "@/mixins/FirebaseMixin"
-export default {
-  name: 'FormRegisterTask',
-  components: { ResponseModal },
-  props: {
-    form: Boolean,
-    user: String,
-    cronograma_obra: String,
-    tasks: Array,
-    task_names: Array
-  },
-  mixins: [FirebaseMixin],
-  data() {
-    return {
-      /* eslint-disable no-mixed-spaces-and-tabs */
-      name: '',
-      nameRules: [(v) => !!v || "Nome é obrigatório"],
-      dateInit: '',
-      dateEnd: '',
-      today: new Date(),
-      estimated_spend: "",
-      menuDateInit: null,
-      menuDateEnd: null,
-      modal: false,
-      message: { title: '', text: '' },
-      // tasks: [],
-      selected_task: '',
-      status: [
-        'A iniciar',
-        'Em andamento',
-        'Parado',
-        'Finalizado',
-      ],
-      selected_status: 'A iniciar',
-    }
-  },
-  methods: {
-    close () {
-      this.name = ''
-      this.dateInit = ''
-      this.dateEnd = ''
-      this.estimated_spend = ''
-      this.$emit('update:form', false)
-    },
 
-    async addStatusTarefa() {
-      const response = await this.getDocument(Firebase.firestore(), 'StatusTarefa', 'nome', this.selected_status)
-      if (response.status === 'empty') await this.firebaseCreate(Firebase.firestore(), 'StatusTarefa', this.selected_status, { nome: this.selected_status })
-    },
-
-    async addTarefa () {
-      await this.addStatusTarefa()
-      const i = this.task_names.indexOf(this.selected_task)
-      const start = new Date(this.dateInit + 'T00:00:00')
-      const end = new Date(this.dateEnd + 'T00:00:00')
-      const planned = (end - start) / 86400000
-      const elapsed = ((this.today - start) / 86400000) | 0
-      const data = {
-        name: this.name,
-        usuarioID: this.user, // responsavel => Para manter o padrão
-        start: this.dateInit,
-        end: this.dateEnd,
-        progress: (elapsed / planned) * 100,
-        dependencies: this.selected_task.length ? this.tasks[i].id : null,
-        status: this.selected_status,
-        cronograma_obra: this.cronograma_obra,
-        gasto_previsto: this.estimated_spend
-      }
-      const response = await this.firebaseCreate(Firebase.firestore(), 'Tarefa', null, data)
-      await this.firebaseUpdate(Firebase.firestore(), 'Tarefa', response.created_id, {id: response.created_id})
-      if (response.status === 'ok') {
-        this.message.title = "Tarefa cadastrada com sucesso!"
-      } else {
-        this.message.title = "Ocorreu um erro..."
-        this.message.text = response.error
-      }
-      this.modal = true
-      this.$emit('update:form', false)
-      this.$emit('update:refresh', true)
-    },
-  },
-}
-</script>
 <style lang="css">
 .btn-container-client {
   width: 11rem;

@@ -108,7 +108,7 @@
 // import Functions from '@/functions/Functions'
 import ResponseModal from '@/components/ResponseModal.vue'
 export default {
-  name: 'FormGantt',
+  name: 'ModalGantt',
   components: { ResponseModal },
   props: {
     form: Boolean,

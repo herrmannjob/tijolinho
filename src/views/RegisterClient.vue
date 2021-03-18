@@ -3,14 +3,14 @@
     <Drawer />
     <div class="content">
       <TopBar :email="email" />
-      <FormRegisterClient/>
+      <ModalRegisterClient/>
     </div>
   </div>
 </template>
 
 <script>
 // import { api, urls } from '../services/Api'
-import FormRegisterClient from '@/components/FormRegisterClient.vue'
+import ModalRegisterClient from '@/components/ModalRegisterClient.vue'
 import Drawer from '@/components/Drawer.vue'
 import TopBar from '@/components/TopBar.vue'
 import Firebase from "@/services/Firebase"
@@ -19,7 +19,7 @@ import Firebase from "@/services/Firebase"
 export default {
   name: 'Calendar',
   components: {
-    FormRegisterClient, Drawer, TopBar
+    ModalRegisterClient, Drawer, TopBar
   },
   data () {
     return {

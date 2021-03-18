@@ -1,162 +1,183 @@
 <template>
   <div class="components row list-clients">
-    <div class="btn-list">
-      <v-btn
-        color="primary"
-        class="btn-primario"
-        @click="openDialog()"
-        style="margin-bottom:0.5rem; margin-left:0; margin-top:0"
-      >
-        <v-icon>mdi-plus</v-icon>
-        <router-link class="link-client" to="/register-client">NOVO CLIENTE</router-link>
-      </v-btn>
-      <v-btn text>
-        Histórico
-      </v-btn>
-    </div>
-    <v-data-table
-      v-model="selected"
-      :single-select="singleSelect"
-      show-select
-      :headers="headers"
-      :items="clients"
-      item-key="id"
-      class="elevation-1"
-      :search="search"
-      :custom-filter="filter"
+    <v-btn
+      type="button"
+      color="primary"
+      class="btn-primario"
+      @click="showModal()"
+      style="margin: 2%;"
     >
-      <template v-slot:top>
-        <v-text-field
-          v-model="search"
-          label="Buscar cliente"
-          class="mx-4"
-        ></v-text-field>
-      </template>
-      
-    </v-data-table>
+      <v-icon style="margin-right: 5%;">mdi-plus</v-icon>
+      Novo Cliente
+    </v-btn>
+    <ModalRegisterClient
+      v-show="isModalVisible"
+      @close="closeModal"
+    ></ModalRegisterClient>
+    <v-col>
+      <v-tabs color="deep-purple accent-4" left>
+        <v-tab>Ativos</v-tab>
+        <v-tab>Inativos</v-tab>
+        <v-tab>Histórico</v-tab>
 
-    <v-speed-dial
-      v-if="selected.length"
-      v-model="fab"
-      bottom
-      right
-      direction="top"
-      transition="slide-y-reverse-transition"
-    >
-      <template v-slot:activator>
-        <v-btn
-          v-model="fab"
-          color="primary"
-          fab
-        >
-          <v-icon v-if="fab">
-            mdi-close
-          </v-icon>
-          <v-icon v-else>
-            mdi-dots-vertical
-          </v-icon>
-        </v-btn>
-      </template>
-      <v-btn
-        fab
-        dark
-        small
-        color="green"
-      >
-        <v-icon>mdi-pencil</v-icon>
-      </v-btn>
-      <v-btn
-        fab
-        dark
-        small
-        color="red"
-      >
-        <v-icon>mdi-delete</v-icon>
-      </v-btn>
-    </v-speed-dial>
+        <v-tab-item v-for="n in 3" :key="n">
+          <v-container fluid>
+            <v-row v-for="i in 6" :key="i">
+              <v-card max-width="100%" class="fill-width" style="margin-bottom: 1.5%;">
+                <v-list two-line>
+                  <v-list-item>
+                    <v-list-item-avatar class="mr-4">
+                      <v-img
+                        src="https://cdn.vuetifyjs.com/images/lists/ali.png"
+                      >
+                      </v-img>
+                    </v-list-item-avatar>
+                    <v-list-item-content class="ml-4 mr-4">
+                      <v-list-item-title>Gabriel</v-list-item-title>
+                      <v-list-item-subtitle>Nome</v-list-item-subtitle>
+                    </v-list-item-content>
+
+                    <v-list-item-content>
+                      <v-list-item-title>3</v-list-item-title>
+                      <v-list-item-subtitle>Obras</v-list-item-subtitle>
+                    </v-list-item-content>
+
+                    <v-list-item-icon>
+                      <v-btn primary icon class="ml-4 mr-4">
+                        <v-icon>mdi-account</v-icon>
+                      </v-btn>
+
+                      <v-btn primary icon class="mr-4">
+                        <v-icon>mdi-pencil</v-icon>
+                      </v-btn>
+
+                      <v-btn primary icon class="mr-4">
+                        <v-icon>mdi-phone-plus</v-icon>
+                      </v-btn>
+
+                      <v-btn primary icon class="mr-4">
+                        <v-icon>mdi-email</v-icon>
+                      </v-btn>
+
+                      <v-btn primary icon>
+                        <v-icon>mdi-dots-vertical</v-icon>
+                      </v-btn>
+                    </v-list-item-icon>
+                  </v-list-item>
+                </v-list>
+              </v-card>
+            </v-row>
+          </v-container>
+        </v-tab-item>
+      </v-tabs>
+    </v-col>
+
+    <!-- <v-data-iterator> </v-data-iterator> -->
   </div>
 </template>
 
 <script>
-import Firebase from "@/services/Firebase"
-import { FirebaseMixin } from "@/mixins/FirebaseMixin"
+import Firebase from "@/services/Firebase";
+import { FirebaseMixin } from "@/mixins/FirebaseMixin";
+import ModalRegisterClient from "@/components/ModalRegisterClient";
 export default {
   mixins: [FirebaseMixin],
   data() {
     return {
       today: "",
-      search: '',
+      search: "",
       clients: [
         {
-          title: "Nenhum cliente cadastrado"
+          title: "Nenhum cliente cadastrado",
         },
       ],
       singleSelect: true,
       selected: [],
-      user_email: '',
+      user_email: "",
       companies: [],
-    }
+      isModalVisible: false,
+    };
   },
-  async mounted () {
-    await Firebase.auth().onAuthStateChanged(user => {
+  components: { ModalRegisterClient },
+  async mounted() {
+    await Firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        this.user_email = user.email
-        this.getClients()
-      }
-      else this.$router.push("/")
-    })
+        this.user_email = user.email;
+        this.getClients();
+      } else this.$router.push("/");
+    });
   },
-  
   methods: {
-    filter (value, search) {
-      return value != null &&
-        search != null &&
-        typeof value === 'string' &&
-        value.toString().toLocaleLowerCase().indexOf(search.toLocaleLowerCase()) !== -1
+    showModal() {
+      this.isModalVisible = true;
     },
-    async getCompanies () {
-      const response = await this.getDocumentList(Firebase.firestore(), 'Empresa', 'usuarioID', this.user_email)
-      if (response.status === 'ok') {
-        this.companies = response.documents
+    closeModal() {
+      this.isModalVisible = false;
+    },
+    filter(value, search) {
+      return (
+        value != null &&
+        search != null &&
+        typeof value === "string" &&
+        value
+          .toString()
+          .toLocaleLowerCase()
+          .indexOf(search.toLocaleLowerCase()) !== -1
+      );
+    },
+    async getCompanies() {
+      const response = await this.getDocumentList(
+        Firebase.firestore(),
+        "Empresa",
+        "usuarioID",
+        this.user_email
+      );
+      if (response.status === "ok") {
+        this.companies = response.documents;
       }
     },
-    async getClients () {
-      await this.getCompanies()
+    async getClients() {
+      await this.getCompanies();
       if (this.companies.length) {
-        let client_ids = []
-        this.companies.map(company => {
-          company.usuarioID.map(client => {
-            if (client !== this.user_email) client_ids.push(client)
-          })
-        })
+        let client_ids = [];
+        this.companies.map((company) => {
+          company.usuarioID.map((client) => {
+            if (client !== this.user_email) client_ids.push(client);
+          });
+        });
         if (client_ids.length) {
-          this.clients = []
+          this.clients = [];
           client_ids.map(async (item) => {
-            const response = await this.getDocument(Firebase.firestore(), 'Usuario', 'id', item)
-            this.clients.push(response.documents[0].data)
-          })
+            const response = await this.getDocument(
+              Firebase.firestore(),
+              "Usuario",
+              "id",
+              item
+            );
+            this.clients.push(response.documents[0].data);
+          });
         }
       }
     },
   },
 
   computed: {
-    headers () {
+    headers() {
       return [
         {
-          text: 'Nome',
-          align: 'start',
-          value: 'nome',
+          text: "Nome",
+          align: "start",
+          value: "nome",
         },
         {
-          text: 'Telefone',
-          value: 'telefone',
+          text: "Telefone",
+          value: "telefone",
         },
         {
-          text: 'Email',
-          value: 'email'
-        }
-      ]
+          text: "Email",
+          value: "email",
+        },
+      ];
     },
   },
 };
@@ -165,44 +186,6 @@ export default {
 html,
 body {
   overflow-y: auto;
-}
-.teste1 {
-  flex: 0, 0 !important;
-}
-.paragrafo {
-  float: inline-start;
-  flex: 1 1;
-}
-.link-client {
-  color: aliceblue;
-  text-decoration: none;
-}
-
-.components {
-  padding: 20px;
-}
-.right-col > .title {
-  margin-top: 20px;
-}
-.card-right {
-  margin-top: 5px;
-  margin-bottom: 5px;
-  min-height: 60px;
-}
-.group-data {
-  align-items: flex-start;
-  flex-direction: row;
-  padding-left: 25px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-.group-data > p {
-  padding: 0;
-}
-.avatar {
-  display: flex;
-  width: 65px !important;
-  height: 65px !important;
 }
 .btn-list {
   display: flex;
@@ -213,7 +196,14 @@ body {
 .list-clients {
   flex-direction: column !important;
 }
-.v-speed-dial {
-  position: absolute !important;
+
+@media only screen and (max-width: 768px) {
+  .btn-primario .btn-cliente {
+    margin: 5%;
+  }
+
+  /* .btn-primario {
+    max-width: 120px;
+  } */
 }
 </style>

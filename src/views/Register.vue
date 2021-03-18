@@ -1,16 +1,16 @@
 <template>
   <div class="Login">
-    <FormRegister/>
+    <ModalRegister/>
   </div>
 </template>
 
 <script>
 
-import FormRegister from '@/components/FormRegister.vue'
+import ModalRegister from '@/components/ModalRegister.vue'
 export default {
   name: 'Register',
   components: {
-    FormRegister
+    ModalRegister
   },
 }
 </script>
