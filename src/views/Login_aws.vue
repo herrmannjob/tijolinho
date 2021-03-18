@@ -34,7 +34,7 @@ export default {
     try {
       this.user = await Auth.currentAuthenticatedUser()
       this.signedIn = true
-      this.$router.push('calendar')
+      this.$router.push('calendario')
     } catch (error) {
       console.log('erro: ', error)
       this.signedIn = false

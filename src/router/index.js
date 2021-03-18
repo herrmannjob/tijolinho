@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import FormLogin from '../views/Login.vue'
+import ModalLogin from '../views/Login.vue'
 import LoginAws from '../views/Login_aws.vue'
-import FormRegister from'../views/Register.vue'
+import ModalRegister from'../views/Register.vue'
 import ListClient from'../views/Client.vue'
-import FormRegisterClient from'../views/RegisterClient.vue'
+import ModalRegisterClient from'../views/RegisterClient.vue'
 import Calendar from'../views/Calendar.vue'
 import Schedule from'../views/Schedule.vue'
 import ResetLogin from'../views/ResetLogin.vue'
@@ -16,7 +16,7 @@ const routes = [
   {
     path: '/',
     name: 'Login',
-    component: FormLogin
+    component: ModalLogin
   },
   {
     path: '/aws',
@@ -24,32 +24,32 @@ const routes = [
     component: LoginAws
   },
   {
-    path: '/client',
+    path: '/clientes',
     name: 'ListClient',
     component:ListClient
   },
   {
-    path: '/register',
+    path: '/registro',
     name: 'Cadastro',
-    component: FormRegister
+    component: ModalRegister
   },
   {
-    path: '/calendar',
+    path: '/calendario',
     name: 'Calendar',
     component: Calendar
   },
   {
-    path: '/register-client',
+    path: '/registro-cliente',
     name: 'RegisterClient',
-    component: FormRegisterClient
+    component: ModalRegisterClient
   },
   {
-    path: '/schedule',
+    path: '/planejamento',
     name: 'Schedule',
     component: Schedule
   },
   {
-    path: '/reset',
+    path: '/resetar',
     name: 'ResetLogin',
     component: ResetLogin
   },

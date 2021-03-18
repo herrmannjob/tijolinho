@@ -10,13 +10,9 @@
       <!-- <v-list-item-avatar style="margin-right:10px">
         <v-img src="https://randomuser.me/api/portraits/women/85.jpg"></v-img>
       </v-list-item-avatar> -->
-      
+
       <span class="top-menu">
-        <v-menu
-          bottom
-          offset-y
-          class="extend_menu"
-        >
+        <v-menu bottom offset-y class="extend_menu mobile-menu">
           <template v-slot:activator="{ on, attrs }">
             <v-btn
               class="mx-2"
@@ -29,14 +25,9 @@
               <span style="color:white">{{ name }}</span>
             </v-btn>
           </template>
-          <v-list>
+          <v-list class="mobile-view">
             <div class="extend_icon_name">
-              <v-btn
-                class="mx-2"
-                fab
-                small
-                color="#002b4b"
-              >
+              <v-btn class="mx-2" fab small color="#002b4b">
                 <span style="color:white">{{ name }}</span>
               </v-btn>
               <div class="extend_name_email">
@@ -55,40 +46,30 @@
               <v-list-item-title>{{ option.title }}</v-list-item-title>
             </v-list-item>
             <v-list-item style="display:contents">
-              <v-btn
-                outlined
-                @click="logout"
-              >
+              <v-btn outlined @click="logout">
                 Sair
               </v-btn>
             </v-list-item>
           </v-list>
         </v-menu>
-        
       </span>
     </div>
 
-    <v-dialog
-      v-model="error_dialog"
-      max-width="290"
-    >
+    <v-dialog v-model="error_dialog" max-width="290">
       <v-card>
         <v-card-title class="headline">
           Erro
         </v-card-title>
 
         <v-card-text>
-          Tivemos um erro :(<br>
+          Tivemos um erro :(<br />
           {{ error }}
         </v-card-text>
 
         <v-card-actions>
           <v-spacer></v-spacer>
 
-          <v-btn
-            text
-            @click="error_dialog = false"
-          >
+          <v-btn text @click="error_dialog = false">
             Ok
           </v-btn>
         </v-card-actions>
@@ -98,65 +79,75 @@
 </template>
 
 <script>
-import Seed from '@/components/Seed'
-import Firebase from "@/services/Firebase"
-import { FirebaseMixin } from "@/mixins/FirebaseMixin"
+import Seed from "@/components/Seed";
+import Firebase from "@/services/Firebase";
+import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 export default {
-  name: 'TopBar',
+  name: "TopBar",
   components: {
-    Seed
+    Seed,
   },
   props: {
     email: String,
   },
   mixins: [FirebaseMixin],
-  data () {
+  data() {
     return {
       user: null,
-      username: '',
+      username: "",
       user_options: [
         {
-          title: 'Conta',
+          title: "Conta",
         },
         {
-          title: 'Configurações',
-        }
+          title: "Configurações",
+        },
       ],
       signedIn: false,
       error_dialog: false,
-      error: '',
-    }
+      error: "",
+    };
   },
-  async updated () {
-    const response = await this.getDocument(Firebase.firestore(), 'Usuario', 'email', this.email)
-    this.username = response.documents[0].data.nome
+  async updated() {
+    const response = await this.getDocument(
+      Firebase.firestore(),
+      "Usuario",
+      "email",
+      this.email
+    );
+    this.username = response.documents[0].data.nome;
   },
   computed: {
-    name: function () {
-      let initials = ''
-      this.username.split(" ").map(name => {
-        initials += name[0]
-      })
-      return initials.substr(0, 2)
-    }
+    name: function() {
+      let initials = "";
+      this.username.split(" ").map((name) => {
+        initials += name[0];
+      });
+      return initials.substr(0, 2);
+    },
   },
   methods: {
-    async logout () {
-      Firebase.auth().signOut().then(() => {
-        this.$router.push("/")
-      }).catch((error) => {
-        console.log('error: ', error)
-      })
-    }
-  }
-}
+    async logout() {
+      Firebase.auth()
+        .signOut()
+        .then(() => {
+          this.$router.push("/");
+        })
+        .catch((error) => {
+          console.log("error: ", error);
+        });
+    },
+  },
+};
 </script>
 <style lang="css">
-html, body {
- overflow-y: auto!important;
- height:100vh;
- width: 100vw !important;}
- 
+html,
+body {
+  overflow-y: auto !important;
+  height: 100vh;
+  width: 100vw !important;
+}
+
 .top-items {
   display: flex;
   align-items: center;
@@ -187,12 +178,25 @@ html, body {
 }
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */
-  body{
+
+  .home {
+    background-color: white !important;
+  }
+  body {
     overflow-x: auto;
     overflow-y: auto;
   }
-  .space {
-    display: none;
+
+  .v-menu__content {
+    width: auto !important;
+  }
+
+  .extend_icon_name {
+    display: flex;
+    flex-direction: column !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
   }
 }
 </style>
