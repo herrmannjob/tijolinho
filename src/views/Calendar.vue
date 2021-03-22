@@ -41,7 +41,7 @@ export default {
       username: "",
       constructions: [],
       constructions_names: [],
-      tasks: [{ titulo: "Nenhuma atividade" }],
+      tasks: [{ name: "Nenhuma atividade" }],
       form: false,
     };
   },
@@ -65,6 +65,42 @@ export default {
       );
       this.username = response.documents[0].data.nome;
     },
+    async getClients() {
+      await this.getCompanies();
+      if (this.companies.length > 0) {
+        let client_ids = [];
+        this.companies.map((company) => {
+          company.usuarioID.map((client) => {
+            if (client !== this.user_email) client_ids.push(client);
+          });
+        });
+        if (client_ids.length > 0) {
+          this.clients = [];
+          this.client_names = [];
+          client_ids.map(async (item) => {
+            const response = await this.getDocument(
+              Firebase.firestore(),
+              "Usuario",
+              "id",
+              item
+            );
+            this.clients.push(response.documents[0].data);
+            this.client_names.push(response.documents[0].data.nome);
+          });
+        }
+      }
+    },
+    async getCompanies() {
+      const response = await this.getDocumentList(
+        Firebase.firestore(),
+        "Empresa",
+        "usuarioID",
+        this.user_email
+      );
+      if (response.status === "ok") {
+        this.companies = response.documents;
+      }
+    },
     async getObras() {
       const response = await this.getDocument(
         Firebase.firestore(),
@@ -82,7 +118,7 @@ export default {
         this.getConstructionsTasks();
       }
     },
-    async getConstructionsTasks() {
+    async getTasks() {
       this.tasks = [];
       this.constructions.map(async (c) => {
         const response = await this.getDocument(
@@ -97,6 +133,52 @@ export default {
           });
         }
       });
+    },
+    async getAllTasks() {
+      await this.getParticularTasks();
+      await this.getConstructionsTasks();
+    },
+
+    async getConstructionsTasks() {
+      this.constructions_tasks = [];
+      this.constructions.map(async (c) => {
+        const response = await this.getDocument(
+          Firebase.firestore(),
+          "AgendaObra",
+          "obraID",
+          c.id
+        );
+        if (response.status === "ok") {
+          response.documents.map((item) => {
+            this.constructions_tasks.push(item.data);
+            this.calendarOptions.events.push({
+              title: item.data.titulo,
+              start: item.data.data_inicio,
+              end: item.data.data_fim,
+            });
+          });
+        }
+      });
+    },
+    async getParticularTasks() {
+      const response = await this.getDocument(
+        Firebase.firestore(),
+        "AgendaParticular",
+        "usuarioID",
+        this.user_email
+      );
+      if (response.status === "ok") {
+        this.particular_tasks = [];
+        this.calendarOptions.events = [];
+        response.documents.map((item) => {
+          this.particular_tasks.push(item.data);
+          this.calendarOptions.events.push({
+            title: item.data.titulo,
+            start: item.data.data_inicio.substr(0, 19) + "Z",
+            end: item.data.data_fim.substr(0, 19) + "Z",
+          });
+        });
+      }
     },
   },
 };
@@ -126,44 +208,19 @@ export default {
           <div>
             <v-container>
               <v-row dense>
-                <v-col v-for="(task, i) in items" :key="i" cols="12">
+                <v-col v-for="task in tasks" :key="task">
                   <v-card shaped :color="task.prioridade" dark>
-                    <div class="d-flex flex-no-wrap justify-space-between">
-                      <div>
-                        <v-card-title
-                          class="headline"
-                          v-text="task.titulo"
-                        ></v-card-title>
-
-                        <v-card-subtitle
-                          v-text="task.descricao"
-                        ></v-card-subtitle>
-                        <v-card-text style="text-align:center;">
-                          Início: {{ task.data_inicio }} - Fim: {{ task.data_fim }}
-                        </v-card-text>
-                        <v-card-actions>
-                          <v-btn
-                            class="ma-3"
-                            fab
-                            icon
-                            height="20px"
-                            right
-                            width="20px"
-                          >
-                            <v-icon>mdi-dots-vertical</v-icon>
-                          </v-btn>
-                        </v-card-actions>
-                      </div>
-
-                      <v-avatar class="mt-3" right size="100">
-                        <v-img :src="task.src"></v-img>
-                      </v-avatar>
-                    </div>
+                    <v-col>
+                      <v-card-subtitle v-text="task.name"> </v-card-subtitle>
+                      <v-card-text style="text-align:center;">
+                        Início: {{ task.start }} - Fim: {{ task.end }}
+                      </v-card-text>
+                    </v-col>
                   </v-card>
                 </v-col>
               </v-row>
             </v-container>
-            <v-card
+            <!-- <v-card
               class="card-right"
               color="primary"
               v-for="task in tasks"
@@ -174,24 +231,24 @@ export default {
                   <v-expansion-panel-header
                     style="padding-left:unset; padding-right:unset"
                   >
-                    <span>{{ task.titulo }}</span>
+                    <span>{{ task.name }}</span>
                   </v-expansion-panel-header>
                   <v-expansion-panel-content
-                    v-if="tasks[0].titulo !== 'Nenhuma atividade'"
+                    v-if="tasks[0].name !== 'Nenhuma atividade'"
                   >
                     <p style="text-align:left">
                       Descrição: {{ task.descricao }}
                     </p>
                     <p style="text-align:left; margin-top: 10px">
-                      Início: {{ task.data_inicio }}
+                      Início: {{ task.start }}
                     </p>
                     <p style="text-align:left; margin-top: 10px">
-                      Fim: {{ task.data_fim }}
+                      Fim: {{ task.end }}
                     </p>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
-            </v-card>
+            </v-card> -->
           </div>
         </div>
       </div>

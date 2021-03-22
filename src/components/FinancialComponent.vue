@@ -1,31 +1,25 @@
 <script>
-import ModalCalendar from "@/components/ModalCalendar";
+// import ModalCalendar from "@/components/ModalCalendar";
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 
 export default {
-  name: "SchedulerComponent",
-  components: { ModalCalendar },
+  name: "FinancialComponent",
+  //   components: { ModalCalendar },
   mixins: [FirebaseMixin],
   data: () => ({
-    calendar_view: "",
+    outlinedColor: "#002b4b",
+    gradientColor: "#00467a",
     client_names: [],
     clients: [],
     companies: [],
     constructions: [],
     constructions_names: [],
-    createEvent: null,
-    createStart: null,
-    date_clicked: "",
-    dragEvent: null,
-    dragStart: null,
     end: "",
     endMenu: false,
-    events: [],
     extendOriginal: null,
     form: false,
-    mode: "stack",
-    modes: ["stack", "column"],
+    parcelas: '',
     ready: false,
     refresh: false,
     selectedEvent: {},
@@ -33,78 +27,65 @@ export default {
     selectedOpen: false,
     start: "",
     startMenu: false,
-    type: "month",
-    types: ["month", "week", "day", "4day"],
-    typeToLabel: {
-      month: "Mês",
-      week: "Semana",
-      day: "Dia",
-      "4day": "4 dias",
-    },
     user_email: "",
     value: "",
-    weekday: [0, 1, 2, 3, 4, 5, 6],
-    weekdays: [],
-    colors: [
-      "#2196F3",
-      "#3F51B5",
-      "#673AB7",
-      "#00BCD4",
-      "#4CAF50",
-      "#FF9800",
-      "#757575",
+    dialog: false,
+    dialogDelete: false,
+    headers: [
+      {
+        text: "Descrição",
+        align: "start",
+        sortable: false,
+        value: "name",
+      },
+      { text: "Data", value: "data_solicitada" },
+      { text: "Fornecedor", value: "fornecedor" },
+      { text: "Pedido", value: "pedido" },
+      { text: "Anexos", value: "anexos" },
+      { text: "Forma de Pagamento", value: "pagamento" },
+      { text: "Parcelas", value: "parcelas" },
+      { text: "Vencimento", value: "data_vencimento" },
+      { text: "Valor", value: "valor_total" },
+      { text: "Actions", value: "actions", sortable: false },
     ],
-    names: [
-      "Meeting",
-      "Holiday",
-      "PTO",
-      "Travel",
-      "Event",
-      "Birthday",
-      "Conference",
-      "Party",
-    ],
-    eventos: "",
-    task_titulo: null,
-    task_cliente: null,
-    task_obra: null,
-    task_prioridade: null,
-    task_categoria: null,
-    task_observacao: null,
-    particular_tasks: [],
-    constructions_tasks: [],
-    user: null,
-    uid: "",
+    orcamentos: [],
+    editedIndex: -1,
+    editedItem: {},
+    defaultItem: {},
   }),
   computed: {
-    cal() {
-      return this.ready ? this.$refs.calendar : null;
-    },
-    nowY() {
-      return this.cal ? this.cal.timeToY(this.cal.times.now) + "px" : "-10px";
-    },
     formTitle() {
       return this.editedIndex === -1 ? "Novo Item" : "Editar Item";
     },
   },
+
+  watch: {
+    dialog(val) {
+      val || this.close();
+    },
+    dialogDelete(val) {
+      val || this.closeDelete();
+    },
+  },
+
+  created() {
+    this.initialize();
+  },
+
   async mounted() {
-    this.ready = true;
-    this.scrollToTime();
-    this.updateTime();
     await Firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
         this.user_email = user.email;
         await this.getUser();
         await this.getObras();
         await this.getClients();
-        await this.getAllTasks();
         await this.getTasks();
       }
     });
   },
   async updated() {
     if (this.refresh) {
-      await this.getAllTasks();
+      await this.getTasks();
       this.refresh = false;
     }
   },
@@ -445,203 +426,206 @@ export default {
     rndElement(arr) {
       return arr[this.rnd(0, arr.length - 1)];
     },
+    initialize() {
+      this.orcamentos;
+    },
+
+    editItem(item) {
+      this.editedIndex = this.orcamentos.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+      this.dialog = true;
+    },
+
+    deleteItem(item) {
+      this.editedIndex = this.orcamentos.indexOf(item);
+      this.editedItem = Object.assign({}, item);
+      this.dialogDelete = true;
+    },
+
+    deleteItemConfirm() {
+      this.orcamentos.splice(this.editedIndex, 1);
+      this.closeDelete();
+    },
+
+    close() {
+      this.dialog = false;
+      this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedIndex = -1;
+      });
+    },
+
+    closeDelete() {
+      this.dialogDelete = false;
+      this.$nextTick(() => {
+        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedIndex = -1;
+      });
+    },
+
+    save() {
+      if (this.editedIndex > -1) {
+        Object.assign(this.orcamentos[this.editedIndex], this.editedItem);
+      } else {
+        this.orcamentos.push(this.editedItem);
+      }
+      this.close();
+    },
   },
 };
 </script>
 
 <template>
-  <div>
-    <v-sheet tile height="54" class="d-flex menu-flex">
-      <v-btn icon class="ma-2" @click="prev()">
-        <v-icon class="icone-setas">mdi-chevron-left</v-icon>
+  <v-data-table
+    :headers="headers"
+    :items="orcamentos"
+    sort-by="data_solicitada"
+    class="elevation-1"
+    :single-expand="singleExpand"
+    :expanded.sync="expanded"
+    item-key="name"
+    show-expand
+  >
+    <template v-slot:top>
+      <v-toolbar flat>
+        <v-toolbar-title class="toolbar-text">Minhas Finanças</v-toolbar-title>
+        <v-divider class="mx-4" inset vertical></v-divider>
+        <v-spacer></v-spacer>
+        <v-dialog v-model="dialog" max-width="500px">
+          <template v-slot:activator="{ on, attrs }">
+            <vs-button
+              :color="outlinedColor"
+              :gradient-color-secondary="gradientColor"
+              type="gradient"
+              class="mb-2 button-font"
+              v-bind="attrs"
+              v-on="on"
+            >
+              Novo Item
+            </vs-button>
+          </template>
+          <v-card>
+            <v-card-title>
+              <span class="headline">{{ formTitle }}</span>
+            </v-card-title>
+
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.name"
+                      label="Descrição"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.data_solicitada"
+                      label="Data"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.fornecedor"
+                      label="Fornecedor"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.pedido"
+                      label="Pedido"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.anexos"
+                      label="Anexos"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.pagamento"
+                      label="Forma de Pagamento"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.parcelas"
+                      label="Parcelas"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.data_vencimento"
+                      label="Vencimento"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.valor_total"
+                      label="Valor"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="close">
+                Cancelar
+              </v-btn>
+              <v-btn color="blue darken-1" text @click="save">
+                Salvar
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+        <v-dialog v-model="dialogDelete" max-width="500px">
+          <v-card>
+            <v-card-title class="headline"
+              >Você realmente quer excluir este item?</v-card-title
+            >
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue darken-1" text @click="closeDelete">Não</v-btn>
+              <v-btn color="blue darken-1" text @click="deleteItemConfirm"
+                >Sim</v-btn
+              >
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </v-toolbar>
+    </template>
+    <template v-slot:item.actions="{ item }">
+      <v-icon small class="mr-2" @click="editItem(item)">
+        mdi-pencil
+      </v-icon>
+      <v-icon small @click="deleteItem(item)">
+        mdi-delete
+      </v-icon>
+    </template>
+    <template v-slot:no-data>
+      <v-btn color="primary" @click="initialize">
+        Limpar
       </v-btn>
-      <v-spacer></v-spacer>
-      <v-menu bottom right>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            class="tipo-calendario"
-            outlined
-            color="grey darken-2"
-            v-bind="attrs"
-            v-on="on"
-          >
-            <span class="fonte-btns">Calendário</span>
-            <v-icon class="icone-btns" right>
-              mdi-menu-down
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="type = 'day'">
-            <v-list-item-title>Dia</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = 'week'">
-            <v-list-item-title>Semana</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = 'month'">
-            <v-list-item-title>Mês</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = '4day'">
-            <v-list-item-title>4 Dias</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <v-menu bottom right>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            class="dias-da-semana ml-3 mr-3"
-            outlined
-            color="grey darken-2"
-            v-bind="attrs"
-            v-on="on"
-          >
-            <span class="fonte-btns">Dias da Semana</span>
-            <v-icon class="icone-btns" right>
-              mdi-menu-down
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="weekday = [0, 1, 2, 3, 4, 5, 6]">
-            <v-list-item-title>Dom - Sáb</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="weekday = [1, 2, 3, 4, 5, 6, 0]">
-            <v-list-item-title>Seg - Dom</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="weekday = [1, 2, 3, 4, 5]">
-            <v-list-item-title>Seg - Sex</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="weekday = [6, 0]">
-            <v-list-item-title>Final de Semana</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <v-menu bottom right>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            class="selecao-cliente"
-            outlined
-            color="grey darken-2"
-            v-bind="attrs"
-            v-on="on"
-          >
-            <span class="fonte-btns">Cliente</span>
-            <v-icon class="icone-btns" right>
-              mdi-menu-down
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-list v-for="cliente in clients" :key="cliente">
-          <v-list-item @click="clients">
-            <v-list-item-title>{{ cliente.nome }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <v-menu bottom right>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            class="ml-3 selecao-obra"
-            outlined
-            color="grey darken-2"
-            v-bind="attrs"
-            v-on="on"
-          >
-            <span class="fonte-btns">Obra</span>
-            <v-icon class="icone-btns" right>
-              mdi-menu-down
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-list v-for="obra in constructions" :key="obra">
-          <v-list-item @click="constructions">
-            <v-list-item-title>{{ obra.nome }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <v-spacer></v-spacer>
-      <v-btn icon class="ma-2" @click="next()">
-        <v-icon class="icone-setas">mdi-chevron-right</v-icon>
-      </v-btn>
-    </v-sheet>
-    <v-sheet height="600">
-      <v-calendar
-        ref="calendar"
-        v-model="value"
-        :weekdays="weekday"
-        :type="type"
-        :events="events"
-        :event-overlap-mode="mode"
-        :event-overlap-threshold="30"
-        :event-color="getEventColor"
-        :now="today"
-        color="primary"
-        @change="updateRange"
-        @mousedown:event="startDrag"
-        @mousedown:time="startTime"
-        @mousemove:time="mouseMove"
-        @mouseup:time="endDrag"
-        @mouseleave.native="cancelDrag"
-        @click:event="showEvent"
-        @click:more="viewDay"
-        @click:date="form = true"
-        @click="form = true"
-        ><template v-slot:event="{ event, timed, eventSummary }">
-          <div class="v-event-draggable" v-html="eventSummary()"></div>
-          <div
-            v-if="timed"
-            class="v-event-drag-bottom"
-            @mousedown.stop="extendBottom(event)"
-          ></div>
-        </template>
-        <template v-slot:day-body="{ date, week }">
-          <div
-            class="v-current-time"
-            :class="{ first: date === week[0].date }"
-            :style="{ top: nowY }"
-          ></div>
-        </template>
-      </v-calendar>
-      <v-menu
-        v-model="selectedOpen"
-        :close-on-content-click="false"
-        :activator="selectedElement"
-        offset-x
-      >
-        <v-card color="grey lighten-4" min-width="350px" flat>
-          <v-toolbar :color="selectedEvent.color" dark>
-            <v-btn icon @click="editItem(selectedEvent)">
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-            <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
-            <v-spacer></v-spacer>
-            <v-btn icon>
-              <v-icon>mdi-heart</v-icon>
-            </v-btn>
-            <v-btn icon>
-              <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
-          </v-toolbar>
-          <v-card-text>
-            <span v-html="selectedEvent.details"></span>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn text color="secondary" @click="selectedOpen = false">
-              Cancelar
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-menu>
-    </v-sheet>
-    <ModalCalendar
-      :form.sync="form"
-      :refresh.sync="refresh"
-      :date="date_clicked"
-      :user="user_email"
-    />
-  </div>
+    </template>
+    <template v-if="parcelas > 1" v-slot:expanded-item="{ headers, item }">
+      <td :colspan="headers.length">More info about {{ item.name }}</td>
+    </template>
+  </v-data-table>
 </template>
 
 <style scoped lang="scss">
+.toolbar-text {
+  font-family: "Comfortaa", cursive;
+}
+.button-font {
+  font-family: "Comfortaa", cursive !important;
+  font-size: 14px;
+  width: 15%;
+}
 .v-current-time {
   height: 2px;
   background-color: #ea4335;
@@ -702,30 +686,11 @@ export default {
 }
 
 @media only screen and (max-width: 1000px) {
-  .tipo-calendario {
-    width: 17% !important;
-  }
-
-  .dias-da-semana {
-    width: 20% !important;
-  }
-
-  .fonte-btns {
-    font-size: 9px;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    position: relative;
-  }
-
-  .icone-btns {
-    display: none;
+  .button-font {
+    font-family: "Comfortaa", cursive !important;
   }
 }
 
 @media only screen and (max-width: 768px) {
-  .icone-setas {
-    color: #002b4b !important;
-  }
 }
 </style>

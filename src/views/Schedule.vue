@@ -1,5 +1,6 @@
 <script>
 import Gantt from "@/components/Gantt.vue";
+import FinancialComponent from "@/components/FinancialComponent.vue";
 import Drawer from "@/components/Drawer.vue";
 import TopBar from "@/components/TopBar.vue";
 import ModalRegisterConstruction from "@/components/ModalRegisterConstruction";
@@ -13,12 +14,17 @@ export default {
     Drawer,
     TopBar,
     Gantt,
+    FinancialComponent,
     ModalRegisterConstruction,
     ModalRegisterTask,
   },
   mixins: [FirebaseMixin],
   data() {
     return {
+      showFinancialComponent: false,
+      showGanttTask: false,
+      outlinedColor: "#002b4b",
+      gradientColor: "#00467a",
       today: new Date(),
       user: null,
       user_email: "",
@@ -99,6 +105,12 @@ export default {
         });
       }
     },
+    async getObraSelecionada() {
+      if (this.selected.length && this.count) {
+        const i = this.constructions_names.indexOf(this.selected);
+        this.construction = this.constructions[i];
+      }
+    },
     async getConstructionData() {
       if (this.selected.length && this.count) {
         const i = this.constructions_names.indexOf(this.selected);
@@ -137,20 +149,25 @@ export default {
     },
     async showGantt() {
       await this.getTasks();
-      this.form_task = true;
+      this.showGanttTask = true;
+      this.showFinancialComponent = false;
+    },
+    showFinancial() {
+      this.showFinancialComponent = true;
+      this.showGanttTask = false;
     },
   },
   computed: {
-    tarefas: function () {
+    tarefas: function() {
       if (this.tasks.length) {
-        let tasks = []
-        this.tasks.map(item => {
-          tasks.push(item)
-        })
-        return tasks
-      } else return []
-    }
-  }
+        let tasks = [];
+        this.tasks.map((item) => {
+          tasks.push(item);
+        });
+        return tasks;
+      } else return [];
+    },
+  },
 };
 </script>
 <template>
@@ -168,13 +185,29 @@ export default {
           <p class="username">{{ username }}</p>
 
           <div class="group-data-schedule" data-app>
-            <v-select
-              :items="constructions_names"
-              label="Obra"
-              dense
-              v-model="selected"
-              :onselect="getConstructionData()"
-            ></v-select>
+            <template lang="html">
+              <div class="centerx">
+                <vs-button
+                  @click="form = true"
+                  :color="outlinedColor"
+                  :gradient-color-secondary="gradientColor"
+                  type="gradient"
+                  icon="add"
+                  class="btn-primary-sm"
+                >
+                  Obra</vs-button
+                >
+                <v-select
+                  class="select-items"
+                  :items="constructions_names"
+                  label="Obra"
+                  dense
+                  v-model="selected"
+                  :onselect="getConstructionData()"
+                ></v-select>
+              </div>
+            </template>
+
             <v-progress-linear
               v-model="completed"
               height="25"
@@ -182,54 +215,65 @@ export default {
             >
               <strong class="percentage">{{ Math.ceil(completed) }}%</strong>
             </v-progress-linear>
-            <v-btn color="primary" @click="form = true">
-              <v-icon dark left>
-                mdi-plus
-              </v-icon>
-              Nova Obra
-            </v-btn>
-            <v-btn color="primary" @click="form_task = true">
-              <v-icon dark left>
-                mdi-plus
-              </v-icon>
-              Novo Serviço
-            </v-btn>
-            <v-btn color="primary" outlined>
+            <vs-button
+              class="btn-primary-lg"
+              :color="outlinedColor"
+              type="border"
+              @click="showFinancial()"
+            >
               Financeiro
-            </v-btn>
-            <v-btn color="primary" outlined @click="showGantt()">
+            </vs-button>
+            <vs-button
+              class="btn-primary-lg"
+              :color="outlinedColor"
+              type="border"
+              @click="showGantt()"
+            >
               Cronograma
-            </v-btn>
+            </vs-button>
+            <div class="row cards-report">
+              <v-card elevation="2" shaped class="one-card card-color">
+                <v-card-text class="text-center">
+                  <div><span class="text-card">Tempo decorrido</span></div>
+                  <p class="text-content">{{ elapsed_time }} dias</p>
+                </v-card-text>
+              </v-card>
+              <v-card elevation="2" shaped class="one-card card-color">
+                <v-card-text class="text-center">
+                  <div><span class="text-card">Tempo planejado</span></div>
+                  <p class="text-content">{{ planned_time }} dias</p>
+                </v-card-text>
+              </v-card>
+            </div>
+            <div class="row cards-report">
+              <v-card elevation="2" shaped class="one-card card-color">
+                <v-card-text class="text-center">
+                  <div><span class="text-card">Total planejado</span></div>
+                  <p class="text-content">R$ {{ planned_money }}</p>
+                </v-card-text>
+              </v-card>
+              <v-card elevation="2" shaped class="one-card card-color">
+                <v-card-text class="text-center">
+                  <div><span class="text-card">Total gasto</span></div>
+                  <p class="text-content">R$ {{ spent_money }}</p>
+                </v-card-text>
+              </v-card>
+            </div>
           </div>
         </div>
         <div class="col-12 col-sm-7 col-md-9">
-          <div class="row cards-report">
-            <v-card elevation="2" shaped class="one-card card-passed-time">
-              <v-card-text class="text-center">
-                <div><span class="text-primary">Tempo decorrido</span></div>
-                <p class="text--primary">{{ elapsed_time }} dias</p>
-              </v-card-text>
-            </v-card>
-            <v-card elevation="2" shaped class="one-card card-plan-time">
-              <v-card-text class="text-center">
-                <div><span class="text-primary">Tempo planejado</span></div>
-                <p class="text--primary">{{ planned_time }} dias</p>
-              </v-card-text>
-            </v-card>
-            <v-card elevation="2" shaped class="one-card card-total-plan">
-              <v-card-text class="text-center">
-                <div><span class="text-primary">Total planejado</span></div>
-                <p class="text--primary">R$ {{ planned_money }}</p>
-              </v-card-text>
-            </v-card>
-            <v-card elevation="2" shaped class="one-card card-total-spent">
-              <v-card-text class="text-center">
-                <div><span class="text-primary">Total gasto</span></div>
-                <p class="text--primary">R$ {{ spent_money }}</p>
-              </v-card-text>
-            </v-card>
-          </div>
           <div class="row" style="padding: 10px">
+            <template v-if="showFinancialComponent == true">
+              <FinancialComponent />
+            </template>
+            <vs-button
+              v-if="showGanttTask == true"
+              class="btn-primary-lg"
+              :color="outlinedColor"
+              @click="form_task = true"
+            >
+              Novo Serviço
+            </vs-button>
             <template v-if="tasks.length">
               <Gantt :tarefas="tasks" />
             </template>
@@ -326,7 +370,7 @@ body {
   flex-direction: column;
   align-items: space-evenly;
   justify-content: center;
-  height: 40%;
+  height: 60%;
   padding-left: unset;
 }
 .group-data > p {
@@ -335,35 +379,43 @@ body {
 .primary {
   background-color: #2c3e50;
 }
-.text-primary {
-  color: #2c3e50;
+.text-card {
+  color: #fafafa !important;
+}
+.text-center {
+  text-align: center;
+  color: #fafafa !important;
+}
+.text-content {
+  color: white;
 }
 .percentage {
   color: #fafafa;
 }
-.text-center {
-  text-align: center;
-}
 .cards-report {
   justify-content: space-around;
   margin-top: 20px;
-  margin-bottom: 40px;
-  max-width: 95%;
 }
 .one-card {
-  width: 7em;
-  height: 7em;
+  width: 8em;
+  height: 6em;
 }
-.card-passed-time {
-  background-color: #f8f032 !important;
+.card-color {
+  background-color: #002b4b !important;
 }
-.card-plan-time {
-  background-color: #ff0be7 !important;
+.btn-primary-sm {
+  font-family: "Comfortaa", cursive;
+  height: 45%;
 }
-.card-total-plan {
-  background-color: #6c63ff !important;
+.btn-primary-lg {
+  font-family: "Comfortaa", cursive;
+  height: 55%;
 }
-.card-total-spent {
-  background-color: #3fe306 !important;
+.vs-button--text {
+  text-transform: uppercase !important;
+}
+.select-items {
+  width: 62%;
+  margin-left: 8%;
 }
 </style>

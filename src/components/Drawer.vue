@@ -1,24 +1,3 @@
-<template>
-  <div class="drawerBg">
-    <v-card class="left-drawer desktop-card">
-      <v-navigation-drawer v-model="drawer" permanent>
-        <v-list dense class="icons-group">
-          <v-list-item
-            v-for="item in items"
-            :key="item.title"
-            link
-            @click="item.method"
-          >
-            <v-list-item-icon>
-              <v-icon dark large>{{ item.icon }}</v-icon>
-            </v-list-item-icon>
-          </v-list-item>
-        </v-list>
-      </v-navigation-drawer>
-    </v-card>
-  </div>
-</template>
-
 <script>
 export default {
   name: "Drawer",
@@ -51,6 +30,29 @@ export default {
   },
 };
 </script>
+
+<template>
+  <div class="drawerBg">
+    <v-card class="left-drawer desktop-card">
+      <v-navigation-drawer v-model="drawer" permanent>
+        <v-list dense class="icons-group">
+          <v-list-item
+            v-for="item in items"
+            :key="item.title"
+            link
+            @click="item.method"
+          >
+            <v-list-item-icon>
+              <v-icon dark large>{{ item.icon }}</v-icon>
+            </v-list-item-icon>
+          </v-list-item>
+        </v-list>
+      </v-navigation-drawer>
+    </v-card>
+  </div>
+</template>
+
+
 <style lang="css">
 html,
 body {

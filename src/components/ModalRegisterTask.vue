@@ -28,7 +28,7 @@ export default {
       message: { title: "", text: "" },
       // tasks: [],
       selected_task: "",
-      status: ["A iniciar", "Em andamento", "Parado", "Finalizado"],
+      status: ["A iniciar", "Em andamento", "Finalizado"],
       selected_status: "A iniciar",
     };
   },
