@@ -2,10 +2,10 @@
 import image from "../assets/register.png";
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
-import ModalRegisterConstruction from "@/components/ModalRegisterConstruction";
+import ModalEditConstruction from "@/components/ModalEditConstruction";
 export default {
-  name: "ModalRegisterClient",
-  components: { ModalRegisterConstruction },
+  name: "ModalEditClient",
+  components: { ModalEditConstruction },
   mixins: [FirebaseMixin],
   props: {
     value: {
@@ -117,6 +117,47 @@ export default {
     });
   },
   methods: {
+    editarCliente(id) {
+      this.idParams = id;
+      this.isModalVisible = true;
+      this.getClients();
+    },
+    async getClients() {
+      await this.getCompanies();
+      if (this.companies.length) {
+        let client_ids = [];
+        this.companies.map((company) => {
+          company.usuarioID.map((client) => {
+            if (client !== this.user_email) client_ids.push(client);
+          });
+        });
+        if (client_ids.length) {
+          this.clients = [];
+          client_ids.map(async (item) => {
+            const response = await this.getDocument(
+              Firebase.firestore(),
+              "Usuario",
+              "id",
+              item
+            );
+            this.clients.push(response.documents[0].data);
+            this.nome.push(response.documents[0].data.nome);
+            this.TipoUsuario.push(response.documents[0].data.TipoUsuario);
+          });
+        }
+      }
+    },
+    async getCompanies() {
+      const response = await this.getDocumentList(
+        Firebase.firestore(),
+        "Empresa",
+        "usuarioID",
+        this.user_email
+      );
+      if (response.status === "ok") {
+        this.companies = response.documents;
+      }
+    },
     close() {
       this.$emit("close");
     },
@@ -412,7 +453,7 @@ export default {
                       </v-card-actions>
                     </v-card>
                   </v-dialog>
-                  <ModalRegisterConstruction
+                  <ModalEditConstruction
                     :form.sync="form"
                     :confirm.sync="confirm"
                     :refresh.sync="refresh"

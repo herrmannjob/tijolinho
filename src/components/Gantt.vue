@@ -13,13 +13,17 @@ export default {
     name: 'Gantt',
     props: {
         tarefas: Array,
+        viewMode: {
+            type: String,
+            required: false,
+            default: 'Month'
+        },
     },
     // mixins: [FirebaseMixin],
     data () {
         return {
             gantt: {},
             viewModeOptions: ['Quarter Day', 'Half Day', 'Day', 'Week', 'Month'],
-            viewMode: 'Day',
             tasks: this.tarefas
         }
     },

@@ -18,31 +18,15 @@ export default {
   },
   data() {
     return {
-      items: [
-        {
-          prioridade: "#1F7087",
-          src: "https://cdn.vuetifyjs.com/images/cards/foster.jpg",
-          titulo: "Maria Julia",
-          descricao: "Entrega de Cimento",
-          data_inicio: "9h",
-          data_fim: "11h",
-        },
-        {
-          prioridade: "#952175",
-          src: "https://cdn.vuetifyjs.com/images/cards/halcyon.png",
-          titulo: "Gabriel Herrmann",
-          descricao: "Entrega de Pisos",
-          data_inicio: "9h",
-          data_fim: "11h",
-        },
-      ],
-      today: "",
       user_email: "",
       username: "",
       constructions: [],
-      constructions_names: [],
-      tasks: [{ titulo: "Nenhuma atividade" }],
+      constructions_names: [{}],
+      constructions_tasks: [],
+      particular_tasks: [],
+      tasks: [{}],
       form: false,
+      events: [],
     };
   },
   async mounted() {
@@ -51,9 +35,17 @@ export default {
         this.user_email = user.email;
         await this.getUser();
         await this.getObras();
+        await this.getTasks();
       } else this.$router.push("/");
     });
-    this.today = moment().format("ll");
+    moment.locale("pt-br");
+    this.today = moment().format("LL");
+  },
+  async updated() {
+    if (this.refresh) {
+      await this.getTasks();
+      this.refresh = false;
+    }
   },
   methods: {
     async getUser() {
@@ -64,6 +56,42 @@ export default {
         this.user_email
       );
       this.username = response.documents[0].data.nome;
+    },
+    async getClients() {
+      await this.getCompanies();
+      if (this.companies.length > 0) {
+        let client_ids = [];
+        this.companies.map((company) => {
+          company.usuarioID.map((client) => {
+            if (client !== this.user_email) client_ids.push(client);
+          });
+        });
+        if (client_ids.length > 0) {
+          this.clients = [];
+          this.client_names = [];
+          client_ids.map(async (item) => {
+            const response = await this.getDocument(
+              Firebase.firestore(),
+              "Usuario",
+              "id",
+              item
+            );
+            this.clients.push(response.documents[0].data);
+            this.client_names.push(response.documents[0].data.nome);
+          });
+        }
+      }
+    },
+    async getCompanies() {
+      const response = await this.getDocumentList(
+        Firebase.firestore(),
+        "Empresa",
+        "usuarioID",
+        this.user_email
+      );
+      if (response.status === "ok") {
+        this.companies = response.documents;
+      }
     },
     async getObras() {
       const response = await this.getDocument(
@@ -82,8 +110,13 @@ export default {
         this.getConstructionsTasks();
       }
     },
+    async getTasks() {
+      await this.getParticularTasks();
+      await this.getConstructionsTasks();
+    },
+
     async getConstructionsTasks() {
-      this.tasks = [];
+      this.constructions_tasks = [];
       this.constructions.map(async (c) => {
         const response = await this.getDocument(
           Firebase.firestore(),
@@ -94,9 +127,39 @@ export default {
         if (response.status === "ok") {
           response.documents.map((item) => {
             this.tasks.push(item.data);
+            this.constructions_tasks.push({
+              data_fim: item.data.data_fim,
+              data_inicio: item.data.data_inicio,
+              descricao: item.data.descricao,
+              duracao: item.data.duracao,
+              id: item.data.id,
+              obraID: item.data.obraID,
+              prioridade: item.data.prioridade,
+              titulo: item.data.titulo,
+            });
           });
         }
       });
+    },
+    async getParticularTasks() {
+      const response = await this.getDocument(
+        Firebase.firestore(),
+        "AgendaParticular",
+        "usuarioID",
+        this.user_email
+      );
+      if (response.status === "ok") {
+        this.particular_tasks = [];
+        this.events = [];
+        response.documents.map((item) => {
+          this.particular_tasks.push(item.data);
+          this.events.push({
+            title: item.data.titulo,
+            start: item.data.data_inicio.substr(11, 5),
+            end: item.data.data_fim.substr(11, 5),
+          });
+        });
+      }
     },
   },
 };
@@ -122,76 +185,21 @@ export default {
           <div class="row date">
             <p class="col">Hoje {{ today }}</p>
           </div>
-
           <div>
-            <v-container>
-              <v-row dense>
-                <v-col v-for="(task, i) in items" :key="i" cols="12">
-                  <v-card shaped :color="task.prioridade" dark>
-                    <div class="d-flex flex-no-wrap justify-space-between">
-                      <div>
-                        <v-card-title
-                          class="headline"
-                          v-text="task.titulo"
-                        ></v-card-title>
-
-                        <v-card-subtitle
-                          v-text="task.descricao"
-                        ></v-card-subtitle>
-                        <v-card-text style="text-align:center;">
-                          Início: {{ task.data_inicio }} - Fim: {{ task.data_fim }}
-                        </v-card-text>
-                        <v-card-actions>
-                          <v-btn
-                            class="ma-3"
-                            fab
-                            icon
-                            height="20px"
-                            right
-                            width="20px"
-                          >
-                            <v-icon>mdi-dots-vertical</v-icon>
-                          </v-btn>
-                        </v-card-actions>
-                      </div>
-
-                      <v-avatar class="mt-3" right size="100">
-                        <v-img :src="task.src"></v-img>
-                      </v-avatar>
-                    </div>
-                  </v-card>
-                </v-col>
-              </v-row>
+            <v-container class="container-task">
+              <v-col v-for="item in events" :key="item">
+                <v-card shaped :color="item.prioridade" dark class="card-task">
+                  <v-col>
+                    <v-card-subtitle v-text="item.title"> </v-card-subtitle>
+                    <v-card-text>
+                      <!-- Início: {{ item.start }} - Fim: {{ item.end }} -->
+                      <div>Início: {{ item.start }}</div>
+                      <div>Fim: {{ item.end }}</div>
+                    </v-card-text>
+                  </v-col>
+                </v-card>
+              </v-col>
             </v-container>
-            <v-card
-              class="card-right"
-              color="primary"
-              v-for="task in tasks"
-              :key="task.id"
-            >
-              <v-expansion-panels accordion>
-                <v-expansion-panel>
-                  <v-expansion-panel-header
-                    style="padding-left:unset; padding-right:unset"
-                  >
-                    <span>{{ task.titulo }}</span>
-                  </v-expansion-panel-header>
-                  <v-expansion-panel-content
-                    v-if="tasks[0].titulo !== 'Nenhuma atividade'"
-                  >
-                    <p style="text-align:left">
-                      Descrição: {{ task.descricao }}
-                    </p>
-                    <p style="text-align:left; margin-top: 10px">
-                      Início: {{ task.data_inicio }}
-                    </p>
-                    <p style="text-align:left; margin-top: 10px">
-                      Fim: {{ task.data_fim }}
-                    </p>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
-            </v-card>
           </div>
         </div>
       </div>
@@ -224,41 +232,34 @@ body {
   padding-top: 20px;
   flex-wrap: unset;
 }
-.right-col {
-  overflow-y: -moz-hidden-unscrollable;
-}
 .right-col > .title {
   margin-top: 20px;
   margin-bottom: 20px;
   text-align: left;
 }
 
+.col {
+  overflow: auto !important;
+}
+
 .title {
   font-weight: bold;
+  font-family: "Comfortaa", cursive;
 }
 
 .card-right {
-  margin-top: 10px;
   margin-bottom: 10px;
   min-height: unset !important;
 }
-.group-data {
-  align-items: center;
-  padding-left: 25px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-.group-data > p {
-  padding: 0;
-}
-.avatar {
-  display: block;
-  width: 65px !important;
-  height: 65px !important;
-}
 .date {
   align-items: center;
-  margin-top: 20px;
+  margin-top: 1%;
+  font-family: "Comfortaa", cursive;
+}
+.container-task {
+  height: 100px !important;
+  overflow: visible;
+  padding: 0 !important;
 }
 
 @media only screen and (min-width: 769px) and (max-width: 1024px) {

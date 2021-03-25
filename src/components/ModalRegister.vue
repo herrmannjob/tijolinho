@@ -569,10 +569,6 @@ img {
     overflow-y: auto;
   }
 
-  /* .v-btn {
-    margin-top: 2rem;
-  } */
-
   body {
     overflow-x: auto;
     overflow-y: auto;

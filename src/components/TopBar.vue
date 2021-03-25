@@ -1,3 +1,72 @@
+<script>
+import Seed from "@/components/Seed";
+import Firebase from "@/services/Firebase";
+import { FirebaseMixin } from "@/mixins/FirebaseMixin";
+export default {
+  name: "TopBar",
+  components: {
+    Seed,
+  },
+  props: {
+    email: String,
+  },
+  mixins: [FirebaseMixin],
+  data() {
+    return {
+      user: null,
+      username: "",
+      user_options: [
+        {
+          title: "Conta", method: this.account
+        },
+        {
+          title: "Configurações", method: this.settings
+        },
+      ],
+      signedIn: false,
+      error_dialog: false,
+      error: "",
+      outlinedColor: "#002b4b",
+    };
+  },
+  async updated() {
+    const response = await this.getDocument(
+      Firebase.firestore(),
+      "Usuario",
+      "email",
+      this.email
+    );
+    this.username = response.documents[0].data.nome;
+  },
+  computed: {
+    name: function() {
+      let initials = "";
+      this.username.split(" ").map((name) => {
+        initials += name[0];
+      });
+      return initials.substr(0, 2);
+    },
+  },
+  methods: {
+    async logout() {
+      Firebase.auth()
+        .signOut()
+        .then(() => {
+          this.$router.push("/");
+        })
+        .catch((error) => {
+          console.log("error: ", error);
+        });
+    },
+    account() {
+      this.$router.push("conta");
+    },
+    settings() {
+      this.$router.push("configuracoes");
+    },
+  },
+};
+</script>
 <template>
   <v-app-bar>
     <v-spacer class="space"></v-spacer>
@@ -32,23 +101,24 @@
               </v-btn>
               <div class="extend_name_email">
                 <strong>{{ username }}</strong>
-                <span style="color:gray">{{ email }}</span>
+                <span class="email_menu" style="color:gray">{{ email }}</span>
               </div>
             </div>
           </v-list>
-          <v-divider></v-divider>
           <v-list>
             <v-list-item
               v-for="(option, i) in user_options"
               :key="i"
-              @click="() => {}"
+              link
+              @click="option.method"
             >
               <v-list-item-title>{{ option.title }}</v-list-item-title>
             </v-list-item>
             <v-list-item style="display:contents">
-              <v-btn outlined @click="logout">
+              <vs-button class="btn-primary-sm" :color="outlinedColor"
+              type="border" @click="logout">
                 Sair
-              </v-btn>
+              </vs-button>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -78,68 +148,6 @@
   </v-app-bar>
 </template>
 
-<script>
-import Seed from "@/components/Seed";
-import Firebase from "@/services/Firebase";
-import { FirebaseMixin } from "@/mixins/FirebaseMixin";
-export default {
-  name: "TopBar",
-  components: {
-    Seed,
-  },
-  props: {
-    email: String,
-  },
-  mixins: [FirebaseMixin],
-  data() {
-    return {
-      user: null,
-      username: "",
-      user_options: [
-        {
-          title: "Conta",
-        },
-        {
-          title: "Configurações",
-        },
-      ],
-      signedIn: false,
-      error_dialog: false,
-      error: "",
-    };
-  },
-  async updated() {
-    const response = await this.getDocument(
-      Firebase.firestore(),
-      "Usuario",
-      "email",
-      this.email
-    );
-    this.username = response.documents[0].data.nome;
-  },
-  computed: {
-    name: function() {
-      let initials = "";
-      this.username.split(" ").map((name) => {
-        initials += name[0];
-      });
-      return initials.substr(0, 2);
-    },
-  },
-  methods: {
-    async logout() {
-      Firebase.auth()
-        .signOut()
-        .then(() => {
-          this.$router.push("/");
-        })
-        .catch((error) => {
-          console.log("error: ", error);
-        });
-    },
-  },
-};
-</script>
 <style lang="css">
 html,
 body {
@@ -168,13 +176,22 @@ body {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
-  padding: 5px;
+  justify-content: space-evenly;
+  padding: 1%;
 }
 .extend_name_email {
   display: flex;
   flex-direction: column;
-  align-items: baseline;
+  align-items: center;
+}
+
+.email_menu {
+  font-size: 11px;
+}
+
+.btn-primary-sm {
+  font-family: "Comfortaa", cursive;
+  height: 45%;
 }
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */
@@ -197,6 +214,11 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 1rem;
+  }
+
+  .btn-primary-sm {
+  font-family: "Comfortaa", cursive;
+  height: 40% !important;
   }
 }
 </style>
