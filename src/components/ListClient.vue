@@ -2,6 +2,7 @@
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 import ModalRegisterClient from "@/components/ModalRegisterClient";
+import ModalEditClient from "@/components/ModalEditClient";
 export default {
   mixins: [FirebaseMixin],
   data() {
@@ -19,10 +20,19 @@ export default {
       selected: [],
       user_email: "",
       companies: [],
-      isModalVisible: false,
+      editModal: false,
+      registerModal: false,
+      nome: [],
+      email: [],
+      telefone: [],
+      data_nascimento: [],
+      nome_conjuge: [],
+      data_nascimento_conjuge: [],
+      TipoUsuario: [],
+      idParams: "",
     };
   },
-  components: { ModalRegisterClient },
+  components: { ModalRegisterClient, ModalEditClient },
   async mounted() {
     await Firebase.auth().onAuthStateChanged((user) => {
       if (user) {
@@ -32,11 +42,37 @@ export default {
     });
   },
   methods: {
-    showModal() {
-      this.isModalVisible = true;
+    showEditModal(id) {
+      this.idParams = id;
+      this.editModal = true;
     },
-    closeModal() {
-      this.isModalVisible = false;
+    showRegisterModal() {
+      this.registerModal = true;
+    },
+    closeEditModal() {
+      this.editModal = false;
+    },
+    closeRegisterModal() {
+      this.registerModal = false;
+    },
+    linkWhatsApp() {
+      let number = 5551980478617;
+      let message = "teste".split(" ").join("%20");
+
+      // return console.log(
+      //   "https://api.whatsapp.com/send?phone=" + number + "&text=%20" + message
+      // );
+
+      var url =
+        "https://api.whatsapp.com/send?phone=" +
+        number +
+        "&text=" +
+        encodeURIComponent(message);
+
+      window.open(url);
+    },
+    sendEmail() {
+      window.open("mailto:herrmannjob@gmail.com?subject=teste&body=testando");
     },
     async getCompanies() {
       const response = await this.getDocumentList(
@@ -48,6 +84,9 @@ export default {
       if (response.status === "ok") {
         this.companies = response.documents;
       }
+    },
+    rotaCronograma() {
+      this.$router.push("planejamento");
     },
     async getClients() {
       await this.getCompanies();
@@ -68,6 +107,8 @@ export default {
               item
             );
             this.clients.push(response.documents[0].data);
+            this.nome.push(response.documents[0].data.nome);
+            this.TipoUsuario.push(response.documents[0].data.TipoUsuario);
           });
         }
       }
@@ -81,48 +122,48 @@ export default {
     <div>
       <vs-button
         :color="outlinedColor"
-        :gradient-color-secondary="gradientColor"
-        type="gradient"
         class="btn-primary-extra-lg"
-        @click="showModal()"
+        @click="showRegisterModal()"
         style="margin: 2%;"
-        icon="add"
-      >
+        icon
+        ><box-icon name="plus"></box-icon>
         Novo Cliente
       </vs-button>
     </div>
     <ModalRegisterClient
-      v-show="isModalVisible"
-      @close="closeModal"
+      v-show="registerModal"
+      @close="closeRegisterModal"
     ></ModalRegisterClient>
     <v-col>
       <v-tabs color="deep-purple accent-4" left>
         <v-tab>Ativos</v-tab>
         <v-tab>Inativos</v-tab>
-        <v-tab>Histórico</v-tab>
 
-        <v-tab-item v-for="n in 3" :key="n">
+        <v-tab-item v-for="n in 2" :key="n">
           <v-container fluid>
-            <v-row v-for="client in clients" :key="client">
+            <v-row v-for="(client, index) in clients" :key="index">
               <v-card
                 max-width="100%"
-                class="fill-width"
+                class="fill-width each-card"
                 style="margin-bottom: 1.5%;"
               >
                 <v-list two-line>
                   <v-list-item>
-                    <v-list-item-avatar class="mr-4">
+                    <v-list-item-avatar class="mr-4" @click="rotaCronograma()">
                       <v-img
                         src="https://cdn.vuetifyjs.com/images/lists/ali.png"
                       >
                       </v-img>
                     </v-list-item-avatar>
-                    <v-list-item-content class="ml-4 mr-4">
+                    <v-list-item-content
+                      class="ml-4 mr-4"
+                      @click="rotaCronograma()"
+                    >
                       <v-list-item-title>{{ client.nome }}</v-list-item-title>
                       <v-list-item-subtitle>Nome</v-list-item-subtitle>
                     </v-list-item-content>
 
-                    <v-list-item-content>
+                    <v-list-item-content @click="rotaCronograma()">
                       <v-list-item-title>{{ client.email }}</v-list-item-title>
                       <v-list-item-subtitle>Obras</v-list-item-subtitle>
                     </v-list-item-content>
@@ -132,21 +173,26 @@ export default {
                         <v-icon>mdi-account</v-icon>
                       </v-btn>
 
-                      <v-btn primary icon class="mr-4">
+                      <v-btn
+                        primary
+                        icon
+                        class="mr-4"
+                        @click="showEditModal(client.id)"
+                      >
                         <v-icon>mdi-pencil</v-icon>
                       </v-btn>
 
-                      <v-btn primary icon class="mr-4">
+                      <v-btn primary icon class="mr-4" @click="linkWhatsApp()">
                         <v-icon>mdi-phone-plus</v-icon>
                       </v-btn>
 
-                      <v-btn primary icon class="mr-4">
+                      <v-btn primary icon class="mr-4" @click="sendEmail()">
                         <v-icon>mdi-email</v-icon>
                       </v-btn>
 
-                      <v-btn primary icon>
+                      <!-- <v-btn primary icon>
                         <v-icon>mdi-dots-vertical</v-icon>
-                      </v-btn>
+                      </v-btn> -->
                     </v-list-item-icon>
                   </v-list-item>
                 </v-list>
@@ -155,6 +201,12 @@ export default {
           </v-container>
         </v-tab-item>
       </v-tabs>
+      <ModalEditClient
+        v-show="editModal"
+        @close="closeEditModal"
+        :idParams="this.idParams"
+        :firstname="this.nome"
+      ></ModalEditClient>
     </v-col>
 
     <!-- <v-data-iterator> </v-data-iterator> -->
@@ -178,6 +230,9 @@ body {
 .btn-primary-extra-lg {
   font-family: "Comfortaa", cursive;
   width: 20%;
+}
+.each-card {
+  width: 100%;
 }
 
 @media only screen and (max-width: 768px) {

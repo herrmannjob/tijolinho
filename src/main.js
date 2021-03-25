@@ -8,16 +8,12 @@ import VueFlexLayout from "@jporto/vue-flex-layout";
 import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
-import { vsButton, vsSelect, vsPopup } from "vuesax";
-import Vuesax from 'vuesax'
+import Vuesax from '../node_modules/vuesax'
 import "vuesax/dist/vuesax.css";
 import 'material-icons/iconfont/material-icons.css';
+import 'boxicons';
 
 Vue.use(Vuesax);
-Vue.use(vsButton);
-Vue.use(vsSelect);
-Vue.use(vsPopup);
-
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
 Vue.use(VueFlexLayout);

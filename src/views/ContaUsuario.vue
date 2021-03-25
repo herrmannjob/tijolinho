@@ -1,28 +1,20 @@
 <script>
-import Gantt from "@/components/Gantt.vue";
-import FinancialComponent from "@/components/FinancialComponent.vue";
 import Drawer from "@/components/Drawer.vue";
 import TopBar from "@/components/TopBar.vue";
-import ModalRegisterConstruction from "@/components/ModalRegisterConstruction";
-import ModalRegisterTask from "@/components/ModalRegisterTask";
+import ModalRegister from "@/components/ModalRegister.vue";
 import Firebase from "@/services/Firebase";
-import { FirebaseMixin } from "@/mixins/FirebaseMixin";
-import "boxicons";
+import { FirebaseMixin } from "@/mixins/FirebaseMixin"
 
 export default {
-  name: "Schedule",
+  name: "ContaUsuario",
   components: {
     Drawer,
     TopBar,
-    Gantt,
-    FinancialComponent,
-    ModalRegisterConstruction,
-    ModalRegisterTask,
+    ModalRegister,
   },
   mixins: [FirebaseMixin],
   data() {
     return {
-      active: 0,
       showFinancialComponent: false,
       showGanttTask: false,
       outlinedColor: "#002b4b",
@@ -48,7 +40,6 @@ export default {
       planned_money: "",
       spent_money: "",
       count: true,
-      mode: "week",
     };
   },
   async updated() {
@@ -159,9 +150,6 @@ export default {
       this.showFinancialComponent = true;
       this.showGanttTask = false;
     },
-    demoViewMode(viewMode) {
-      this.mode = viewMode;
-    },
   },
   computed: {
     tarefas: function() {
@@ -192,20 +180,22 @@ export default {
 
           <div class="group-data-schedule" data-app>
             <template lang="html">
-              <div class="centerx row adicionar-obra">
+              <div class="centerx">
                 <vs-button
                   @click="form = true"
-                  color="#002b4b"
-                  border
-                  icon
+                  :color="outlinedColor"
+                  :gradient-color-secondary="gradientColor"
+                  type="gradient"
+                  icon="add"
                   class="btn-primary-sm"
-                  ><box-icon name="plus"></box-icon
-                ></vs-button>
-
+                >
+                  Obra</vs-button
+                >
                 <v-select
-                  class="select-obra"
+                  class="select-items"
                   :items="constructions_names"
                   label="Obra"
+                  dense
                   v-model="selected"
                   :onselect="getConstructionData()"
                 ></v-select>
@@ -215,25 +205,24 @@ export default {
             <v-progress-linear
               v-model="completed"
               height="25"
-              v-if="showGanttTask == true"
-              class="progress-schedule"
+              v-if="selected.length"
             >
               <strong class="percentage">{{ Math.ceil(completed) }}%</strong>
             </v-progress-linear>
             <vs-button
-              v-if="selected.length"
+            v-if="selected.length"
               class="btn-primary-lg"
-              color="#002b4b"
-              border
+              :color="outlinedColor"
+              type="border"
               @click="showFinancial()"
             >
               Financeiro
             </vs-button>
             <vs-button
-              v-if="selected.length"
+             v-if="selected.length"
               class="btn-primary-lg"
-              color="#002b4b"
-              border
+              :color="outlinedColor"
+              type="border"
               @click="showGantt()"
             >
               Cronograma
@@ -269,33 +258,23 @@ export default {
           </div>
         </div>
         <div class="col-12 col-sm-7 col-md-9">
-          <div style="padding: 10px">
+          <div class="row" style="padding: 10px">
             <template v-if="showFinancialComponent == true">
-              <FinancialComponent />
+              <ModalRegister />
             </template>
             <vs-button
               v-if="showGanttTask == true"
               class="btn-primary-lg"
-              color="#002b4b"
-              gradient
+              :color="outlinedColor"
               @click="form_task = true"
             >
               Novo Serviço
             </vs-button>
-            <template v-if="showGanttTask == true && tasks.length">
-              <Gantt :tarefas="tasks" :view-mode="mode" />
+            <template v-if="tasks.length">
+              <Gantt :tarefas="tasks" />
             </template>
-            <vs-button v-if="showGanttTask == true" color="#002b4b" gradient @click="demoViewMode('day')"
-              >Dia</vs-button
-            >
-            <vs-button v-if="showGanttTask == true" color="#002b4b" gradient @click="demoViewMode('week')"
-              >Semana</vs-button
-            >
-            <vs-button v-if="showGanttTask == true" color="#002b4b" gradient @click="demoViewMode('month')"
-              >Mês</vs-button
-            >
             <template v-if="tasks.length > 0">
-              <!-- <v-card
+              <v-card
                 class="card-right"
                 color="primary"
                 v-for="task in tasks"
@@ -326,7 +305,7 @@ export default {
                     </v-expansion-panel-content>
                   </v-expansion-panel>
                 </v-expansion-panels>
-              </v-card> -->
+              </v-card>
             </template>
           </div>
         </div>
@@ -389,7 +368,6 @@ body {
   justify-content: center;
   height: 60%;
   padding-left: unset;
-  margin-right: 1%;
 }
 .group-data > p {
   padding: 0;
@@ -423,33 +401,17 @@ body {
 }
 .btn-primary-sm {
   font-family: "Comfortaa", cursive;
-  height: 40%;
-  max-height: 40px;
-  margin-left: 1.45em !important;
-  padding-bottom: 1%;
+  height: 45%;
 }
 .btn-primary-lg {
-  height: 50px !important;
-  max-height: 55%;
+  font-family: "Comfortaa", cursive;
+  height: 55%;
 }
-.vs-button {
-  font-family: "Comfortaa", cursive !important;
+.vs-button--text {
   text-transform: uppercase !important;
 }
-.select-obra {
-  width: 62% !important;
-  margin-left: 2%;
-}
-.adicionar-obra {
-  max-width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-.progress-schedule {
-  border-radius: 10px;
-  max-width: 250px;
-  margin-left: 1.1%;
+.select-items {
+  width: 62%;
+  margin-left: 8%;
 }
 </style>

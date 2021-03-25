@@ -2,69 +2,60 @@
 import ModalCalendar from "@/components/ModalCalendar";
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
+// import { db } from '../services/Firebase.js'
 
 export default {
   name: "SchedulerComponent",
   components: { ModalCalendar },
   mixins: [FirebaseMixin],
   data: () => ({
-    calendar_view: "",
     client_names: [],
     clients: [],
+    clienteSelecionado: "",
+    color: "primary",
     companies: [],
     constructions: [],
     constructions_names: [],
     createEvent: null,
     createStart: null,
+    currentlyEditing: null,
     date_clicked: "",
+    details: null,
+    dialog: false,
+    dialogDate: false,
     dragEvent: null,
     dragStart: null,
-    end: "",
+    end: null,
     endMenu: false,
     events: [],
     extendOriginal: null,
+    focus: new Date().toISOString().substr(0, 10),
     form: false,
     mode: "stack",
     modes: ["stack", "column"],
+    name: null,
+    obraSelecionada: "",
     ready: false,
     refresh: false,
     selectedEvent: {},
     selectedElement: null,
     selectedOpen: false,
-    start: "",
+    start: null,
     startMenu: false,
+    today: new Date().toISOString().substr(0, 10),
     type: "month",
-    types: ["month", "week", "day", "4day"],
+    typeChange: "",
+    select_view: ["Dia", "Semana", "Mês"],
+    types: ["month", "week", "day"],
     typeToLabel: {
       month: "Mês",
       week: "Semana",
       day: "Dia",
-      "4day": "4 dias",
     },
     user_email: "",
-    value: "",
     weekday: [0, 1, 2, 3, 4, 5, 6],
+    weekdayChange: "",
     weekdays: [],
-    colors: [
-      "#2196F3",
-      "#3F51B5",
-      "#673AB7",
-      "#00BCD4",
-      "#4CAF50",
-      "#FF9800",
-      "#757575",
-    ],
-    names: [
-      "Meeting",
-      "Holiday",
-      "PTO",
-      "Travel",
-      "Event",
-      "Birthday",
-      "Conference",
-      "Party",
-    ],
-    eventos: "",
     task_titulo: null,
     task_cliente: null,
     task_obra: null,
@@ -91,20 +82,20 @@ export default {
     this.ready = true;
     this.scrollToTime();
     this.updateTime();
+    this.getEvents()
     await Firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
         this.user_email = user.email;
         await this.getUser();
         await this.getObras();
         await this.getClients();
-        await this.getAllTasks();
         await this.getTasks();
       }
     });
   },
   async updated() {
     if (this.refresh) {
-      await this.getAllTasks();
+      await this.getTasks();
       this.refresh = false;
     }
   },
@@ -173,22 +164,6 @@ export default {
       }
     },
     async getTasks() {
-      this.tasks = [];
-      this.constructions.map(async (c) => {
-        const response = await this.getDocument(
-          Firebase.firestore(),
-          "AgendaObra",
-          "obraID",
-          c.id
-        );
-        if (response.status === "ok") {
-          response.documents.map((item) => {
-            this.tasks.push(item.data);
-          });
-        }
-      });
-    },
-    async getAllTasks() {
       await this.getParticularTasks();
       await this.getConstructionsTasks();
     },
@@ -205,16 +180,17 @@ export default {
         if (response.status === "ok") {
           response.documents.map((item) => {
             this.constructions_tasks.push(item.data);
-            this.calendarOptions.events.push({
-              title: item.data.titulo,
-              start: item.data.data_inicio,
-              end: item.data.data_fim,
+            this.events.push({
+              title: item.titulo,
+              start: item.data_inicio,
+              end: item.data_fim,
             });
           });
         }
       });
     },
     async getParticularTasks() {
+      const events = [];
       const response = await this.getDocument(
         Firebase.firestore(),
         "AgendaParticular",
@@ -223,16 +199,75 @@ export default {
       );
       if (response.status === "ok") {
         this.particular_tasks = [];
-        this.calendarOptions.events = [];
         response.documents.map((item) => {
           this.particular_tasks.push(item.data);
-          this.calendarOptions.events.push({
-            title: item.data.titulo,
+          events.push({
+            name: item.data.titulo,
+            details: item.data.prioridade,
             start: item.data.data_inicio.substr(0, 19) + "Z",
             end: item.data.data_fim.substr(0, 19) + "Z",
           });
         });
       }
+      this.events = events;
+    },
+    getEventColor (event) {
+      return event.color
+    },
+    // async getEvents () {
+    //   let snapshot = await db.collection('calEvent').get()
+    //   const events = []
+    //   snapshot.forEach(doc => {
+    //     let appData = doc.data()
+    //     appData.id = doc.id
+    //     events.push(appData)
+    //   })
+    //   this.events = events
+    // },
+    async getEvents() {
+      const events = [];
+
+      this.constructions_tasks = [];
+      this.constructions.map(async (c) => {
+        const response = await this.getDocument(
+          Firebase.firestore(),
+          "AgendaObra",
+          "obraID",
+          c.id
+        );
+        if (response.status === "ok") {
+          response.documents.map((item) => {
+            this.constructions_tasks.push(item.data);
+            this.events.push({
+              name: item.data.titulo,
+              details: item.data.prioridade,
+              start: item.data.data_inicio.substr(0, 10),
+              end: item.data.data_fim.substr(0, 10),
+            });
+          });
+        }
+      });
+
+      const response = await this.getDocument(
+        Firebase.firestore(),
+        "AgendaParticular",
+        "usuarioID",
+        this.user_email
+      );
+      if (response.status === "ok") {
+        this.particular_tasks = [];
+        response.documents.map((item) => {
+          this.particular_tasks.push(item.data);
+          this.events.push({
+            name: item.data.titulo,
+            details: item.data.prioridade,
+            start: item.data.data_inicio.substr(0, 10),
+            end: item.data.data_fim.substr(0, 10),
+          });
+        });
+      }
+
+      this.events = events;
     },
     getCurrentTime() {
       return this.cal
@@ -256,12 +291,30 @@ export default {
       this.focus = date;
       this.type = "day";
     },
+    setToday () {
+      this.focus = this.today
+    },
     prev() {
       this.$refs.calendar.prev();
     },
     next() {
       this.$refs.calendar.next();
     },
+    editEvent(ev) {
+      this.currentlyEditing = ev.id;
+    },
+    // async updateEvent (ev) {
+    //   await db.collection('calEvent').doc(this.currentlyEditing).update({
+    //     details: ev.details
+    //   })
+    //   this.selectedOpen = false,
+    //   this.currentlyEditing = null
+    // },
+    // async deleteEvent (ev) {
+    //   await db.collection("calEvent").doc(ev).delete()
+    //   this.selectedOpen = false,
+    //   this.getEvents()
+    // },
     showEvent({ nativeEvent, event }) {
       const open = () => {
         this.selectedEvent = event;
@@ -281,30 +334,37 @@ export default {
       nativeEvent.stopPropagation();
     },
     updateRange({ start, end }) {
-      const events = [];
-
-      const min = new Date(`${start.date}T00:00:00`);
-      const max = new Date(`${end.date}T23:59:59`);
-      const days = (max.getTime() - min.getTime()) / 86400000;
-      const eventCount = this.rnd(days, days + 20);
-
-      for (let i = 0; i < eventCount; i++) {
-        const allDay = this.rnd(0, 3) === 0;
-        const firstTimestamp = this.rnd(min.getTime(), max.getTime());
-        const first = new Date(firstTimestamp - (firstTimestamp % 900000));
-        const secondTimestamp = this.rnd(2, allDay ? 288 : 8) * 900000;
-        const second = new Date(first.getTime() + secondTimestamp);
-
-        events.push({
-          name: this.names[this.rnd(0, this.names.length - 1)],
-          start: first,
-          end: second,
-          color: this.colors[this.rnd(0, this.colors.length - 1)],
-          timed: !allDay,
-        });
+      this.start = start;
+      this.end = end;
+    },
+    changeView() {
+      switch (this.typeChange) {
+        case "day":
+          this.type = "day";
+          break;
+        case "week":
+          this.type = "week";
+          break;
+        case "month":
+          this.type = "month";
+          break;
       }
-
-      this.events = events;
+    },
+    changeDaysView() {
+      switch (this.weekdayChange) {
+        case "Dom - Sáb":
+          this.weekday = [0, 1, 2, 3, 4, 5, 6];
+          break;
+        case "Seg - Dom":
+          this.weekday = [1, 2, 3, 4, 5, 6, 0];
+          break;
+        case "Seg - Sex":
+          this.weekday = [1, 2, 3, 4, 5];
+          break;
+        case "Final de Semana":
+          this.weekday = [6, 0];
+          break;
+      }
     },
     startDrag({ event, timed }) {
       if (event && timed) {
@@ -401,43 +461,10 @@ export default {
         tms.minute
       ).getTime();
     },
-    getEventColor(event) {
-      const rgb = parseInt(event.color.substring(1), 16);
-      const r = (rgb >> 16) & 0xff;
-      const g = (rgb >> 8) & 0xff;
-      const b = (rgb >> 0) & 0xff;
-
-      return event === this.dragEvent
-        ? `rgba(${r}, ${g}, ${b}, 0.7)`
-        : event === this.createEvent
-        ? `rgba(${r}, ${g}, ${b}, 0.7)`
-        : event.color;
-    },
-    getEvents({ start, end }) {
-      const events = [];
-
-      const min = new Date(`${start.date}T00:00:00`).getTime();
-      const max = new Date(`${end.date}T23:59:59`).getTime();
-      const days = (max - min) / 86400000;
-      const eventCount = this.rnd(days, days + 20);
-
-      for (let i = 0; i < eventCount; i++) {
-        const timed = this.rnd(0, 3) !== 0;
-        const firstTimestamp = this.rnd(min, max);
-        const secondTimestamp = this.rnd(2, timed ? 8 : 288) * 900000;
-        const start = firstTimestamp - (firstTimestamp % 900000);
-        const end = start + secondTimestamp;
-
-        events.push({
-          name: this.rndElement(this.names),
-          color: this.rndElement(this.colors),
-          start,
-          end,
-          timed,
-        });
-      }
-
-      this.events = events;
+    nth(d) {
+      return d > 3 && d < 21
+        ? "th"
+        : ["th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th"][d % 10];
     },
     rnd(a, b) {
       return Math.floor((b - a + 1) * Math.random()) + a;
@@ -451,113 +478,110 @@ export default {
 
 <template>
   <div>
-    <v-sheet tile height="54" class="d-flex menu-flex">
+    <v-sheet height="64" class="d-flex menu-flex">
       <v-btn icon class="ma-2" @click="prev()">
         <v-icon class="icone-setas">mdi-chevron-left</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
-      <v-menu bottom right>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            class="tipo-calendario"
-            outlined
-            color="grey darken-2"
-            v-bind="attrs"
-            v-on="on"
+      <template>
+        <div class="center con-selects">
+          <vs-select
+            :state="color"
+            label-placeholder="Calendário"
+            v-model="typeChange"
+            :onselect="changeView()"
           >
-            <span class="fonte-btns">Calendário</span>
-            <v-icon class="icone-btns" right>
-              mdi-menu-down
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="type = 'day'">
-            <v-list-item-title>Dia</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = 'week'">
-            <v-list-item-title>Semana</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = 'month'">
-            <v-list-item-title>Mês</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="type = '4day'">
-            <v-list-item-title>4 Dias</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <v-menu bottom right>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            class="dias-da-semana ml-3 mr-3"
-            outlined
-            color="grey darken-2"
-            v-bind="attrs"
-            v-on="on"
+            <vs-option label="Dia" value="day">
+              Dia
+            </vs-option>
+            <vs-option label="Semana" value="week">
+              Semana
+            </vs-option>
+            <vs-option label="Mês" value="month">
+              Mês
+            </vs-option>
+          </vs-select>
+        </div>
+      </template>
+      <template>
+        <div class="center con-selects">
+          <vs-select
+            :state="color"
+            label-placeholder="Dias da Semana"
+            v-model="weekdayChange"
+            :onselect="changeDaysView()"
           >
-            <span class="fonte-btns">Dias da Semana</span>
-            <v-icon class="icone-btns" right>
-              mdi-menu-down
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="weekday = [0, 1, 2, 3, 4, 5, 6]">
-            <v-list-item-title>Dom - Sáb</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="weekday = [1, 2, 3, 4, 5, 6, 0]">
-            <v-list-item-title>Seg - Dom</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="weekday = [1, 2, 3, 4, 5]">
-            <v-list-item-title>Seg - Sex</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="weekday = [6, 0]">
-            <v-list-item-title>Final de Semana</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <v-menu bottom right>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            class="selecao-cliente"
-            outlined
-            color="grey darken-2"
-            v-bind="attrs"
-            v-on="on"
+            <vs-option label="Dom - Sáb" value="Dom - Sáb">
+              Dom - Sáb
+            </vs-option>
+            <vs-option label="Seg - Dom" value="Seg - Dom">
+              Seg - Dom
+            </vs-option>
+            <vs-option label="Seg - Sex" value="Seg - Sex">
+              Seg - Sex
+            </vs-option>
+            <vs-option label="Final de Semana" value="Final de Semana">
+              Final de Semana
+            </vs-option>
+          </vs-select>
+        </div>
+      </template>
+      <template>
+        <div class="center con-selects">
+          <vs-select
+            :state="color"
+            filter
+            label-placeholder="Cliente"
+            v-model="clienteSelecionado"
           >
-            <span class="fonte-btns">Cliente</span>
-            <v-icon class="icone-btns" right>
-              mdi-menu-down
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-list v-for="cliente in clients" :key="cliente">
-          <v-list-item @click="clients">
-            <v-list-item-title>{{ cliente.nome }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-      <v-menu bottom right>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            class="ml-3 selecao-obra"
-            outlined
-            color="grey darken-2"
-            v-bind="attrs"
-            v-on="on"
+            <vs-option
+              v-for="(cliente, index) in client_names"
+              :key="index"
+              :label="cliente"
+            >
+              {{ cliente }}
+            </vs-option>
+          </vs-select>
+        </div>
+      </template>
+      <template>
+        <div class="center con-selects">
+          <vs-select
+            :state="color"
+            filter
+            label-placeholder="Obra"
+            v-model="obraSelecionada"
           >
-            <span class="fonte-btns">Obra</span>
-            <v-icon class="icone-btns" right>
-              mdi-menu-down
-            </v-icon>
-          </v-btn>
-        </template>
-        <v-list v-for="obra in constructions" :key="obra">
-          <v-list-item @click="constructions">
-            <v-list-item-title>{{ obra.nome }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+            <vs-option
+              v-for="(obra, index) in constructions_names"
+              :key="index"
+              :label="obra"
+            >
+              {{ obra }}
+            </vs-option>
+          </vs-select>
+        </div>
+      </template>
+      <!-- <template>
+        <div class="center con-selects">
+          <v-select
+            :items="client_names"
+            label="Cliente"
+            dense
+            outlined
+          ></v-select>
+        </div>
+      </template> -->
+      <!-- <template>
+        <div class="center con-selects">
+          <v-select
+            :items="constructions_names"
+            label="Obra"
+            dense
+            outlined
+          ></v-select>
+        </div>
+      </template> -->
       <v-spacer></v-spacer>
       <v-btn icon class="ma-2" @click="next()">
         <v-icon class="icone-setas">mdi-chevron-right</v-icon>
@@ -584,7 +608,6 @@ export default {
         @click:event="showEvent"
         @click:more="viewDay"
         @click:date="form = true"
-        @click="form = true"
         ><template v-slot:event="{ event, timed, eventSummary }">
           <div class="v-event-draggable" v-html="eventSummary()"></div>
           <div
@@ -607,26 +630,49 @@ export default {
         :activator="selectedElement"
         offset-x
       >
-        <v-card color="grey lighten-4" min-width="350px" flat>
+        <v-card color="grey lighten-4" :width="350" flat>
           <v-toolbar :color="selectedEvent.color" dark>
-            <v-btn icon @click="editItem(selectedEvent)">
-              <v-icon>mdi-pencil</v-icon>
+            <v-btn @click="deleteEvent(selectedEvent.id)" icon>
+              <v-icon>mdi-delete</v-icon>
             </v-btn>
             <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
-            <v-spacer></v-spacer>
-            <v-btn icon>
-              <v-icon>mdi-heart</v-icon>
-            </v-btn>
-            <v-btn icon>
-              <v-icon>mdi-dots-vertical</v-icon>
-            </v-btn>
+            <div class="flex-grow-1"></div>
           </v-toolbar>
+
           <v-card-text>
-            <span v-html="selectedEvent.details"></span>
+            <form v-if="currentlyEditing !== selectedEvent.id">
+              {{ selectedEvent.details }}
+            </form>
+            <form v-else>
+              <textarea-autosize
+                v-model="selectedEvent.details"
+                type="text"
+                style="width: 100%"
+                :min-height="100"
+                placeholder="add note"
+              >
+              </textarea-autosize>
+            </form>
           </v-card-text>
+
           <v-card-actions>
             <v-btn text color="secondary" @click="selectedOpen = false">
-              Cancelar
+              Fechar
+            </v-btn>
+            <v-btn
+              v-if="currentlyEditing !== selectedEvent.id"
+              text
+              @click.prevent="editEvent(selectedEvent)"
+            >
+              Editar
+            </v-btn>
+            <v-btn
+              text
+              v-else
+              type="submit"
+              @click.prevent="updateEvent(selectedEvent)"
+            >
+              Salvar
             </v-btn>
           </v-card-actions>
         </v-card>

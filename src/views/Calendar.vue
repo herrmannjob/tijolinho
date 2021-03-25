@@ -18,31 +18,15 @@ export default {
   },
   data() {
     return {
-      items: [
-        {
-          prioridade: "#1F7087",
-          src: "https://cdn.vuetifyjs.com/images/cards/foster.jpg",
-          titulo: "Maria Julia",
-          descricao: "Entrega de Cimento",
-          data_inicio: "9h",
-          data_fim: "11h",
-        },
-        {
-          prioridade: "#952175",
-          src: "https://cdn.vuetifyjs.com/images/cards/halcyon.png",
-          titulo: "Gabriel Herrmann",
-          descricao: "Entrega de Pisos",
-          data_inicio: "9h",
-          data_fim: "11h",
-        },
-      ],
-      today: "",
       user_email: "",
       username: "",
       constructions: [],
-      constructions_names: [],
-      tasks: [{ name: "Nenhuma atividade" }],
+      constructions_names: [{}],
+      constructions_tasks: [],
+      particular_tasks: [],
+      tasks: [{}],
       form: false,
+      events: [],
     };
   },
   async mounted() {
@@ -51,9 +35,17 @@ export default {
         this.user_email = user.email;
         await this.getUser();
         await this.getObras();
+        await this.getTasks();
       } else this.$router.push("/");
     });
-    this.today = moment().format("ll");
+    moment.locale("pt-br");
+    this.today = moment().format("LL");
+  },
+  async updated() {
+    if (this.refresh) {
+      await this.getTasks();
+      this.refresh = false;
+    }
   },
   methods: {
     async getUser() {
@@ -119,22 +111,6 @@ export default {
       }
     },
     async getTasks() {
-      this.tasks = [];
-      this.constructions.map(async (c) => {
-        const response = await this.getDocument(
-          Firebase.firestore(),
-          "AgendaObra",
-          "obraID",
-          c.id
-        );
-        if (response.status === "ok") {
-          response.documents.map((item) => {
-            this.tasks.push(item.data);
-          });
-        }
-      });
-    },
-    async getAllTasks() {
       await this.getParticularTasks();
       await this.getConstructionsTasks();
     },
@@ -150,11 +126,16 @@ export default {
         );
         if (response.status === "ok") {
           response.documents.map((item) => {
-            this.constructions_tasks.push(item.data);
-            this.calendarOptions.events.push({
-              title: item.data.titulo,
-              start: item.data.data_inicio,
-              end: item.data.data_fim,
+            this.tasks.push(item.data);
+            this.constructions_tasks.push({
+              data_fim: item.data.data_fim,
+              data_inicio: item.data.data_inicio,
+              descricao: item.data.descricao,
+              duracao: item.data.duracao,
+              id: item.data.id,
+              obraID: item.data.obraID,
+              prioridade: item.data.prioridade,
+              titulo: item.data.titulo,
             });
           });
         }
@@ -169,13 +150,13 @@ export default {
       );
       if (response.status === "ok") {
         this.particular_tasks = [];
-        this.calendarOptions.events = [];
+        this.events = [];
         response.documents.map((item) => {
           this.particular_tasks.push(item.data);
-          this.calendarOptions.events.push({
+          this.events.push({
             title: item.data.titulo,
-            start: item.data.data_inicio.substr(0, 19) + "Z",
-            end: item.data.data_fim.substr(0, 19) + "Z",
+            start: item.data.data_inicio.substr(11, 5),
+            end: item.data.data_fim.substr(11, 5),
           });
         });
       }
@@ -204,51 +185,21 @@ export default {
           <div class="row date">
             <p class="col">Hoje {{ today }}</p>
           </div>
-
           <div>
-            <v-container>
-              <v-row dense>
-                <v-col v-for="task in tasks" :key="task">
-                  <v-card shaped :color="task.prioridade" dark>
-                    <v-col>
-                      <v-card-subtitle v-text="task.name"> </v-card-subtitle>
-                      <v-card-text style="text-align:center;">
-                        Início: {{ task.start }} - Fim: {{ task.end }}
-                      </v-card-text>
-                    </v-col>
-                  </v-card>
-                </v-col>
-              </v-row>
+            <v-container class="container-task">
+              <v-col v-for="item in events" :key="item">
+                <v-card shaped :color="item.prioridade" dark class="card-task">
+                  <v-col>
+                    <v-card-subtitle v-text="item.title"> </v-card-subtitle>
+                    <v-card-text>
+                      <!-- Início: {{ item.start }} - Fim: {{ item.end }} -->
+                      <div>Início: {{ item.start }}</div>
+                      <div>Fim: {{ item.end }}</div>
+                    </v-card-text>
+                  </v-col>
+                </v-card>
+              </v-col>
             </v-container>
-            <!-- <v-card
-              class="card-right"
-              color="primary"
-              v-for="task in tasks"
-              :key="task.id"
-            >
-              <v-expansion-panels accordion>
-                <v-expansion-panel>
-                  <v-expansion-panel-header
-                    style="padding-left:unset; padding-right:unset"
-                  >
-                    <span>{{ task.name }}</span>
-                  </v-expansion-panel-header>
-                  <v-expansion-panel-content
-                    v-if="tasks[0].name !== 'Nenhuma atividade'"
-                  >
-                    <p style="text-align:left">
-                      Descrição: {{ task.descricao }}
-                    </p>
-                    <p style="text-align:left; margin-top: 10px">
-                      Início: {{ task.start }}
-                    </p>
-                    <p style="text-align:left; margin-top: 10px">
-                      Fim: {{ task.end }}
-                    </p>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
-            </v-card> -->
           </div>
         </div>
       </div>
@@ -281,41 +232,34 @@ body {
   padding-top: 20px;
   flex-wrap: unset;
 }
-.right-col {
-  overflow-y: -moz-hidden-unscrollable;
-}
 .right-col > .title {
   margin-top: 20px;
   margin-bottom: 20px;
   text-align: left;
 }
 
+.col {
+  overflow: auto !important;
+}
+
 .title {
   font-weight: bold;
+  font-family: "Comfortaa", cursive;
 }
 
 .card-right {
-  margin-top: 10px;
   margin-bottom: 10px;
   min-height: unset !important;
 }
-.group-data {
-  align-items: center;
-  padding-left: 25px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-.group-data > p {
-  padding: 0;
-}
-.avatar {
-  display: block;
-  width: 65px !important;
-  height: 65px !important;
-}
 .date {
   align-items: center;
-  margin-top: 20px;
+  margin-top: 1%;
+  font-family: "Comfortaa", cursive;
+}
+.container-task {
+  height: 100px !important;
+  overflow: visible;
+  padding: 0 !important;
 }
 
 @media only screen and (min-width: 769px) and (max-width: 1024px) {
