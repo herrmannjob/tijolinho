@@ -3,10 +3,11 @@ import Drawer from "@/components/Drawer.vue";
 import TopBar from "@/components/TopBar.vue";
 import ModalRegister from "@/components/ModalRegister.vue";
 import Firebase from "@/services/Firebase";
-import { FirebaseMixin } from "@/mixins/FirebaseMixin"
+import { FirebaseMixin } from "@/mixins/FirebaseMixin";
+import "boxicons";
 
 export default {
-  name: "Configuracoes",
+  name: "ContaUsuario",
   components: {
     Drawer,
     TopBar,
@@ -15,37 +16,36 @@ export default {
   mixins: [FirebaseMixin],
   data() {
     return {
-      showFinancialComponent: false,
-      showGanttTask: false,
-      outlinedColor: "#002b4b",
-      gradientColor: "#00467a",
-      today: new Date(),
+      color: "#002b4b",
       user: null,
-      user_email: "",
       username: "",
-      constructions: [],
-      constructions_names: [],
-      construction: {},
-      cronograma_obra: {},
-      tasks: [],
-      task_names: [],
-      selected: "",
+      user_email: "",
       company: {},
-      completed: 0,
       form: false,
-      form_task: false,
       refresh: false,
-      elapsed_time: "",
-      planned_time: "",
-      planned_money: "",
-      spent_money: "",
-      count: true,
+      clients: [
+        {
+          title: "Nenhum cliente cadastrado",
+        },
+      ],
+      singleSelect: true,
+      selected: [],
+      companies: [],
+      editModal: false,
+      registerModal: false,
+      nome: [],
+      email: [],
+      telefone: [],
+      data_nascimento: [],
+      nome_conjuge: [],
+      data_nascimento_conjuge: [],
+      TipoUsuario: [],
+      idParams: "",
     };
   },
   async updated() {
     if (this.refresh) {
-      await this.getObras();
-      await this.getConstructionData();
+      await this.getClients();
       this.refresh = false;
     }
   },
@@ -54,8 +54,7 @@ export default {
       if (user) {
         this.user_email = user.email;
         await this.getUser();
-        await this.getCompany();
-        this.getObras();
+        await this.getCompanies();
       } else this.$router.push("/");
     });
   },
@@ -71,8 +70,15 @@ export default {
         this.user_email
       );
       this.username = response.documents[0].data.nome;
+      this.TipoUsuario = response.documents[0].data.TipoUsuario;
+      this.email = response.documents[0].data.email;
+      this.telefone = response.documents[0].data.telefone;
+      this.data_nascimento = response.documents[0].data.data_nascimento;
+      this.nome_conjuge = response.documents[0].data.nome_conjuge;
+      this.data_nascimento_conjuge =
+        response.documents[0].data.data_nascimento_conjuge;
     },
-    async getCompany() {
+    async getCompanies() {
       const response = await this.getDocumentList(
         Firebase.firestore(),
         "Empresa",
@@ -80,86 +86,31 @@ export default {
         this.user_email
       );
       if (response.status === "ok") {
-        this.company = response.documents[0];
+        this.companies = response.documents;
       }
     },
-    async getObras() {
-      const response = await this.getDocument(
-        Firebase.firestore(),
-        "Obra",
-        "usuarioID",
-        this.user_email
-      );
-      if (response.status === "ok") {
-        this.constructions = [];
-        this.constructions_names = [];
-        response.documents.map((item) => {
-          this.constructions.push(item.data);
-          this.constructions_names.push(item.data.nome);
+    async getClients() {
+      await this.getCompanies();
+      if (this.companies.length) {
+        let client_ids = [];
+        this.companies.map((company) => {
+          company.usuarioID.map((client) => {
+            if (client !== this.user_email) client_ids.push(client);
+          });
         });
+        if (client_ids.length) {
+          this.clients = [];
+          client_ids.map(async (item) => {
+            const response = await this.getDocument(
+              Firebase.firestore(),
+              "Usuario",
+              "id",
+              item
+            );
+            this.clients.push(response.documents[0].data);
+          });
+        }
       }
-    },
-    async getObraSelecionada() {
-      if (this.selected.length && this.count) {
-        const i = this.constructions_names.indexOf(this.selected);
-        this.construction = this.constructions[i];
-      }
-    },
-    async getConstructionData() {
-      if (this.selected.length && this.count) {
-        const i = this.constructions_names.indexOf(this.selected);
-        this.construction = this.constructions[i];
-        const cronogramas = await this.getDocument(
-          Firebase.firestore(),
-          "CronogramaObra",
-          "obraID",
-          this.construction.id
-        );
-        const start = new Date(this.cronograma_obra.data_inicio + "T00:00:00");
-        const end = new Date(this.cronograma_obra.data_fim + "T00:00:00");
-        this.cronograma_obra = cronogramas.documents[0].data;
-        this.elapsed_time = ((this.today - start) / 86400000) | 0;
-        this.planned_time = (end - start) / 86400000; // miliseconds => day
-        this.planned_money = this.cronograma_obra.gasto_previsto;
-        this.completed = (this.elapsed_time / this.planned_time) * 100;
-        await this.getTasks();
-        this.count = false;
-      }
-    },
-    async getTasks() {
-      const tasks = await this.getDocument(
-        Firebase.firestore(),
-        "Tarefa",
-        "cronograma_obra",
-        this.cronograma_obra.id
-      );
-      if (tasks.status === "ok") {
-        this.tasks = [];
-        tasks.documents.map((item) => {
-          this.tasks.push(item.data);
-          this.task_names.push(item.data.name);
-        });
-      }
-    },
-    async showGantt() {
-      await this.getTasks();
-      this.showGanttTask = true;
-      this.showFinancialComponent = false;
-    },
-    showFinancial() {
-      this.showFinancialComponent = true;
-      this.showGanttTask = false;
-    },
-  },
-  computed: {
-    tarefas: function() {
-      if (this.tasks.length) {
-        let tasks = [];
-        this.tasks.map((item) => {
-          tasks.push(item);
-        });
-        return tasks;
-      } else return [];
     },
   },
 };
@@ -169,162 +120,123 @@ export default {
     <Drawer />
     <div class="content">
       <TopBar :email="user_email" />
-      <div class="components row">
-        <div class="col-12 col-sm-5 col-md-3 left-col">
-          <v-avatar size="112">
-            <v-img
-              src="https://randomuser.me/api/portraits/women/85.jpg"
-            ></v-img>
-          </v-avatar>
-          <p class="username">{{ username }}</p>
-
-          <div class="group-data-schedule" data-app>
-            <template lang="html">
-              <div class="centerx">
-                <vs-button
-                  @click="form = true"
-                  :color="outlinedColor"
-                  :gradient-color-secondary="gradientColor"
-                  type="gradient"
-                  icon="add"
-                  class="btn-primary-sm"
-                >
-                  Obra</vs-button
-                >
-                <v-select
-                  class="select-items"
-                  :items="constructions_names"
-                  label="Obra"
-                  dense
-                  v-model="selected"
-                  :onselect="getConstructionData()"
-                ></v-select>
-              </div>
-            </template>
-
-            <v-progress-linear
-              v-model="completed"
-              height="25"
-              v-if="selected.length"
-            >
-              <strong class="percentage">{{ Math.ceil(completed) }}%</strong>
-            </v-progress-linear>
-            <vs-button
-            v-if="selected.length"
-              class="btn-primary-lg"
-              :color="outlinedColor"
-              type="border"
-              @click="showFinancial()"
-            >
-              Financeiro
-            </vs-button>
-            <vs-button
-             v-if="selected.length"
-              class="btn-primary-lg"
-              :color="outlinedColor"
-              type="border"
-              @click="showGantt()"
-            >
-              Cronograma
-            </vs-button>
-            <div class="row cards-report">
-              <v-card elevation="2" shaped class="one-card card-color">
-                <v-card-text class="text-center">
-                  <div><span class="text-card">Tempo decorrido</span></div>
-                  <p class="text-content">{{ elapsed_time }} dias</p>
-                </v-card-text>
-              </v-card>
-              <v-card elevation="2" shaped class="one-card card-color">
-                <v-card-text class="text-center">
-                  <div><span class="text-card">Tempo planejado</span></div>
-                  <p class="text-content">{{ planned_time }} dias</p>
-                </v-card-text>
-              </v-card>
-            </div>
-            <div class="row cards-report">
-              <v-card elevation="2" shaped class="one-card card-color">
-                <v-card-text class="text-center">
-                  <div><span class="text-card">Total planejado</span></div>
-                  <p class="text-content">R$ {{ planned_money }}</p>
-                </v-card-text>
-              </v-card>
-              <v-card elevation="2" shaped class="one-card card-color">
-                <v-card-text class="text-center">
-                  <div><span class="text-card">Total gasto</span></div>
-                  <p class="text-content">R$ {{ spent_money }}</p>
-                </v-card-text>
-              </v-card>
-            </div>
-          </div>
-        </div>
-        <div class="col-12 col-sm-7 col-md-9">
-          <div class="row" style="padding: 10px">
-            <template v-if="showFinancialComponent == true">
-              <ModalRegister />
-            </template>
-            <vs-button
-              v-if="showGanttTask == true"
-              class="btn-primary-lg"
-              :color="outlinedColor"
-              @click="form_task = true"
-            >
-              Novo Serviço
-            </vs-button>
-            <template v-if="tasks.length">
-              <Gantt :tarefas="tasks" />
-            </template>
-            <template v-if="tasks.length > 0">
-              <v-card
-                class="card-right"
-                color="primary"
-                v-for="task in tasks"
-                :key="task.id"
+      <v-col class="container-account">
+        <template>
+          <div class="center grid">
+            <vs-row>
+              <vs-col
+                vs-type="flex"
+                vs-justify="center"
+                vs-align="center"
+                w="12"
               >
-                <v-expansion-panels accordion>
-                  <v-expansion-panel>
-                    <v-expansion-panel-header
-                      style="padding-left:unset; padding-right:unset"
-                    >
-                      <span>{{ task.titulo }}</span>
-                    </v-expansion-panel-header>
-                    <v-expansion-panel-content
-                      v-if="tasks[0].titulo !== 'Nenhuma atividade'"
-                    >
-                      <p style="text-align:left">
-                        Descrição: {{ task.descricao }}
-                      </p>
-                      <p style="text-align:left; margin-top: 10px">
-                        Início: {{ task.data_inicio }}
-                      </p>
-                      <p style="text-align:left; margin-top: 10px">
-                        Fim: {{ task.data_fim }}
-                      </p>
-                      <p style="text-align:left; margin-top: 10px">
-                        Prioridade: {{ task.prioridade }}
-                      </p>
-                    </v-expansion-panel-content>
-                  </v-expansion-panel>
-                </v-expansion-panels>
-              </v-card>
-            </template>
+                <vs-card type="5" style="margin-top: 4em">
+                  <template #title>
+                    <h3>{{ username }}</h3>
+                  </template>
+                  <template #img>
+                    <img
+                      src="https://randomuser.me/api/portraits/women/85.jpg"
+                      alt=""
+                    />
+                  </template>
+                  <template #text>
+                    <p>
+                      {{ TipoUsuario }}
+                    </p>
+                  </template>
+                </vs-card>
+                <div>
+                  <vs-input
+                    class="input-conta"
+                    primary
+                    v-model="username"
+                    readonly
+                    label-placeholder="Nome"
+                    ><template #icon>
+                      <box-icon
+                        color="#002b4b"
+                        name="user"
+                      ></box-icon> </template
+                  ></vs-input>
+                  <vs-input
+                    class="input-conta"
+                    primary
+                    v-model="nome_conjuge"
+                    readonly
+                    label-placeholder="Conjuge"
+                    ><template #icon>
+                      <box-icon
+                        color="#002b4b"
+                        name="user"
+                      ></box-icon> </template
+                  ></vs-input>
+                  <vs-input
+                    class="input-conta"
+                    primary
+                    v-model="email"
+                    readonly
+                    label-placeholder="E-mail"
+                    ><template #icon>
+                      <box-icon
+                        color="#002b4b"
+                        name="mail-send"
+                      ></box-icon> </template
+                  ></vs-input>
+                  <vs-input
+                    class="input-conta"
+                    primary
+                    v-model="data_nascimento"
+                    readonly
+                    label="Nascimento"
+                    ><template #icon>
+                      <box-icon
+                        color="#002b4b"
+                        name="calendar"
+                      ></box-icon> </template
+                  ></vs-input>
+                  <vs-input
+                    class="input-conta"
+                    primary
+                    v-model="data_nascimento_conjuge"
+                    readonly
+                    label="Nascimento Conjuge"
+                    ><template #icon>
+                      <box-icon
+                        color="#002b4b"
+                        name="calendar"
+                      ></box-icon> </template
+                  ></vs-input>
+                  <vs-input
+                    class="input-conta"
+                    primary
+                    v-model="telefone"
+                    readonly
+                    label-placeholder="Telefone"
+                    ><template #icon>
+                      <box-icon
+                        color="#002b4b"
+                        name="phone"
+                      ></box-icon> </template
+                  ></vs-input>
+                  <vs-button
+                    class="button-atualizar"
+                    color="rgb(0,58,102)"
+                    gradient
+                    @click="active = 0"
+                  >
+                    Atualizar Dados
+                  </vs-button>
+                </div>
+              </vs-col>
+            </vs-row>
           </div>
-        </div>
-      </div>
+        </template>
+      </v-col>
+      <template v-if="form == true">
+        <ModalRegister />
+      </template>
     </div>
-    <ModalRegisterConstruction
-      :form.sync="form"
-      :refresh.sync="refresh"
-      :user_id="user_email"
-      :company="company.id"
-      client=""
-    />
-    <ModalRegisterTask
-      :form.sync="form_task"
-      :tasks="tasks"
-      :task_names="task_names"
-      :user="user_email"
-      :cronograma_obra="cronograma_obra.id"
-    />
   </div>
 </template>
 <style lang="css">
@@ -338,80 +250,25 @@ body {
   height: 100% !important;
   width: 100%;
 }
-.content {
-  width: 100%;
-}
-.components {
-  height: 100%;
-}
-.left-col {
+.container-account {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-right: lightgray 0.1px solid;
-}
-.left-col > .username {
-  margin-top: 20px;
+  justify-content: center !important;
+  align-items: center !important;
 }
 .username {
   font-family: "Comfortaa", cursive;
 }
-.card-right {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  min-height: 60px;
+.icone-account {
+  color: "#002b4b" !important;
 }
-.group-data-schedule {
-  display: grid;
-  flex-direction: column;
-  align-items: space-evenly;
-  justify-content: center;
-  height: 60%;
-  padding-left: unset;
-}
-.group-data > p {
-  padding: 0;
-}
-.primary {
-  background-color: #2c3e50;
-}
-.text-card {
-  color: #fafafa !important;
-}
-.text-center {
-  text-align: center;
-  color: #fafafa !important;
-}
-.text-content {
-  color: white;
-}
-.percentage {
-  color: #fafafa;
-}
-.cards-report {
-  justify-content: space-around;
-  margin-top: 20px;
-}
-.one-card {
-  width: 8em;
-  height: 6em;
-}
-.card-color {
-  background-color: #002b4b !important;
-}
-.btn-primary-sm {
+.input-conta {
+  margin-top: 20%;
   font-family: "Comfortaa", cursive;
-  height: 45%;
+  width: 100%;
 }
-.btn-primary-lg {
+.button-atualizar {
+  margin-top: 20% !important;
   font-family: "Comfortaa", cursive;
-  height: 55%;
-}
-.vs-button--text {
-  text-transform: uppercase !important;
-}
-.select-items {
-  width: 62%;
-  margin-left: 8%;
+  width: 100%;
 }
 </style>

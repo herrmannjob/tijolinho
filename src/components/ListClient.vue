@@ -59,10 +59,6 @@ export default {
       let number = 5551980478617;
       let message = "teste".split(" ").join("%20");
 
-      // return console.log(
-      //   "https://api.whatsapp.com/send?phone=" + number + "&text=%20" + message
-      // );
-
       var url =
         "https://api.whatsapp.com/send?phone=" +
         number +
