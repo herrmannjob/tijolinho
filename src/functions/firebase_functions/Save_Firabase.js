@@ -91,11 +91,12 @@ class Endereco {
     }
 }
 class Usuario {
-    constructor(nome, tipoUsuario, empresaId = null, obraId = null, email = null, telefone = null, cpf = null, data_nascimento = null, data_nascimento_conjuge = null, nome_conjuge = null, foto = null, endereco = null, avaliacao = null) {
+    constructor(nome, tipoUsuario, empresaId = null, obraId = null, email = null, telefone = null, cpf = null, data_nascimento = null, data_nascimento_conjuge = null, nome_conjuge = null, foto = null, endereco = null, avaliacao = null, whatsapp = null) {
         this.nome = nome;
         this.tipoUsuario = tipoUsuario;
         this.email = email;
         this.telefone = telefone;
+        this.whatsapp = whatsapp;
         this.cpf = cpf;
         this.data_nascimento = data_nascimento;
         this.data_nascimento_conjuge = data_nascimento_conjuge;
@@ -140,6 +141,7 @@ class Usuario {
             map["tipoUsuario"] = this.tipoUsuario;
             map["email"] = this.email;
             map["telefone"] = this.telefone;
+            map["whatsapp"] = this.whatsapp;
             map["cpf"] = this.cpf;
             map["data_nascimento"] = this.data_nascimento;
             map["data_nascimento_conjuge"] = this.data_nascimento_conjuge;
@@ -201,15 +203,17 @@ class tipoObra {
     }
 }
 class Obra {
-    constructor(nome, Endereco, TipoObra, Empresa, clienteID = null, arquitetoId = null, cor = null) {
+    constructor(nome, Endereco, TipoObra, Empresa, clienteID = null, arquitetoId = null, cor = null, inativo = false) {
         this.nome = nome;
         this.Endereco = Endereco;
         this.TipoObra = TipoObra;
         this.Empresa = Empresa;
         this.cor = cor;
+        this.inativo = inativo;
         var id_arquitetos = [];
         var id_clientes = [];
         var ids_cotacoes = [];
+        var fotos = [];
         if (arquitetoId != null)
             id_arquitetos.push(arquitetoId);
         if (clienteID != null)
@@ -222,6 +226,9 @@ class Obra {
         };
         this.setCor = function (value) {
             this.cor = cor;
+        };
+        this.inativador = function () {
+            this.inativo = !this.inativo;
         };
         this.addArquiteto = function (value) {
             id_arquitetos.push(value);
@@ -244,6 +251,13 @@ class Obra {
             var indice = ids_cotacoes.indexOf(value);
             ids_cotacoes.pud(indice);
         };
+        this.addFoto = function (value) {
+            fotos.push(value);
+        };
+        this.removeFoto = function (value) {
+            var indice = fotos.indexOf(value);
+            fotos.pud(indice);
+        };
         this.getMap = function () {
             var map = new Object();
             map["nome"] = this.nome;
@@ -251,9 +265,11 @@ class Obra {
             map["TipoObra"] = this.TipoObra;
             map["Empresa"] = this.Empresa;
             map["cor"] = this.cor;
+            map["inativo"] = this.inativo;
             map["idArquitetos"] = id_arquitetos;
             map["idClientes"] = id_clientes;
             map["idCotacao"] = ids_cotacoes;
+            map["fotos"] = fotos;
             return map;
         }
     }
