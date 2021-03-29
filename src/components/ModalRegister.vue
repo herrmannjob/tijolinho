@@ -88,7 +88,7 @@ export default {
       phone: "",
       phone_rules: [
         (v) => !!v || "Telefone é obrigatório",
-        (v) => v.length === 13 || "Telefone com 13 dígitos - +55 84 98765 4321",
+        (v) => v.length === 11 || "Telefone com 11 dígitos - 11 98765 4321",
       ],
       error_dialog: false,
       error: "",
@@ -342,8 +342,8 @@ export default {
                   <v-text-field
                     label="Telefone"
                     v-model="phone"
-                    hint="Apenas números (13 dígitos)"
-                    placeholder="+55 84 98765 4321"
+                    hint="Apenas números (11 dígitos)"
+                    placeholder="11 98765 4321"
                     :rules="phone_rules"
                     required
                   ></v-text-field>

@@ -57,9 +57,9 @@ export default {
       phone: "",
       phone_rules: [
         (v) => !!v || "Telefone é obrigatório",
-        (v) => v.length === 13 || "Telefone com 13 dígitos - +55 84 98765 4321",
+        (v) => v.length === 11 || "Telefone com 11 dígitos - 11 98765 4321",
         (v) =>
-          !isNaN(Number(v)) || "Telefone com 13 dígitos - +55 84 98765 4321",
+          !isNaN(Number(v)) || "Telefone com 11 dígitos - 11 98765 4321",
       ],
       lastname: "",
       nameRules: [(v) => !!v || "Nome é obrigatório"],
@@ -175,8 +175,8 @@ export default {
       const response = await this.getDocument(
         Firebase.firestore(),
         "Usuario",
-        "email",
-        this.email
+        "telefone",
+        this.user_email
       );
       if (response.status === "empty") {
         const data = {
@@ -202,9 +202,10 @@ export default {
         );
         this.client_id = client.created_id;
         this.confirm = true;
+        this.close();
       } else {
         this.client_id = response.documents[0].id;
-        this.confirm_message = `Já existe um usuário com este email ${this.email}!`;
+        this.confirm_message = "Já existe um usuário com este número" + "" + this.phone;
         this.confirm = true;
       }
       this.updateCompany();
@@ -257,7 +258,6 @@ export default {
     <div class="modal">
       <header class="modal-header">
         <slot name="header">
-          <!-- {{cliente.CodigoCliente}} -->
         </slot>
         <button type="button" class="btn-close" @click="close">
           <v-icon class="return-btn">mdi-arrow-left</v-icon>
@@ -317,7 +317,7 @@ export default {
                   <v-text-field
                     v-model="email"
                     :rules="email.length > 0 ? emailRules : []"
-                    label="E-mail (opcional)"
+                    label="E-mail"
                   ></v-text-field>
 
                   <v-menu

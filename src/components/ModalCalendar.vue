@@ -1,146 +1,100 @@
 <template>
-  <v-dialog max-width="400px" v-model="form" persistent>
-    <v-card>
-      <v-btn class="closeBtn" color="blue darken-1" text @click="close">
-        Fechar
-      </v-btn>
-      <!-- <v-card-title>
-        <span class="headline">Nova atividade:</span>
-      </v-card-title> -->
-      <v-card-text>
-        <v-col cols="12">
-          <v-text-field
-            class="atividadeField"
-            placeholder="Atividade*"
-            :rules="[rules.required]"
-            v-model="title"
-          ></v-text-field>
+  <vs-dialog class="modalBg" max-width="350px" v-model="form" prevent-close>
+    <div class="con-form">
+      <v-col cols="12" class="gridControl">
+        <vs-input
+          class="inputControl"
+          color="#002b4b"
+          border
+          type="text"
+          v-model="title"
+          :rules="[rules.required]"
+          label-placeholder="Atividade"
+        >
+        </vs-input>
 
-          <v-select
-            :items="priority_list"
-            v-model="priority"
-            label="Prioridade"
-            dense
-          ></v-select>
+        <vs-select
+          class="inputControl"
+          label-placeholder="Prioridade"
+          :options="priority_list"
+          v-model="priority"
+        >
+          <vs-option label="Baixa" value="Baixa">
+            Baixa
+          </vs-option>
+          <vs-option label="Média" value="Média">
+            Média
+          </vs-option>
+          <vs-option label="Alta" value="Alta">
+            Alta
+          </vs-option>
+        </vs-select>
 
-          <!-- <v-menu
-            ref="menu"
-            :close-on-content-click="true"
-            transition="scale-transition"
-            offset-y
-            min-width="auto"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-model="dateStart.date"
-                label="Início"
-                prepend-icon="mdi-calendar"
-                readonly
-                v-bind="attrs"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              ref="picker"
+        <div class="inputControl">
+          <template>
+            <vs-input
+              id="agend"
+              type="date"
               v-model="dateStart.date"
-              min="1950-01-01"
-            ></v-date-picker>
-          </v-menu> -->
+              label="Data Inicial"
+              required
+            />
+          </template>
+        </div>
 
-          <v-menu
-            ref="menu"
-            :close-on-content-click="false"
-            :nudge-right="40"
-            :return-value.sync="dateStart.time"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-model="dateStart.time"
-                label="Horário inicial"
-                readonly
-                v-bind="attrs"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-time-picker
+        <div class="inputControl">
+          <template>
+            <vs-input
+              type="time"
               v-model="dateStart.time"
-              @click:minute="$refs.menu.save(dateStart.time)"
-              full-width
-            ></v-time-picker>
-          </v-menu>
+              label="Horário Inicial"
+              required
+            />
+          </template>
+        </div>
 
-          <!-- <v-menu
-            ref="menu"
-            :close-on-content-click="true"
-            transition="scale-transition"
-            offset-y
-            min-width="auto"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-model="dateEnd.date"
-                label="Término"
-                prepend-icon="mdi-calendar"
-                readonly
-                v-bind="attrs"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              ref="picker"
+        <div class="inputControl">
+          <template>
+            <vs-input
+              type="date"
               v-model="dateEnd.date"
-              min="1950-01-01"
-            ></v-date-picker>
-          </v-menu> -->
+              label="Data Final"
+              required
+            />
+          </template>
+        </div>
 
-          <v-menu
-            ref="menu"
-            :close-on-content-click="false"
-            :nudge-right="40"
-            :return-value.sync="time_end"
-            transition="scale-transition"
-            offset-y
-            max-width="290px"
-            min-width="290px"
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-model="dateEnd.time"
-                label="Horário final"
-                readonly
-                v-bind="attrs"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-time-picker
+        <div class="inputControl">
+          <template>
+            <vs-input
+              type="time"
               v-model="dateEnd.time"
-              @click:minute="$refs.menu.save(dateEnd.time)"
-              full-width
-            ></v-time-picker>
-          </v-menu>
-          <v-textarea color="teal" v-model="description">
-            <template v-slot:label>
-              <div>
-                Observações:
-              </div>
-            </template>
-          </v-textarea>
-        </v-col>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer>
-          <v-btn class="confirmBtn" color="primary" @click="save">
-            Criar Evento
-          </v-btn>
-        </v-spacer>
-      </v-card-actions>
-    </v-card>
+              label="Horário Final"
+              required
+            />
+          </template>
+        </div>
+
+        <vs-input
+          class="inputControl"
+          color="#002b4b"
+          border
+          type="text"
+          v-model="description"
+          label="Observações"
+        >
+        </vs-input>
+      </v-col>
+    </div>
+    <template #footer>
+      <div class="footer-dialog">
+        <vs-button :disabled="!title" class="confirmBtn" block @click="save">
+          Criar Evento
+        </vs-button>
+      </div>
+    </template>
     <ResponseModal :modal.sync="modal" :message="message" />
-  </v-dialog>
+  </vs-dialog>
 </template>
 
 <script>
@@ -176,6 +130,17 @@ export default {
           const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
           return pattern.test(value) || "Invalid e-mail.";
         },
+        pastDate: function() {
+          var agendamento = document
+            .getElementById("#agend")
+            .val()
+            .split("T");
+          agendamento = new Date(agendamento[0]).setHours(24);
+          var hoje = new Date();
+          if (agendamento <= hoje) {
+            alert("Por favor, insira uma data válida!");
+          }
+        },
       },
     };
   },
@@ -193,15 +158,15 @@ export default {
     async save() {
       const start = new Date(this.date);
       const end = new Date(
-        this.dateEnd.date + "T" + this.dateEnd.time + ":00Z"
+        this.dateEnd.date + " " + this.dateEnd.time + ":00Z"
       );
       const duration = (end - start) / 1000 / 60 / 60 / 24;
       const data = {
         titulo: this.title,
         descricao: this.description,
         data_inicio:
-          this.dateStart.date + "T" + this.dateStart.time + ":00.000Z",
-        data_fim: this.dateEnd.date + "T" + this.dateEnd.time + ":00.000Z",
+          this.dateStart.date + " " + this.dateStart.time + ":00.000Z",
+        data_fim: this.dateEnd.date + " " + this.dateEnd.time + ":00.000Z",
         duracao: `${duration} dia(s)`,
         prioridade: this.priority,
         usuarioID: this.user,
@@ -239,6 +204,12 @@ export default {
 };
 </script>
 <style lang="css">
+.modalBg {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
 .theme--light.v-messages {
   display: flex !important;
   color: red;
@@ -250,12 +221,29 @@ export default {
   font-weight: bold;
 }
 
+.inputControl {
+  max-width: 200px !important;
+  color: "#002b4b";
+  font-weight: bold;
+}
+
+.gridControl {
+  padding-top: 10%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 70%;
+  padding-left: unset;
+}
+
 .closeBtn {
   width: 200px;
 }
 .confirmBtn {
   margin-bottom: 2% !important;
   width: 200px;
+  background-color: #004f8b !important;
 }
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */

@@ -27,6 +27,7 @@ export default {
       tasks: [{}],
       form: false,
       events: [],
+      today: "",
     };
   },
   async mounted() {
@@ -152,9 +153,22 @@ export default {
         this.particular_tasks = [];
         this.events = [];
         response.documents.map((item) => {
+          if (item.data.prioridade == "Alta") {
+            this.corPrioridade = "#eb4034";
+          }
+          if (item.data.prioridade == "Média") {
+            this.corPrioridade = "#eb9c34";
+          }
+          if (item.data.prioridade == "Baixa") {
+            this.corPrioridade = "#71eb34";
+          }
+          if (item.data.prioridade == "") {
+            this.corPrioridade = "#002b4b";
+          }
           this.particular_tasks.push(item.data);
           this.events.push({
             title: item.data.titulo,
+            color: this.corPrioridade,
             start: item.data.data_inicio.substr(11, 5),
             end: item.data.data_fim.substr(11, 5),
           });
@@ -188,11 +202,10 @@ export default {
           <div>
             <v-container class="container-task">
               <v-col v-for="item in events" :key="item">
-                <v-card shaped :color="item.prioridade" dark class="card-task">
+                <v-card shaped :color="item.color" class="card-task">
                   <v-col>
-                    <v-card-subtitle v-text="item.title"> </v-card-subtitle>
-                    <v-card-text>
-                      <!-- Início: {{ item.start }} - Fim: {{ item.end }} -->
+                    <v-card-subtitle style="color: white" v-text="item.title"> </v-card-subtitle>
+                    <v-card-text style="color: white">
                       <div>Início: {{ item.start }}</div>
                       <div>Fim: {{ item.end }}</div>
                     </v-card-text>
