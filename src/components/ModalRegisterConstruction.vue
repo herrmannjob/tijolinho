@@ -50,6 +50,9 @@ export default {
     };
   },
   methods: {
+    schedule() {
+      this.$router.push("planejamento");
+    },
     close() {
       this.$emit("update:form", false);
     },
@@ -132,6 +135,7 @@ export default {
       if (response.status === "ok") {
         this.obra = response.created_id;
         this.addCronogramaObra();
+        this.schedule();
       }
     },
     async addCronogramaObra() {
@@ -172,138 +176,80 @@ export default {
 };
 </script>
 <template>
-  <v-dialog v-model="form" persistent max-width="800px">
-    <v-card>
-      <v-card-title>
-        <span class="headline">Cadastrar Obra</span>
-      </v-card-title>
-      <v-card-text>
-        <v-form>
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="firstname"
-                :rules="nameRules"
-                label="Nome da obra"
-                :close-on-content-click="false"
-                required
-              ></v-text-field>
-              <v-select
-                v-model="category"
-                :items="categoria"
-                :close-on-content-click="false"
-                :menu-props="{ top: true, offsetY: true }"
-                label="Categoria"
-                required
-              ></v-select>
+  <vs-dialog v-model="form" max-width="800px" prevent-close>
+    <template #header>
+      <h4 class="not-margin">Cadastrar <b>Obra</b></h4>
+    </template>
+    <div class="con-form">
+      <v-row>
+        <v-col cols="12" md="6">
+          <vs-input
+            type="text"
+            v-model="firstname"
+            label="Nome da obra"
+            required
+          />
 
-              <v-menu
-                ref="menuInit"
-                v-model="menuDateInit"
-                :close-on-content-click="false"
-                transition="scale-transition"
-                offset-y
-                min-width="auto"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="dateInit"
-                    label="Data de inicio"
-                    prepend-icon="mdi-calendar"
-                    readonly
-                    required
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  ref="pickerInit"
-                  v-model="dateInit"
-                  min="1950-01-01"
-                ></v-date-picker>
-              </v-menu>
+          <vs-select filter placeholder="Categoria" v-model="category" required>
+            <vs-option label="Residencial" value="Residencial">
+              Residencial
+            </vs-option>
+            <vs-option label="Reforma" value="Reforma">
+              Reforma
+            </vs-option>
+            <vs-option label="Comercial" value="Comercial">
+              Comercial
+            </vs-option>
+            <vs-option label="Restauração" value="Restauração">
+              Restauração
+            </vs-option>
+            <vs-option label="Criação" value="Criação">
+              Criação
+            </vs-option>
+          </vs-select>
 
-              <v-menu
-                ref="menuEnd"
-                v-model="menuDateEnd"
-                :close-on-content-click="false"
-                transition="scale-transition"
-                offset-y
-                min-width="auto"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="dateEnd"
-                    label="Termino previsto"
-                    prepend-icon="mdi-calendar"
-                    readonly
-                    required
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  ref="pickerEnd"
-                  v-model="dateEnd"
-                  :min="dateInit"
-                ></v-date-picker>
-              </v-menu>
-              <v-text-field
-                label="Gasto estimado"
-                v-model="estimated_spend"
-                required
-                hint="Apenas números"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="Cep"
-                required
-                v-model="cep"
-                @change="searchCep"
-                @keyup="searchCep()"
-              ></v-text-field>
-              <v-text-field
-                v-model="cidade"
-                label="Cidade"
-                required
-              ></v-text-field>
-              <v-text-field
-                v-model="estado"
-                label="Estado"
-                required
-              ></v-text-field>
-              <v-text-field
-                v-model="logradouro"
-                label="Rua"
-                required
-              ></v-text-field>
-              <v-text-field
-                label="Complemento"
-                required
-                v-model="complemento"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="primary"
-          depressed
-          class="btn-primario"
-          @click="addObra()"
-        >
+          <vs-input type="date" v-model="dateInit" label="Data de Início" />
+
+          <vs-input type="date" v-model="dateEnd" label="Termino previsto" />
+
+          <vs-input
+            type="number"
+            v-model="estimated_spend"
+            label="Gasto estimado"
+          />
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-text-field
+            label="Cep"
+            required
+            v-model="cep"
+            @change="searchCep"
+            @keyup="searchCep()"
+          ></v-text-field>
+          <v-text-field v-model="cidade" label="Cidade" required></v-text-field>
+          <v-text-field v-model="estado" label="Estado" required></v-text-field>
+          <v-text-field
+            v-model="logradouro"
+            label="Rua"
+            required
+          ></v-text-field>
+          <v-text-field
+            label="Complemento"
+            required
+            v-model="complemento"
+          ></v-text-field>
+        </v-col>
+      </v-row>
+    </div>
+    <template #footer>
+      <div class="footer-dialog">
+        <vs-button block class="btn-primario" @click="addObra()">
           SALVAR
-        </v-btn>
-        <v-btn color="primary" text @click="close">
-          Cancelar
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+        </vs-button>
+      </div>
+    </template>
     <ResponseModal :modal.sync="modal" :message="message" />
-  </v-dialog>
+  </vs-dialog>
 </template>
 
 <style lang="css">

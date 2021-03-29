@@ -57,9 +57,9 @@ export default {
       phone: "",
       phone_rules: [
         (v) => !!v || "Telefone é obrigatório",
-        (v) => v.length === 13 || "Telefone com 13 dígitos - +55 84 98765 4321",
+        (v) => v.length === 11 || "Telefone com 11 dígitos - 11 98765 4321",
         (v) =>
-          !isNaN(Number(v)) || "Telefone com 13 dígitos - +55 84 98765 4321",
+          !isNaN(Number(v)) || "Telefone com 11 dígitos - 11 98765 4321",
       ],
       lastname: "",
       nameRules: [(v) => !!v || "Nome é obrigatório"],

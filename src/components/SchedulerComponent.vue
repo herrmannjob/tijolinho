@@ -13,6 +13,16 @@ export default {
     clients: [],
     clienteSelecionado: "",
     color: "primary",
+    colors: [
+      "#2196F3",
+      "#3F51B5",
+      "#673AB7",
+      "#00BCD4",
+      "#4CAF50",
+      "#FF9800",
+      "#757575",
+    ],
+    corPrioridade: "",
     companies: [],
     constructions: [],
     constructions_names: [],
@@ -28,6 +38,7 @@ export default {
     end: null,
     endMenu: false,
     events: [],
+    eventos: [],
     extendOriginal: null,
     focus: new Date().toISOString().substr(0, 10),
     form: false,
@@ -82,7 +93,7 @@ export default {
     this.ready = true;
     this.scrollToTime();
     this.updateTime();
-    this.getEvents()
+    this.$refs.calendar.checkChange();
     await Firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
         this.user_email = user.email;
@@ -90,6 +101,7 @@ export default {
         await this.getObras();
         await this.getClients();
         await this.getTasks();
+        // await this.getEvents();
       }
     });
   },
@@ -180,14 +192,17 @@ export default {
         if (response.status === "ok") {
           response.documents.map((item) => {
             this.constructions_tasks.push(item.data);
-            this.events.push({
+            this.eventos.push({
               title: item.titulo,
-              start: item.data_inicio,
-              end: item.data_fim,
+              color: "#002b4b",
+              details: item.data.prioridade,
+              start: item.data_inicio.substr(0, 10),
+              end: item.data_fim.substr(0, 10),
             });
           });
         }
       });
+      // this.events.push(this.eventos);
     },
     async getParticularTasks() {
       const events = [];
@@ -200,30 +215,33 @@ export default {
       if (response.status === "ok") {
         this.particular_tasks = [];
         response.documents.map((item) => {
+          if (item.data.prioridade == "Alta") {
+            this.corPrioridade = "#eb4034";
+          }
+          if (item.data.prioridade == "Média") {
+            this.corPrioridade = "#eb9c34";
+          }
+          if (item.data.prioridade == "Baixa") {
+            this.corPrioridade = "#71eb34";
+          }
+          if (item.data.prioridade == "") {
+            this.corPrioridade = "#002b4b";
+          }
           this.particular_tasks.push(item.data);
           events.push({
             name: item.data.titulo,
-            details: item.data.prioridade,
-            start: item.data.data_inicio.substr(0, 19) + "Z",
-            end: item.data.data_fim.substr(0, 19) + "Z",
+            color: this.corPrioridade,
+            details: item.data.descricao,
+            start: item.data.data_inicio.substr(0, 10),
+            end: item.data.data_fim.substr(0, 10),
           });
         });
       }
       this.events = events;
     },
-    getEventColor (event) {
-      return event.color
+    getEventColor(event) {
+      return event.color;
     },
-    // async getEvents () {
-    //   let snapshot = await db.collection('calEvent').get()
-    //   const events = []
-    //   snapshot.forEach(doc => {
-    //     let appData = doc.data()
-    //     appData.id = doc.id
-    //     events.push(appData)
-    //   })
-    //   this.events = events
-    // },
     async getEvents() {
       const events = [];
 
@@ -238,8 +256,9 @@ export default {
         if (response.status === "ok") {
           response.documents.map((item) => {
             this.constructions_tasks.push(item.data);
-            this.events.push({
+            events.push({
               name: item.data.titulo,
+              color: "#002b4b",
               details: item.data.prioridade,
               start: item.data.data_inicio.substr(0, 10),
               end: item.data.data_fim.substr(0, 10),
@@ -258,16 +277,15 @@ export default {
         this.particular_tasks = [];
         response.documents.map((item) => {
           this.particular_tasks.push(item.data);
-          this.events.push({
+          events.push({
             name: item.data.titulo,
+            color: "#002b4b",
             details: item.data.prioridade,
             start: item.data.data_inicio.substr(0, 10),
             end: item.data.data_fim.substr(0, 10),
           });
         });
       }
-
-      this.events = events;
     },
     getCurrentTime() {
       return this.cal
@@ -291,8 +309,8 @@ export default {
       this.focus = date;
       this.type = "day";
     },
-    setToday () {
-      this.focus = this.today
+    setToday() {
+      this.focus = this.today;
     },
     prev() {
       this.$refs.calendar.prev();
@@ -300,21 +318,17 @@ export default {
     next() {
       this.$refs.calendar.next();
     },
-    editEvent(ev) {
-      this.currentlyEditing = ev.id;
+    editEvent() {
+      this.form = true;
     },
-    // async updateEvent (ev) {
-    //   await db.collection('calEvent').doc(this.currentlyEditing).update({
-    //     details: ev.details
-    //   })
-    //   this.selectedOpen = false,
-    //   this.currentlyEditing = null
-    // },
-    // async deleteEvent (ev) {
-    //   await db.collection("calEvent").doc(ev).delete()
-    //   this.selectedOpen = false,
-    //   this.getEvents()
-    // },
+    async deleteEvent (ev) {
+      Firebase.firestore(),
+        "AgendaParticular",
+        "usuarioID",
+        this.user_email.doc(ev).delete()
+      this.selectedOpen = false,
+      this.getEvents()
+    },
     showEvent({ nativeEvent, event }) {
       const open = () => {
         this.selectedEvent = event;
@@ -350,22 +364,22 @@ export default {
           break;
       }
     },
-    changeDaysView() {
-      switch (this.weekdayChange) {
-        case "Dom - Sáb":
-          this.weekday = [0, 1, 2, 3, 4, 5, 6];
-          break;
-        case "Seg - Dom":
-          this.weekday = [1, 2, 3, 4, 5, 6, 0];
-          break;
-        case "Seg - Sex":
-          this.weekday = [1, 2, 3, 4, 5];
-          break;
-        case "Final de Semana":
-          this.weekday = [6, 0];
-          break;
-      }
-    },
+    // changeDaysView() {
+    //   switch (this.weekdayChange) {
+    //     case "Dom - Sáb":
+    //       this.weekday = [0, 1, 2, 3, 4, 5, 6];
+    //       break;
+    //     case "Seg - Dom":
+    //       this.weekday = [1, 2, 3, 4, 5, 6, 0];
+    //       break;
+    //     case "Seg - Sex":
+    //       this.weekday = [1, 2, 3, 4, 5];
+    //       break;
+    //     case "Final de Semana":
+    //       this.weekday = [6, 0];
+    //       break;
+    //   }
+    // },
     startDrag({ event, timed }) {
       if (event && timed) {
         this.dragEvent = event;
@@ -484,7 +498,7 @@ export default {
       </v-btn>
       <v-spacer></v-spacer>
       <template>
-        <div class="center con-selects">
+        <div class="headerCalendar center con-selects">
           <vs-select
             :state="color"
             label-placeholder="Calendário"
@@ -504,30 +518,7 @@ export default {
         </div>
       </template>
       <template>
-        <div class="center con-selects">
-          <vs-select
-            :state="color"
-            label-placeholder="Dias da Semana"
-            v-model="weekdayChange"
-            :onselect="changeDaysView()"
-          >
-            <vs-option label="Dom - Sáb" value="Dom - Sáb">
-              Dom - Sáb
-            </vs-option>
-            <vs-option label="Seg - Dom" value="Seg - Dom">
-              Seg - Dom
-            </vs-option>
-            <vs-option label="Seg - Sex" value="Seg - Sex">
-              Seg - Sex
-            </vs-option>
-            <vs-option label="Final de Semana" value="Final de Semana">
-              Final de Semana
-            </vs-option>
-          </vs-select>
-        </div>
-      </template>
-      <template>
-        <div class="center con-selects">
+        <div class="headerCalendar center con-selects">
           <vs-select
             :state="color"
             filter
@@ -545,7 +536,7 @@ export default {
         </div>
       </template>
       <template>
-        <div class="center con-selects">
+        <div class="headerCalendar center con-selects">
           <vs-select
             :state="color"
             filter
@@ -562,44 +553,25 @@ export default {
           </vs-select>
         </div>
       </template>
-      <!-- <template>
-        <div class="center con-selects">
-          <v-select
-            :items="client_names"
-            label="Cliente"
-            dense
-            outlined
-          ></v-select>
-        </div>
-      </template> -->
-      <!-- <template>
-        <div class="center con-selects">
-          <v-select
-            :items="constructions_names"
-            label="Obra"
-            dense
-            outlined
-          ></v-select>
-        </div>
-      </template> -->
       <v-spacer></v-spacer>
-      <v-btn icon class="ma-2" @click="next()">
+      <v-btn fab text small icon class="ma-2" @click="next()">
         <v-icon class="icone-setas">mdi-chevron-right</v-icon>
       </v-btn>
     </v-sheet>
     <v-sheet height="600">
       <v-calendar
         ref="calendar"
-        v-model="value"
+        v-model="today"
         :weekdays="weekday"
         :type="type"
         :events="events"
         :event-overlap-mode="mode"
         :event-overlap-threshold="30"
         :event-color="getEventColor"
+        :event-ripple="false"
         :now="today"
         color="primary"
-        @change="updateRange"
+        @change="getEvents"
         @mousedown:event="startDrag"
         @mousedown:time="startTime"
         @mousemove:time="mouseMove"
@@ -666,14 +638,6 @@ export default {
             >
               Editar
             </v-btn>
-            <v-btn
-              text
-              v-else
-              type="submit"
-              @click.prevent="updateEvent(selectedEvent)"
-            >
-              Salvar
-            </v-btn>
           </v-card-actions>
         </v-card>
       </v-menu>
@@ -688,6 +652,11 @@ export default {
 </template>
 
 <style scoped lang="scss">
+.headerCalendar {
+  margin-left: 1%;
+  margin-right: 1%
+}
+
 .v-current-time {
   height: 2px;
   background-color: #ea4335;
