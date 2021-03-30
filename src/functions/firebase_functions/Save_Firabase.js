@@ -1,41 +1,44 @@
 import * as firebase from '@/services/Firebase'
 const db = firebase.firestore();
-const userId = firebase.auth().currentUser.uid;
-var x = new Empresa('empresa');
-x.addUsuariosIDs('01');
-var w = setData(x,'teste');
-console.log(w);
-async function setData(campo,title){
+// const userId = firebase.auth().currentUser.uid;
+async function setData(campo, title) {
     const data = await db.collection(campo.getTableName()).doc(title).set(campo.getMap())
-    .then(()=>{
-        location.reload()
-        console.log('deu bom');
-    })
-    .catch(error =>{
-        console.error(error);
-    });
+        .then(() => {
+            location.reload()
+        })
+        .catch(error => {
+            console.error(error);
+        });
     return data;
 }
-
 class Empresa {
-    constructor(nome, id_endereco, usuarioId = null, cnpj = null, telefone = null, email = null, foto = null) {
+    constructor(nome, id_endereco, usuarioId = null, cnpj = null, telefone = null, email = null, foto = null, raio_entrega = null, valor_min = null) {
         this.nome = nome;
         this.cnpj = cnpj;
         this.telefone = telefone;
         this.email = email;
         this.foto = foto;
         this.id_endereco = id_endereco;
+        this.raio_entrega = raio_entrega;
+        this.valor_min = valor_min;
         var usuariosIDs = [];
-        this.usuariosIDs = [];
+        var tiposMaterial = [];
         if (usuarioId != null)
-            this.usuariosIDs.push(usuarioId);
+            usuariosIDs.push(usuarioId);
 
         this.addUsuariosIDs = function (value) {
-            this.usuariosIDs.push(value);
+            usuariosIDs.push(value);
         };
         this.removeUsuariosIDs = function (value) {
             var indice = usuariosIDs.indexOf(value);
-            this.usuariosIDs.pud(indice);
+            usuariosIDs.pud(indice);
+        };
+        this.addTiposMaterial = function (value) {
+            tiposMaterial.push(value);
+        };
+        this.removeTiposMaterial = function (value) {
+            var indice = tiposMaterial.indexOf(value);
+            tiposMaterial.pud(indice);
         };
         this.getNome = function () {
             return nome;
@@ -54,7 +57,10 @@ class Empresa {
             map["email"] = this.email;
             map["foto"] = this.foto;
             map["id_endereco"] = this.id_endereco;
-            map["usuariosIDs"] = this.usuariosIDs;
+            map["usuariosIDs"] = usuariosIDs;
+            map["raio_entrega"] = this.raio_entrega;
+            map["valor_min"] = this.valor_min;
+            map["tiposMaterial"] = tiposMaterial;
             return map;
         }
     }
@@ -85,39 +91,49 @@ class Endereco {
     }
 }
 class Usuario {
-    constructor(nome, tipoUsuario, empresaId = null, obraId = null, email = null, telefone = null, cpf = null, data_nascimento = null, data_nascimento_conjuge = null, nome_conjuge = null, foto = null, endereco = null) {
+    constructor(nome, tipoUsuario, empresaId = null, obraId = null, email = null, telefone = null, cpf = null, data_nascimento = null, data_nascimento_conjuge = null, nome_conjuge = null, foto = null, endereco = null, avaliacao = null, whatsapp = null) {
         this.nome = nome;
         this.tipoUsuario = tipoUsuario;
         this.email = email;
         this.telefone = telefone;
+        this.whatsapp = whatsapp;
         this.cpf = cpf;
         this.data_nascimento = data_nascimento;
         this.data_nascimento_conjuge = data_nascimento_conjuge;
         this.nome_conjuge = nome_conjuge;
         this.foto = foto;
         this.endereco = endereco;
-        this.empresas = [];
-        this.obra = [];
+        this.avaliacao = avaliacao;
+        var empresas = [];
+        var obra = [];
+        var cotacao = [];
         if (empresaId != null)
-            this.empresas.push(empresaId);
+            empresas.push(empresaId);
         if (obraId != null)
-            this.obra.push(obraId);
+            obra.push(obraId);
         this.getTableName = function () {
             return 'Usuario';
         };
         this.addEmpresas = function (value) {
-            this.empresas.push(value);
+            empresas.push(value);
         };
         this.removeEmpresas = function (value) {
             var indice = empresas.indexOf(value);
-            this.empresas.pud(indice);
+            empresas.pud(indice);
         };
         this.addObra = function (value) {
-            this.empresas.push(value);
+            empresas.push(value);
         };
         this.removeObra = function (value) {
             var indice = obra.indexOf(value);
-            this.obra.pud(indice);
+            obra.pud(indice);
+        };
+        this.addCotacao = function (value) {
+            cotacao.push(value);
+        };
+        this.removeCotacao = function (value) {
+            var indice = cotacao.indexOf(value);
+            cotacao.pud(indice);
         };
         this.getMap = function () {
             var map = new Object();
@@ -125,14 +141,17 @@ class Usuario {
             map["tipoUsuario"] = this.tipoUsuario;
             map["email"] = this.email;
             map["telefone"] = this.telefone;
+            map["whatsapp"] = this.whatsapp;
             map["cpf"] = this.cpf;
             map["data_nascimento"] = this.data_nascimento;
             map["data_nascimento_conjuge"] = this.data_nascimento_conjuge;
             map["nome_conjuge"] = this.nome_conjuge;
             map["foto"] = this.foto;
             map["endereco"] = this.endereco;
-            map["empresas"] = this.empresas;
-            map["obra"] = this.obra;
+            map["empresas"] = empresas;
+            map["obra"] = obra;
+            map["avaliacao"] = this.avaliacao;//só para fornecedor
+            map["cotacao"] = cotacao;//só para fornecedor
             return map;
         }
     }
@@ -184,18 +203,21 @@ class tipoObra {
     }
 }
 class Obra {
-    constructor(nome, Endereco, TipoObra, Empresa, clienteID = null, arquitetoId = null, cor = null) {
+    constructor(nome, Endereco, TipoObra, Empresa, clienteID = null, arquitetoId = null, cor = null, inativo = false) {
         this.nome = nome;
         this.Endereco = Endereco;
         this.TipoObra = TipoObra;
         this.Empresa = Empresa;
         this.cor = cor;
-        this.arquitetosId = [];
-        this.clientesID = [];
+        this.inativo = inativo;
+        var id_arquitetos = [];
+        var id_clientes = [];
+        var ids_cotacoes = [];
+        var fotos = [];
         if (arquitetoId != null)
-            this.arquitetosId.push(arquitetoId);
+            id_arquitetos.push(arquitetoId);
         if (clienteID != null)
-            this.clientesID.push(clienteID);
+            id_clientes.push(clienteID);
         this.getTableName = function () {
             return 'Obra';
         };
@@ -205,19 +227,36 @@ class Obra {
         this.setCor = function (value) {
             this.cor = cor;
         };
+        this.inativador = function () {
+            this.inativo = !this.inativo;
+        };
         this.addArquiteto = function (value) {
-            this.arquitetosId.push(value);
+            id_arquitetos.push(value);
         };
         this.removeArquiteto = function (value) {
-            var indice = this.arquitetosId.indexOf(value);
-            this.arquitetosId.pud(indice);
+            var indice = id_arquitetos.indexOf(value);
+            id_arquitetos.pud(indice);
         };
         this.addCliente = function (value) {
-            this.clientesID.push(value);
+            id_clientes.push(value);
         };
         this.removeCliente = function (value) {
-            var indice = this.clientesID.indexOf(value);
-            this.clientesID.pud(indice);
+            var indice = id_clientes.indexOf(value);
+            id_clientes.pud(indice);
+        };
+        this.addCotacao = function (value) {
+            ids_cotacoes.push(value);
+        };
+        this.removeCotacao = function (value) {
+            var indice = ids_cotacoes.indexOf(value);
+            ids_cotacoes.pud(indice);
+        };
+        this.addFoto = function (value) {
+            fotos.push(value);
+        };
+        this.removeFoto = function (value) {
+            var indice = fotos.indexOf(value);
+            fotos.pud(indice);
         };
         this.getMap = function () {
             var map = new Object();
@@ -226,15 +265,18 @@ class Obra {
             map["TipoObra"] = this.TipoObra;
             map["Empresa"] = this.Empresa;
             map["cor"] = this.cor;
-            map["arquitetosId"] = this.arquitetosId;
-            map["clientesID"] = this.clientesID;
+            map["inativo"] = this.inativo;
+            map["idArquitetos"] = id_arquitetos;
+            map["idClientes"] = id_clientes;
+            map["idCotacao"] = ids_cotacoes;
+            map["fotos"] = fotos;
             return map;
         }
     }
 }
 class CronogramaObra {
     constructor(obraId, data_inicio, data_fim, tempo_previsto = null, gasto_previsto = null) {
-        this.obraId = obraId;
+        obraId = obraId;
         this.data_inicio = data_inicio;
         this.data_fim = data_fim;
         this.tempo_previsto = tempo_previsto;
@@ -250,7 +292,7 @@ class CronogramaObra {
         };
         this.getMap = function () {
             var map = new Object();
-            map["obraId"] = this.obraId;
+            map["obraId"] = obraId;
             map["data_inicio"] = this.data_inicio;
             map["data_fim"] = this.data_fim;
             map["tempo_previsto"] = this.tempo_previsto;
@@ -302,25 +344,25 @@ class Tarefa {
         this.status = status;
         this.data_inicio = data_inicio;
         this.data_fim = data_fim;
-        this.tarefas = [];
+        var tarefas = [];
         this.getTableName = function () {
             return 'Tarefa';
         };
         this.addTarefa = function (value) {
-            this.tarefas.push(value);
+            tarefas.push(value);
         };
         this.removeTarefa = function (value) {
-            var indice = this.clientesID.indexOf(value);
-            this.clientesID.pud(indice);
+            var indice = tarefas.indexOf(value);
+            tarefas.pud(indice);
         };
         this.getMap = function () {
             var map = new Object();
-            map["obraId"] = this.obraId;
+            map["obraId"] = obraId;
             map["data_inicio"] = this.data_inicio;
             map["data_fim"] = this.data_fim;
             map["tempo_previsto"] = this.tempo_previsto;
             map["gasto_previsto"] = this.gasto_previsto;
-            map["tarefas"] = this.tarefas;
+            map["tarefas"] = tarefas;
             return map;
         }
     }
@@ -345,8 +387,8 @@ class StatusTarefa {
     }
 }
 class AgendaObra {
-    constructor(obraId,titulo,data_inicio,data_fim,descricao = null,duracao=null,prioridade=null) {
-        this.obraId = obraId;
+    constructor(obraId, titulo, data_inicio, data_fim, descricao = null, duracao = null, prioridade = null) {
+        obraId = obraId;
         this.titulo = titulo;
         this.data_inicio = data_inicio;
         this.data_fim = data_fim;
@@ -364,7 +406,7 @@ class AgendaObra {
         };
         this.getMap = function () {
             var map = new Object();
-            map["obraId"] = this.obraId;
+            map["obraId"] = obraId;
             map["titulo"] = this.titulo;
             map["data_inicio"] = this.data_inicio;
             map["data_fim"] = this.data_fim;
@@ -376,7 +418,7 @@ class AgendaObra {
     }
 }
 class AgendaParticular {
-    constructor(usuarioId,titulo,data_inicio,data_fim,descricao = null,duracao=null,prioridade=null) {
+    constructor(usuarioId, titulo, data_inicio, data_fim, descricao = null, duracao = null, prioridade = null) {
         this.usuarioId = usuarioId;
         this.titulo = titulo;
         this.data_inicio = data_inicio;
@@ -407,7 +449,7 @@ class AgendaParticular {
     }
 }
 class LembreteParticular {
-    constructor(usuarioId,titulo,data_inicio,data_fim,descricao = null,duracao=null,) {
+    constructor(usuarioId, titulo, data_inicio, data_fim, descricao = null, duracao = null,) {
         this.usuarioId = usuarioId;
         this.titulo = titulo;
         this.data_inicio = data_inicio;
@@ -436,8 +478,8 @@ class LembreteParticular {
     }
 }
 class LembreteObra {
-    constructor(obraId,titulo,data_inicio,data_fim,descricao = null,duracao=null,) {
-        this.obraId = obraId;
+    constructor(obraId, titulo, data_inicio, data_fim, descricao = null, duracao = null,) {
+        obraId = obraId;
         this.titulo = titulo;
         this.data_inicio = data_inicio;
         this.data_fim = data_fim;
@@ -454,7 +496,7 @@ class LembreteObra {
         };
         this.getMap = function () {
             var map = new Object();
-            map["obraId"] = this.obraId;
+            map["obraId"] = obraId;
             map["titulo"] = this.titulo;
             map["data_inicio"] = this.data_inicio;
             map["data_fim"] = this.data_fim;
@@ -464,3 +506,237 @@ class LembreteObra {
         }
     }
 }
+class TipoMaterial {
+    constructor(nome) {//ex: material bruto, material de acabamento e decoração
+        this.nome = nome;
+        this.getTableName = function () {
+            return 'TipoMaterial';
+        };
+        this.getMap = function () {
+            var map = new Object();
+            map["nome"] = this.nome;
+            return map;
+        }
+    }
+}
+class TipoCotacao {
+    constructor(status) {
+        this.status = status;
+        this.getTableName = function () {
+            return 'TipoCotacao';
+        };
+        this.getMap = function () {
+            var map = new Object();
+            map["status"] = this.status;
+            return map;
+        }
+    }
+}
+class Cotacao {
+    constructor(titulo, idObra, idTipoCotacao, prazo = null, dataDeEntrega = null, idEtapa, anexo = null) {
+        this.titulo = titulo;
+        this.idObra = idObra;
+        this.prazo = prazo;
+        this.idTipoCotacao = idTipoCotacao;
+        var data_entrega = new Date(Date.now());
+        this.dataDeEntrega = dataDeEntrega;
+        this.idEtapa = idEtapa;
+        this.anexo = anexo;
+        var id_materiais = [];
+        var id_fornecedores = [];
+        this.getTableName = function () {
+            return 'Cotacao';
+        };
+        this.getTitulo = function () {
+            return titulo;
+        };
+        this.setTitulo = function (value) {
+            this.titulo = value;
+        };
+        this.addMaterial = function (value) {
+            id_materiais.push(value);
+        };
+        this.removeMateriais = function (value) {
+            var indice = tarefas.indexOf(value);
+            id_materiais.pud(indice);
+        };
+        this.addFornecedores = function (value) {
+            id_fornecedores.push(value);
+        };
+        this.removeFornecedores = function (value) {
+            var indice = tarefas.indexOf(value);
+            id_fornecedores.pud(indice);
+        };
+        this.getMap = function () {
+            var map = new Object();
+            map["titulo"] = this.titulo;
+            map["idTipoCotacao"] = this.idTipoCotacao;
+            map["data_entrega"] = data_entrega;
+            map["prazo"] = this.prazo;
+            map["idEtapa"] = this.idEtapa;
+            map["anexo"] = this.anexo;
+            map["idpedidoMaterial"] = pedidoMaterial;
+            map["idFornecedor"] = id_fornecedor;//usuario
+            return map;
+        }
+    }
+}
+class Material {
+    constructor(nome,id_tipo_medida = null,tipoMaterial = null) {
+        this.nome = nome;
+        this.id_tipo_medida = id_tipo_medida;
+        this.tipoMaterial = tipoMaterial;
+        var id_especificacoes = [];
+        this.getTableName = function () {
+            return 'Material';
+        };
+        this.addEspecificacoes = function (value) {
+            id_especificacoes.push(value);
+        };
+        this.removeEspecificacoes = function (value) {
+            var indice = id_especificacoes.indexOf(value);
+            id_especificacoes.pud(indice);
+        };
+        this.getMap = function () {
+            var map = new Object();
+            map["nome"] = this.nome;
+            map["id_tipo_medida"] = this.id_tipo_medida;
+            map["tipoMaterial"] = this.tipoMaterial;
+            map["id_especificacoes"] = id_especificacoes;
+            return map;
+        }
+    }
+}
+class PedidoMaterial {
+    constructor(idMaterial, qtd = null, outras_especificacoes = null,preco=null) {
+        this.idMaterial = idMaterial;
+        this.qtd = qtd;
+        this.outras_especificacoes = outras_especificacoes;
+        this.preco = preco;
+        this.getTableName = function () {
+            return 'PedidoMaterial';
+        };
+        this.getMap = function () {
+            var map = new Object();
+            map["idMaterial"] = this.idMaterial;
+            map["qtd"] = this.qtd;
+            map["outras_especificacoes"] = this.outras_especificacoes;
+            map["preco"] = this.preco;
+            return map;
+        }
+    }
+}
+class TipoMedida {
+    constructor(nome, unidade_de_medida) {
+        this.nome = nome;
+        this.unidade_de_medida = unidade_de_medida;
+        this.getTableName = function () {
+            return 'TipoMedida';
+        };
+        this.getMap = function () {
+            var map = new Object();
+            map["nome"] = this.nome;
+            map["unidade_de_medida"] = this.unidade_de_medida;
+            return map;
+        }
+    }
+}
+class Especificacao_material {//cor{amarelo,azul}
+    constructor(nome) {
+        this.nome = nome;
+        var campos = [];
+        this.getTableName = function () {
+            return 'Especificacao_material';
+        };
+        this.addEspecificacoes = function (value) {
+            campos.push(value);
+        };
+        this.removeEspecificacoes = function (value) {
+            var indice = campos.indexOf(value);
+            campos.pud(indice);
+        };
+        this.getMap = function () {
+            var map = new Object();
+            map["nome"] = this.nome;
+            map["campos"] = campos;
+            return map;
+        }
+    }
+}
+class CotacaoResposta {
+    constructor(titulo, idObra, idTipoCotacao, prazo = null, dataDeEntrega = null, anexo = null, frete = null, desconto = null, preco_total = null) {
+        this.titulo = titulo;
+        this.idObra = idObra;
+        this.prazo = prazo;
+        this.idTipoCotacao = idTipoCotacao;
+        var data_entrega = new Date(Date.now());
+        this.dataDeEntrega = dataDeEntrega;
+        this.anexo = anexo;
+        this.frete = frete;
+        this.desconto = desconto;
+        this.preco_total = preco_total;
+        var id_materiais = [];  //nova lista de materiais passando o preço
+        var id_fornecedores = [];   //id do usuario
+        this.getTableName = function () {
+            return 'CotacaoResposta';
+        };
+        this.getTitulo = function () {
+            return titulo;
+        };
+        this.setTitulo = function (value) {
+            this.titulo = value;
+        };
+        this.addMaterial = function (value) {
+            id_materiais.push(value);
+        };
+        this.removeMateriais = function (value) {
+            var indice = tarefas.indexOf(value);
+            id_materiais.pud(indice);
+        };
+        this.addFornecedores = function (value) {
+            id_fornecedores.push(value);
+        };
+        this.removeFornecedores = function (value) {
+            var indice = tarefas.indexOf(value);
+            id_fornecedores.pud(indice);
+        };
+        this.getMap = function () {
+            var map = new Object();
+            map["titulo"] = this.titulo;
+            map["idObra"] = this.idObra;
+            map["idTipoCotacao"] = this.idTipoCotacao;
+            map["data_entrega"] = data_entrega;
+            map["prazo"] = this.prazo;
+            map["anexo"] = this.anexo;
+            map["idMateriais"] = id_materiais;
+            map["idFornecedor"] = id_fornecedores;//usuario
+            return map;
+        }
+    }
+}
+class StatusCotacao {
+    constructor(nome, observacoes) {//são 3 status. só terá motivos e observações no status cancelado
+        this.nome = nome;
+        this.observacoes = observacoes;
+        var motivos = [];//serão sempre 3
+        this.getTableName = function () {
+            return 'StatusCotacao';
+        };
+        this.addMotivos = function (value) {
+            motivos.push(value);
+        };
+        this.removeMotivos = function (value) {
+            var indice = motivos.indexOf(value);
+            motivos.pud(indice);
+        };
+        this.getMap = function () {
+            var map = new Object();
+            map["nome"] = this.nome;
+            map["observacoes"] = this.observacoes;
+            map["motivos"] = motivos;
+            return map;
+        }
+    }
+}
+//falta a tabela de vendas
+export default {Empresa,Usuario,tipoObra,tipoUsuario,Endereco,setData}
