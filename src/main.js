@@ -15,6 +15,21 @@ import "boxicons";
 import NewGantt from "./components/NewGantt.vue";
 import "dayjs/locale/pt-br";
 import dayjs from "dayjs";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faComment } from "@fortawesome/free-regular-svg-icons";
+import { fab, faWhatsapp, faTwitter } from "@fortawesome/free-brands-svg-icons";
+import { faUserSecret, fas } from "@fortawesome/free-solid-svg-icons";
+import {
+  FontAwesomeIcon,
+  FontAwesomeLayers,
+  FontAwesomeLayersText,
+} from "@fortawesome/vue-fontawesome";
+
+library.add(fab, fas, faWhatsapp, faTwitter, faUserSecret, faComment);
+
+Vue.component("font-awesome-icon", FontAwesomeIcon);
+Vue.component("font-awesome-layers", FontAwesomeLayers);
+Vue.component("font-awesome-layers-text", FontAwesomeLayersText);
 
 Vue.use(dayjs);
 Vue.use(NewGantt);

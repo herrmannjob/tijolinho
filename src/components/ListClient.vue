@@ -3,6 +3,7 @@ import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 import ModalRegisterClient from "@/components/ModalRegisterClient";
 import ModalEditClient from "@/components/ModalEditClient";
+import "@fortawesome/free-brands-svg-icons";
 export default {
   mixins: [FirebaseMixin],
   data() {
@@ -121,8 +122,7 @@ export default {
         class="btn-primary-extra-lg"
         @click="showRegisterModal()"
         style="margin: 2%;"
-        icon
-        ><box-icon name="plus"></box-icon>
+        ><font-awesome-icon class="plus-client" :icon="['fas', 'plus']" />
         Novo Cliente
       </vs-button>
     </div>
@@ -179,7 +179,10 @@ export default {
                       </v-btn>
 
                       <v-btn primary icon class="mr-4" @click="linkWhatsApp()">
-                        <v-icon>mdi-phone-plus</v-icon>
+                        <font-awesome-icon
+                          class="whatsapp"
+                          :icon="['fab', 'whatsapp']"
+                        />
                       </v-btn>
 
                       <v-btn primary icon class="mr-4" @click="sendEmail()">
@@ -231,6 +234,14 @@ body {
   width: 100%;
 }
 
+.whatsapp {
+  font-weight: bold !important;
+  font-size: 20px;
+}
+
+.plus-client {
+  margin-right: 4%;
+}
 @media only screen and (max-width: 768px) {
   .btn-primario .btn-cliente {
     margin: 5%;
