@@ -33,7 +33,7 @@
     "dayjs": "^1.10.4",
     "dhtmlx-scheduler": "^5.3.11",
     "firebase": "^8.2.10",
-    "firebase-tools": "^9.7.0",
+    "firebase-tools": "^9.1.0",
     "frappe-gantt": "^0.5.0",
     "fullcalendar": "^5.5.1",
     "gantt-elastic": "^1.0.12",
