@@ -28,6 +28,8 @@ export default {
       form: false,
       events: [],
       today: "",
+      compromissos: [],
+      hoje: "",
     };
   },
   async mounted() {
@@ -41,6 +43,7 @@ export default {
     });
     moment.locale("pt-br");
     this.today = moment().format("LL");
+    this.hoje = moment().format().substr(0, 10);
   },
   async updated() {
     if (this.refresh) {
@@ -172,6 +175,14 @@ export default {
             start: item.data.data_inicio.substr(11, 5),
             end: item.data.data_fim.substr(11, 5),
           });
+          if (item.data.data_inicio.substr(0, 10) == this.hoje) {
+            this.compromissos.push({
+              title: item.data.titulo,
+              color: this.corPrioridade,
+              start: item.data.data_inicio.substr(11, 5),
+              end: item.data.data_fim.substr(11, 5),
+            });
+          }
         });
       }
     },
@@ -201,10 +212,11 @@ export default {
           </div>
           <div>
             <v-container class="container-task">
-              <v-col v-for="item in events" :key="item">
+              <v-col v-for="item in compromissos" :key="item">
                 <v-card shaped :color="item.color" class="card-task">
                   <v-col>
-                    <v-card-subtitle style="color: white" v-text="item.title"> </v-card-subtitle>
+                    <v-card-subtitle style="color: white" v-text="item.title">
+                    </v-card-subtitle>
                     <v-card-text style="color: white">
                       <div>Início: {{ item.start }}</div>
                       <div>Fim: {{ item.end }}</div>

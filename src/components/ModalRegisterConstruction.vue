@@ -183,40 +183,47 @@ export default {
     <div class="con-form">
       <v-row>
         <v-col cols="12" md="6">
-          <vs-input
-            type="text"
-            v-model="firstname"
-            label="Nome da obra"
-            required
-          />
+          <div class="group-data-construction">
+            <vs-input
+              type="text"
+              v-model="firstname"
+              label="Nome da obra"
+              required
+            />
 
-          <vs-select filter placeholder="Categoria" v-model="category" required>
-            <vs-option label="Residencial" value="Residencial">
-              Residencial
-            </vs-option>
-            <vs-option label="Reforma" value="Reforma">
-              Reforma
-            </vs-option>
-            <vs-option label="Comercial" value="Comercial">
-              Comercial
-            </vs-option>
-            <vs-option label="Restauração" value="Restauração">
-              Restauração
-            </vs-option>
-            <vs-option label="Criação" value="Criação">
-              Criação
-            </vs-option>
-          </vs-select>
+            <vs-select
+              filter
+              placeholder="Categoria"
+              v-model="category"
+              required
+            >
+              <vs-option label="Residencial" value="Residencial">
+                Residencial
+              </vs-option>
+              <vs-option label="Reforma" value="Reforma">
+                Reforma
+              </vs-option>
+              <vs-option label="Comercial" value="Comercial">
+                Comercial
+              </vs-option>
+              <vs-option label="Restauração" value="Restauração">
+                Restauração
+              </vs-option>
+              <vs-option label="Criação" value="Criação">
+                Criação
+              </vs-option>
+            </vs-select>
 
-          <vs-input type="date" v-model="dateInit" label="Data de Início" />
+            <vs-input type="date" v-model="dateInit" label="Data de Início" />
 
-          <vs-input type="date" v-model="dateEnd" label="Termino previsto" />
+            <vs-input type="date" v-model="dateEnd" label="Termino previsto" />
 
-          <vs-input
-            type="number"
-            v-model="estimated_spend"
-            label="Gasto estimado"
-          />
+            <vs-input
+              type="number"
+              v-model="estimated_spend"
+              label="Gasto estimado"
+            />
+          </div>
         </v-col>
         <v-col cols="12" md="6">
           <v-text-field
@@ -253,6 +260,15 @@ export default {
 </template>
 
 <style lang="css">
+.group-data-construction {
+  display: grid;
+  flex-direction: column;
+  align-items: space-between;
+  justify-content: center;
+  height: 100%;
+  padding-left: unset;
+}
+
 .btn-container-client {
   width: 11rem;
   display: flex;
