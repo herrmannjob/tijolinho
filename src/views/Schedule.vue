@@ -8,7 +8,7 @@ import ModalRegisterTask from "@/components/ModalRegisterTask";
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 import "boxicons";
-import NewGantt from "@/components/NewGantt"
+import NewGantt from "@/components/NewGantt";
 
 export default {
   name: "Schedule",
@@ -275,7 +275,7 @@ export default {
             <template v-if="showFinancialComponent == true">
               <FinancialComponent />
             </template>
-            <vs-button
+            <!-- <vs-button
               v-if="showGanttTask == true"
               class="btn-primary-lg"
               color="#002b4b"
@@ -283,11 +283,18 @@ export default {
               @click="form_task = true"
             >
               Novo Serviço
-            </vs-button>
+            </vs-button> -->
             <template v-if="showGanttTask == true && tasks.length">
               <Gantt :tarefas="tasks" :view-mode="mode" />
             </template>
             <vs-button
+              v-if="showGanttTask == true"
+              color="#002b4b"
+              gradient
+              @click="form_task = true"
+              >Adiciona</vs-button
+            >
+            <!-- <vs-button
               v-if="showGanttTask == true"
               color="#002b4b"
               gradient
@@ -307,9 +314,9 @@ export default {
               gradient
               @click="demoViewMode('month')"
               >Mês</vs-button
-            >
+            > -->
             <template v-if="showGanttTask == true">
-            <NewGantt />
+              <NewGantt :tarefas="tasks" />
             </template>
             <template v-if="tasks.length > 0">
               <!-- <v-card

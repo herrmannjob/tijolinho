@@ -57,6 +57,19 @@ export default {
         );
     },
 
+    addTask() {
+      this.tasks.push({
+        id: this.lastId++,
+        label:
+          '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">Yeaahh! you have added a task bro!</a>',
+        user: this.user,
+        start: this.dateInit,
+        duration: 1 * 24 * 60 * 60 * 1000,
+        percent: 50,
+        type: "project",
+      });
+    },
+
     async addTarefa() {
       await this.addStatusTarefa();
       const i = this.task_names.indexOf(this.selected_task);
@@ -70,7 +83,12 @@ export default {
         start: this.dateInit,
         end: this.dateEnd,
         progress: (elapsed / planned) * 100,
+        label: this.name,
+        duration: (start / end) * 100,
+        percent: 50,
+        type: "project",
         dependencies: this.selected_task.length ? this.tasks[i].id : null,
+        dependentOn: this.selected_task.length ? this.tasks[i].id : null,
         status: this.selected_status,
         cronograma_obra: this.cronograma_obra,
         gasto_previsto: this.estimated_spend,
@@ -101,121 +119,97 @@ export default {
 };
 </script>
 <template>
-  <v-dialog v-model="form" persistent max-width="800px">
-    <v-card>
-      <v-card-title>
-        <span class="headline">Cadastrar Tarefa</span>
-      </v-card-title>
-      <v-card-text>
-        <v-form>
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="name"
-                :rules="nameRules"
-                label="Nome da tarefa"
-                :close-on-content-click="false"
-                required
-              ></v-text-field>
+  <vs-dialog v-model="form" max-width="800px" prevent-close>
+    <template #header>
+      <h4 class="not-margin">Cadastrar <b>Tarefa</b></h4>
+    </template>
+    <div class="con-form">
+      <v-row>
+        <v-col cols="12" md="6">
+          <div class="group-data-task">
+            <vs-input
+              type="text"
+              v-model="name"
+              label="Nome da tarefa"
+              :rules="nameRules"
+              required
+            />
 
-              <v-menu
-                ref="menuInit"
-                v-model="menuDateInit"
-                :close-on-content-click="false"
-                transition="scale-transition"
-                offset-y
-                min-width="auto"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="dateInit"
-                    label="Data de inicio"
-                    readonly
-                    required
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  ref="pickerInit"
+            <div class="inputControl">
+              <template>
+                <vs-input
+                  id="agend"
+                  type="date"
                   v-model="dateInit"
-                  min="1950-01-01"
-                ></v-date-picker>
-              </v-menu>
+                  label="Data de Início"
+                  required
+                  :min="today"
+                />
+              </template>
+            </div>
 
-              <v-menu
-                ref="menuEnd"
-                v-model="menuDateEnd"
-                :close-on-content-click="false"
-                transition="scale-transition"
-                offset-y
-                min-width="auto"
-              >
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="dateEnd"
-                    label="Termino previsto"
-                    readonly
-                    required
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  ref="pickerEnd"
+            <div class="inputControl">
+              <template>
+                <vs-input
+                  id="agend"
+                  type="date"
                   v-model="dateEnd"
-                  :min="dateInit"
-                ></v-date-picker>
-              </v-menu>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="Gasto estimado"
-                v-model="estimated_spend"
-                required
-                hint="Apenas números"
-              ></v-text-field>
+                  label="Término previsto"
+                  required
+                  :min="today"
+                />
+              </template>
+            </div>
+          </div>
+        </v-col>
+        <v-col cols="12" md="6">
+          <v-text-field
+            label="Gasto estimado"
+            v-model="estimated_spend"
+            required
+            hint="Apenas números"
+          ></v-text-field>
 
-              <v-select
-                v-if="task_names.length"
-                v-model="selected_task"
-                :items="task_names"
-                :close-on-content-click="false"
-                :menu-props="{ top: true, offsetY: true }"
-                label="Depende de..."
-              ></v-select>
+          <v-select
+            v-if="task_names.length"
+            v-model="selected_task"
+            :items="task_names"
+            :close-on-content-click="false"
+            :menu-props="{ top: true, offsetY: true }"
+            label="Depende de..."
+          ></v-select>
 
-              <v-select
-                v-model="selected_status"
-                :items="status"
-                :close-on-content-click="false"
-                :menu-props="{ top: true, offsetY: true }"
-                label="Status"
-              ></v-select>
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="primary"
-          depressed
-          class="btn-primario"
-          @click="addTarefa()"
-        >
+          <v-select
+            v-model="selected_status"
+            :items="status"
+            :close-on-content-click="false"
+            :menu-props="{ top: true, offsetY: true }"
+            label="Status"
+          ></v-select>
+        </v-col>
+      </v-row>
+    </div>
+    <template #footer>
+      <div class="footer-dialog">
+        <vs-button block class="btn-primario" @click="addTarefa()">
           SALVAR
-        </v-btn>
-        <v-btn color="primary" text @click="close">
-          Cancelar
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+        </vs-button>
+      </div>
+    </template>
     <ResponseModal :modal.sync="modal" :message="message" />
-  </v-dialog>
+  </vs-dialog>
 </template>
 
 <style lang="css">
+.group-data-task {
+  display: grid;
+  flex-direction: column;
+  align-items: space-between;
+  justify-content: center;
+  height: 110%;
+  padding-left: unset;
+}
+
 .btn-container-client {
   width: 11rem;
   display: flex;

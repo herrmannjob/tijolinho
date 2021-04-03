@@ -38,6 +38,7 @@
               v-model="dateStart.date"
               label="Data Inicial"
               required
+              :min="today"
             />
           </template>
         </div>
@@ -115,6 +116,7 @@ export default {
   },
   data() {
     return {
+      today: new Date().toISOString().substr(0, 10),
       title: "",
       description: "",
       date_end: "",
