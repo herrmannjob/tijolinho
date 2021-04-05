@@ -19,7 +19,7 @@ export default {
     endMenu: false,
     extendOriginal: null,
     form: false,
-    parcelas: '',
+    parcelas: "",
     ready: false,
     refresh: false,
     selectedEvent: {},
@@ -504,71 +504,147 @@ export default {
               Novo Item
             </vs-button>
           </template>
-          <v-card>
-            <v-card-title>
-              <span class="headline">{{ formTitle }}</span>
-            </v-card-title>
-
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.name"
-                      label="Descrição"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.data_solicitada"
-                      label="Data"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.fornecedor"
-                      label="Fornecedor"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.pedido"
-                      label="Pedido"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.anexos"
-                      label="Anexos"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.pagamento"
-                      label="Forma de Pagamento"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.parcelas"
-                      label="Parcelas"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.data_vencimento"
-                      label="Vencimento"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.valor_total"
-                      label="Valor"
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
+          <vs-dialog v-model="dialog" max-width="800px" prevent-close>
+            <template #header>
+              <h4 class="not-margin">{{ formTitle }}</h4>
+            </template>
+            <v-container>
+              <v-row>
+                <v-col cols="12" sm="6" md="4">
+                  <vs-input
+                    type="text"
+                    v-model="editedItem.name"
+                    label="Descrição"
+                    required
+                  />
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <vs-input
+                    type="date"
+                    v-model="editedItem.data_solicitada"
+                    label="Data"
+                  />
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <vs-input
+                    type="text"
+                    v-model="editedItem.fornecedor"
+                    label="Fornecedor"
+                    required
+                  />
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <vs-input
+                    type="text"
+                    v-model="editedItem.pedido"
+                    label="Pedido"
+                    required
+                  />
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <vs-input
+                    type="text"
+                    v-model="editedItem.anexos"
+                    label="Anexos"
+                    required
+                  />
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <vs-input
+                    type="text"
+                    v-model="editedItem.pagamento"
+                    label="Forma de Pagamento"
+                    required
+                  />
+                  <!-- <vs-select
+                    filter
+                    placeholder="Forma de Pagamento"
+                    v-model="editedItem.pagamento"
+                  >
+                    <vs-option label="Dinheiro" value="Dinheiro">
+                      Dinheiro
+                    </vs-option>
+                    <vs-option label="Cheque" value="Cheque">
+                      Cheque
+                    </vs-option>
+                    <vs-option label="Cartão a Vista" value="Cartão a Vista">
+                      Cartão a Vista
+                    </vs-option>
+                    <vs-option
+                      label="Cartão Parcelado"
+                      value="Cartão Parcelado"
+                    >
+                      Cartão Parcelado
+                    </vs-option>
+                  </vs-select> -->
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <vs-input
+                    type="text"
+                    v-model="editedItem.parcelas"
+                    label="Parcelas"
+                    required
+                  />
+                  <!-- <vs-select
+                    filter
+                    placeholder="Parcelas"
+                    v-model="editedItem.parcelas"
+                  >
+                    <vs-option label="1" value="1">
+                      1
+                    </vs-option>
+                    <vs-option label="2" value="2">
+                      2
+                    </vs-option>
+                    <vs-option label="3" value="3">
+                      3
+                    </vs-option>
+                    <vs-option label="4" value="4">
+                      4
+                    </vs-option>
+                    <vs-option label="5" value="5">
+                      5
+                    </vs-option>
+                    <vs-option label="6" value="6">
+                      6
+                    </vs-option>
+                    <vs-option label="7" value="7">
+                      7
+                    </vs-option>
+                    <vs-option label="8" value="8">
+                      8
+                    </vs-option>
+                    <vs-option label="9" value="9">
+                      9
+                    </vs-option>
+                    <vs-option label="10" value="10">
+                      10
+                    </vs-option>
+                    <vs-option label="11" value="11">
+                      11
+                    </vs-option>
+                    <vs-option label="12" value="12">
+                      12
+                    </vs-option>
+                  </vs-select> -->
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <vs-input
+                    type="date"
+                    v-model="editedItem.data_vencimento"
+                    label="Vencimento"
+                  />
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <vs-input
+                    type="number"
+                    v-model="editedItem.valor_total"
+                    label="Valor"
+                    required
+                  />
+                </v-col>
+              </v-row>
+            </v-container>
 
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -579,7 +655,7 @@ export default {
                 Salvar
               </v-btn>
             </v-card-actions>
-          </v-card>
+          </vs-dialog>
         </v-dialog>
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>

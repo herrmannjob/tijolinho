@@ -275,7 +275,7 @@ export default {
             <template v-if="showFinancialComponent == true">
               <FinancialComponent />
             </template>
-            <!-- <vs-button
+            <vs-button
               v-if="showGanttTask == true"
               class="btn-primary-lg"
               color="#002b4b"
@@ -283,74 +283,45 @@ export default {
               @click="form_task = true"
             >
               Novo Serviço
-            </vs-button> -->
+            </vs-button>
+            <div class="row">
+              <vs-button
+                v-if="showGanttTask == true"
+                color="#002b4b"
+                gradient
+                @click="demoViewMode('day')"
+                >Dia</vs-button
+              >
+              <vs-button
+                v-if="showGanttTask == true"
+                color="#002b4b"
+                gradient
+                @click="demoViewMode('week')"
+                >Semana</vs-button
+              >
+              <vs-button
+                v-if="showGanttTask == true"
+                color="#002b4b"
+                gradient
+                @click="demoViewMode('month')"
+                >Mês</vs-button
+              >
+            </div>
             <template v-if="showGanttTask == true && tasks.length">
               <Gantt :tarefas="tasks" :view-mode="mode" />
             </template>
-            <vs-button
-              v-if="showGanttTask == true"
-              color="#002b4b"
-              gradient
-              @click="form_task = true"
-              >Adiciona</vs-button
-            >
-            <!-- <vs-button
-              v-if="showGanttTask == true"
-              color="#002b4b"
-              gradient
-              @click="demoViewMode('day')"
-              >Dia</vs-button
-            >
-            <vs-button
-              v-if="showGanttTask == true"
-              color="#002b4b"
-              gradient
-              @click="demoViewMode('week')"
-              >Semana</vs-button
-            >
-            <vs-button
-              v-if="showGanttTask == true"
-              color="#002b4b"
-              gradient
-              @click="demoViewMode('month')"
-              >Mês</vs-button
-            > -->
+
             <template v-if="showGanttTask == true">
-              <NewGantt :tarefas="tasks" />
-            </template>
-            <template v-if="tasks.length > 0">
-              <!-- <v-card
-                class="card-right"
-                color="primary"
-                v-for="task in tasks"
-                :key="task.id"
+              <NewGantt
+                :gantt-data="GanttData"
+                :gantt-current-time="GanttCurrentTime"
+                :first-line-stick="firstLineStick"
+                :time-section="GanttTime"
+                :chart-max-height="ChartHeight"
+                :float-view-render-fn="floatRender"
+                @rightClick.native="handleRightClick"
               >
-                <v-expansion-panels accordion>
-                  <v-expansion-panel>
-                    <v-expansion-panel-header
-                      style="padding-left:unset; padding-right:unset"
-                    >
-                      <span>{{ task.titulo }}</span>
-                    </v-expansion-panel-header>
-                    <v-expansion-panel-content
-                      v-if="tasks[0].titulo !== 'Nenhuma atividade'"
-                    >
-                      <p style="text-align:left">
-                        Descrição: {{ task.descricao }}
-                      </p>
-                      <p style="text-align:left; margin-top: 10px">
-                        Início: {{ task.data_inicio }}
-                      </p>
-                      <p style="text-align:left; margin-top: 10px">
-                        Fim: {{ task.data_fim }}
-                      </p>
-                      <p style="text-align:left; margin-top: 10px">
-                        Prioridade: {{ task.prioridade }}
-                      </p>
-                    </v-expansion-panel-content>
-                  </v-expansion-panel>
-                </v-expansion-panels>
-              </v-card> -->
+              </NewGantt>
             </template>
           </div>
         </div>
