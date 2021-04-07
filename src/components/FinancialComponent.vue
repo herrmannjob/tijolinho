@@ -9,7 +9,6 @@ export default {
   mixins: [FirebaseMixin],
   data: () => ({
     outlinedColor: "#002b4b",
-    gradientColor: "#00467a",
     client_names: [],
     clients: [],
     companies: [],
@@ -495,7 +494,6 @@ export default {
           <template v-slot:activator="{ on, attrs }">
             <vs-button
               :color="outlinedColor"
-              :gradient-color-secondary="gradientColor"
               type="gradient"
               class="mb-2 button-font"
               v-bind="attrs"
@@ -508,140 +506,67 @@ export default {
             <template #header>
               <h4 class="not-margin">{{ formTitle }}</h4>
             </template>
-            <v-container>
+            <v-container class="container-financial">
               <v-row>
-                <v-col cols="12" sm="6" md="4">
-                  <vs-input
-                    type="text"
-                    v-model="editedItem.name"
-                    label="Descrição"
-                    required
-                  />
+                <v-col cols="12" sm="6">
+                  <div class="group-data-item">
+                    <vs-input
+                      type="text"
+                      v-model="editedItem.name"
+                      label="Descrição"
+                      required
+                    />
+                    <vs-input
+                      type="date"
+                      v-model="editedItem.data_solicitada"
+                      label="Data"
+                    />
+                    <vs-input
+                      type="text"
+                      v-model="editedItem.fornecedor"
+                      label="Fornecedor"
+                      required
+                    />
+                    <vs-input
+                      type="text"
+                      v-model="editedItem.pedido"
+                      label="Pedido"
+                      required
+                    />
+                    <vs-input
+                      type="text"
+                      v-model="editedItem.anexos"
+                      label="Anexos"
+                      required
+                    />
+                  </div>
                 </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <vs-input
-                    type="date"
-                    v-model="editedItem.data_solicitada"
-                    label="Data"
-                  />
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <vs-input
-                    type="text"
-                    v-model="editedItem.fornecedor"
-                    label="Fornecedor"
-                    required
-                  />
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <vs-input
-                    type="text"
-                    v-model="editedItem.pedido"
-                    label="Pedido"
-                    required
-                  />
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <vs-input
-                    type="text"
-                    v-model="editedItem.anexos"
-                    label="Anexos"
-                    required
-                  />
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <vs-input
-                    type="text"
-                    v-model="editedItem.pagamento"
-                    label="Forma de Pagamento"
-                    required
-                  />
-                  <!-- <vs-select
-                    filter
-                    placeholder="Forma de Pagamento"
-                    v-model="editedItem.pagamento"
-                  >
-                    <vs-option label="Dinheiro" value="Dinheiro">
-                      Dinheiro
-                    </vs-option>
-                    <vs-option label="Cheque" value="Cheque">
-                      Cheque
-                    </vs-option>
-                    <vs-option label="Cartão a Vista" value="Cartão a Vista">
-                      Cartão a Vista
-                    </vs-option>
-                    <vs-option
-                      label="Cartão Parcelado"
-                      value="Cartão Parcelado"
-                    >
-                      Cartão Parcelado
-                    </vs-option>
-                  </vs-select> -->
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <vs-input
-                    type="text"
-                    v-model="editedItem.parcelas"
-                    label="Parcelas"
-                    required
-                  />
-                  <!-- <vs-select
-                    filter
-                    placeholder="Parcelas"
-                    v-model="editedItem.parcelas"
-                  >
-                    <vs-option label="1" value="1">
-                      1
-                    </vs-option>
-                    <vs-option label="2" value="2">
-                      2
-                    </vs-option>
-                    <vs-option label="3" value="3">
-                      3
-                    </vs-option>
-                    <vs-option label="4" value="4">
-                      4
-                    </vs-option>
-                    <vs-option label="5" value="5">
-                      5
-                    </vs-option>
-                    <vs-option label="6" value="6">
-                      6
-                    </vs-option>
-                    <vs-option label="7" value="7">
-                      7
-                    </vs-option>
-                    <vs-option label="8" value="8">
-                      8
-                    </vs-option>
-                    <vs-option label="9" value="9">
-                      9
-                    </vs-option>
-                    <vs-option label="10" value="10">
-                      10
-                    </vs-option>
-                    <vs-option label="11" value="11">
-                      11
-                    </vs-option>
-                    <vs-option label="12" value="12">
-                      12
-                    </vs-option>
-                  </vs-select> -->
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <vs-input
-                    type="date"
-                    v-model="editedItem.data_vencimento"
-                    label="Vencimento"
-                  />
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <vs-input
-                    type="number"
-                    v-model="editedItem.valor_total"
-                    label="Valor"
-                    required
-                  />
+                <v-col cols="12" sm="6">
+                  <div class="group-data-item">
+                    <vs-input
+                      type="text"
+                      v-model="editedItem.pagamento"
+                      label="Forma de Pagamento"
+                      required
+                    />
+                    <vs-input
+                      type="text"
+                      v-model="editedItem.parcelas"
+                      label="Parcelas"
+                      required
+                    />
+                    <vs-input
+                      type="date"
+                      v-model="editedItem.data_vencimento"
+                      label="Vencimento"
+                    />
+                    <vs-input
+                      type="number"
+                      v-model="editedItem.valor_total"
+                      label="Valor"
+                      required
+                    />
+                  </div>
                 </v-col>
               </v-row>
             </v-container>
@@ -654,6 +579,7 @@ export default {
               <v-btn color="blue darken-1" text @click="save">
                 Salvar
               </v-btn>
+              <v-spacer></v-spacer>
             </v-card-actions>
           </vs-dialog>
         </v-dialog>
@@ -694,6 +620,18 @@ export default {
 </template>
 
 <style scoped lang="scss">
+.group-data-item {
+  display: grid;
+  flex-direction: column;
+  align-items: space-between;
+  justify-content: center;
+  height: 180%;
+  padding-left: unset;
+}
+.container-financial {
+  padding: 30px;
+  padding-bottom: 160px;
+}
 .toolbar-text {
   font-family: "Comfortaa", cursive;
 }
@@ -768,5 +706,11 @@ export default {
 }
 
 @media only screen and (max-width: 768px) {
+}
+
+@media only screen and (max-height: 700px) {
+  .button-font {
+    width: 20%;
+  }
 }
 </style>

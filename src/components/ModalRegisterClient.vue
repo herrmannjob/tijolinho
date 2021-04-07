@@ -8,12 +8,11 @@ export default {
   components: { ModalRegisterConstruction },
   mixins: [FirebaseMixin],
   props: {
-    value: {
-      required: true,
-    },
+    active: Boolean,
   },
   data() {
     return {
+      outlinedColor: "#002b4b",
       title: "Image Upload",
       form: false,
       imageName: "",
@@ -58,8 +57,7 @@ export default {
       phone_rules: [
         (v) => !!v || "Telefone é obrigatório",
         (v) => v.length === 11 || "Telefone com 11 dígitos - 11 98765 4321",
-        (v) =>
-          !isNaN(Number(v)) || "Telefone com 11 dígitos - 11 98765 4321",
+        (v) => !isNaN(Number(v)) || "Telefone com 11 dígitos - 11 98765 4321",
       ],
       lastname: "",
       nameRules: [(v) => !!v || "Nome é obrigatório"],
@@ -205,7 +203,8 @@ export default {
         this.close();
       } else {
         this.client_id = response.documents[0].id;
-        this.confirm_message = "Já existe um usuário com este número" + "" + this.phone;
+        this.confirm_message =
+          "Já existe um usuário com este número" + "" + this.phone;
         this.confirm = true;
       }
       this.updateCompany();
@@ -254,224 +253,154 @@ export default {
 };
 </script>
 <template>
-  <div class="modal-backdrop">
-    <div class="modal">
-      <header class="modal-header">
-        <slot name="header">
-        </slot>
-        <button type="button" class="btn-close" @click="close">
-          <v-icon class="return-btn">mdi-arrow-left</v-icon>
-        </button>
-      </header>
+  <vs-dialog v-model="active" max-width="800px" prevent-close>
+    <template #header>
+      <div @click="pickFile" class="card">
+        <div class="side side--front ">
+          <v-icon class="img-upload">mdi-image</v-icon>
+        </div>
+        <div class="side facebook side--back">Add Image</div>
 
-      <section class="modal-body">
-        <slot name="body">
-          <div class="form-container-client">
-            <div class="init-cliente">
-              <div @click="pickFile" class="card">
-                <div class="side side--front ">
-                  <v-icon class="img-upload">mdi-image</v-icon>
-                </div>
-                <div class="side facebook side--back">Add Image</div>
+        <input
+          class="card"
+          type="file"
+          style="display: none"
+          ref="image"
+          accept="image/*"
+          @change="onFilePicked"
+        />
+        <div class="image-responsive">
+          <img
+            class="image-response"
+            :src="imageUrl"
+            height="125"
+            v-if="imageUrl"
+          />
+        </div>
+      </div>
+      <h4 class="not-margin">Cadastrar <b>Cliente</b></h4>
+    </template>
 
-                <input
-                  class="card"
-                  type="file"
-                  style="display: none"
-                  ref="image"
-                  accept="image/*"
-                  @change="onFilePicked"
-                />
-                <div class="image-responsive">
-                  <img
-                    class="image-response"
-                    :src="imageUrl"
-                    height="125"
-                    v-if="imageUrl"
-                  />
-                </div>
-              </div>
-            </div>
-            <v-form
-              v-model="valid"
-              style="justify-content:center; align-items: center; flex-direction: row; display: flex"
+    <div class="con-form">
+      <v-form
+        v-model="valid"
+        style="justify-content:center; align-items: center; flex-direction: row; display: flex"
+      >
+        <v-row>
+          <v-col cols="12" sm="6">
+            <v-text-field
+              v-model="firstname"
+              :rules="nameRules"
+              label="Nome do cliente"
+              required
+            ></v-text-field>
+
+            <v-text-field
+              label="Nome do cônjuge (opcional)"
+              v-model="firstnameConjuge"
+            ></v-text-field>
+
+            <v-text-field
+              label="Telefone"
+              v-model="phone"
+              placeholder="11 98765 4321"
+              :rules="phone_rules"
+              required
             >
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="firstname"
-                    :rules="nameRules"
-                    label="Nome do cliente"
+            </v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="group-data-client">
+              <div class="inputControl bornDateControl">
+                <template>
+                  <vs-input
+                    type="date"
+                    v-model="dateNasc"
+                    label="Data de Nascimento (opcional)"
                     required
-                  ></v-text-field>
-
-                  <v-text-field
-                    label="Telefone"
-                    v-model="phone"
-                    placeholder="11 98765 4321"
-                    :rules="phone_rules"
-                    required
-                  >
-                  </v-text-field>
-
-                  <v-text-field
-                    v-model="email"
-                    :rules="email.length > 0 ? emailRules : []"
-                    label="E-mail"
-                  ></v-text-field>
-
-                  <v-menu
-                    ref="menuNasc"
-                    v-model="menuNasc"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                    min-width="auto"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        v-model="dateNasc"
-                        label="Data de Nascimento (opcional)"
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      ref="pickerNasc"
-                      v-model="dateNasc"
-                      :max="new Date().toISOString().substr(0, 10)"
-                      min="1950-01-01"
-                      @change="saveNasc"
-                    ></v-date-picker>
-                  </v-menu>
-                  <v-text-field
-                    label="Nome do cônjuge (opcional)"
-                    v-model="firstnameConjuge"
-                  ></v-text-field>
-                  <v-menu
-                    ref="menuNascConj"
-                    v-model="menuNascConj"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                    min-width="auto"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        v-model="dateNascConj"
-                        label="Data de Nascimento do Conjuge (opcional)"
-                        readonly
-                        required
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      ref="pickerNascConj"
-                      v-model="dateNascConj"
-                      :max="new Date().toISOString().substr(0, 10)"
-                      min="1950-01-01"
-                      @change="saveNascConj"
-                    ></v-date-picker>
-                  </v-menu>
-                  <div class="form-btns">
-                    <v-btn
-                      elevation="2"
-                      depressed
-                      class="btn-primario btn-save"
-                      @click="addUser()"
-                    >
-                      <p class="button-primario">SALVAR DADOS</p>
-                    </v-btn>
-                    <v-btn color="primary" text @click.prevent="close()">
-                      Voltar
-                    </v-btn>
-                  </div>
-                  <v-dialog v-model="confirm" persistent max-width="450">
-                    <v-card>
-                      <v-card-title class="headline">
-                        {{ confirm_message }}
-                      </v-card-title>
-                      <v-card-text>
-                        Deseja vincular uma obra a esse cliente?
-                      </v-card-text>
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn
-                          color="primary"
-                          class="btn-primario"
-                          depressed
-                          @click="form = true"
-                        >
-                          CADASTRAR OBRA
-                        </v-btn>
-                        <v-btn color="primary" text @click="confirm = false">
-                          Agora não
-                        </v-btn>
-                      </v-card-actions>
-                    </v-card>
-                  </v-dialog>
-                  <ModalRegisterConstruction
-                    :form.sync="form"
-                    :confirm.sync="confirm"
-                    :refresh.sync="refresh"
-                    :user_id="user_email"
-                    :company="company.id"
-                    :client="client_id"
                   />
-                </v-col>
-              </v-row>
-            </v-form>
-          </div>
-        </slot>
-      </section>
+                </template>
+              </div>
+              <div class="inputControl bornDateControlPair">
+                <template>
+                  <vs-input
+                    type="date"
+                    v-model="dateNascConj"
+                    label="Data de Nascimento do Conjuge (opcional)"
+                    required
+                  />
+                </template>
+              </div>
+              <vs-input
+                v-model="email"
+                :rules="email.length > 0 ? emailRules : []"
+                placeholder="E-mail"
+              >
+                <template #icon>
+                  @
+                </template>
+              </vs-input>
+            </div>
+          </v-col>
+
+          <v-dialog v-model="confirm" persistent max-width="450">
+            <v-card>
+              <v-card-title class="headline">
+                {{ confirm_message }}
+              </v-card-title>
+              <v-card-text>
+                Deseja vincular uma obra a esse cliente?
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="primary"
+                  class="btn-primario"
+                  depressed
+                  @click="form = true"
+                >
+                  CADASTRAR OBRA
+                </v-btn>
+                <v-btn color="primary" text @click="confirm = false">
+                  Agora não
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+          <ModalRegisterConstruction
+            :form.sync="form"
+            :confirm.sync="confirm"
+            :refresh.sync="refresh"
+            :user_id="user_email"
+            :company="company.id"
+            :client="client_id"
+          />
+        </v-row>
+      </v-form>
     </div>
-  </div>
+
+    <template #footer>
+      <div class="footer-dialog">
+        <vs-button :color="outlinedColor" @click="addUser()" block>
+          Salvar Dados
+        </vs-button>
+      </div>
+    </template>
+  </vs-dialog>
 </template>
 <style lang="css">
-.modal-backdrop {
-  opacity: 1 !important;
-  background-color: rgba(0, 0, 0, 0.548) !important;
-  display: flex;
+.bornDateControl {
+  margin-bottom: 8% !important;
+}
+.group-data-client {
+  display: grid;
+  flex-direction: column;
+  align-items: space-between;
   justify-content: center;
-  align-items: center;
+  height: 100%;
+  padding-left: unset;
+  padding-top: 5%;
 }
-
-.modal {
-  position: relative !important;
-  box-shadow: 2px 2px 20px 1px;
-  overflow-x: auto;
-  display: flex !important;
-  flex-direction: column;
-  width: 50% !important;
-  height: 80% !important;
-  border-radius: 10px !important;
-  background-color: #ffffff !important;
-}
-
-.modal-header {
-  height: 3rem;
-  position: relative;
-  border-bottom: 1px solid #eeeeee;
-  color: #4aae9b;
-  justify-content: space-between;
-  padding: 15px;
-  display: flex;
-}
-
-.modal-footer {
-  border-top: 1px solid #eeeeee;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.modal-body {
-  background-color: #ffffff;
-  position: relative;
-  padding: 20px 10px;
-}
-
 .btn-close {
   position: absolute;
   top: 0;
@@ -566,6 +495,8 @@ export default {
   flex-direction: row;
   width: 5rem;
   height: 5rem;
+  max-height: 80px !important;
+  max-width: 80px !important;
   margin: 0.5rem;
   border-radius: 50%;
   border: none !important;

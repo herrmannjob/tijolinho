@@ -31,6 +31,7 @@ export default {
       data_nascimento_conjuge: [],
       TipoUsuario: [],
       idParams: "",
+      active: false,
     };
   },
   components: { ModalRegisterClient, ModalEditClient },
@@ -47,14 +48,8 @@ export default {
       this.idParams = id;
       this.editModal = true;
     },
-    showRegisterModal() {
-      this.registerModal = true;
-    },
     closeEditModal() {
       this.editModal = false;
-    },
-    closeRegisterModal() {
-      this.registerModal = false;
     },
     linkWhatsApp() {
       let number = 5551980478617;
@@ -120,16 +115,13 @@ export default {
       <vs-button
         :color="outlinedColor"
         class="btn-primary-extra-lg"
-        @click="showRegisterModal()"
+        @click="active = !active"
         style="margin: 2%;"
         ><font-awesome-icon class="plus-client" :icon="['fas', 'plus']" />
         Novo Cliente
       </vs-button>
     </div>
-    <ModalRegisterClient
-      v-show="registerModal"
-      @close="closeRegisterModal"
-    ></ModalRegisterClient>
+    <ModalRegisterClient :active.sync="active"></ModalRegisterClient>
     <v-col>
       <v-tabs color="deep-purple accent-4" left>
         <v-tab>Ativos</v-tab>
@@ -143,7 +135,7 @@ export default {
                 class="fill-width each-card"
                 style="margin-bottom: 1.5%;"
               >
-                <v-list two-line>
+                <v-list two-line class="list-clients">
                   <v-list-item>
                     <v-list-item-avatar class="mr-4" @click="rotaCronograma()">
                       <v-img
@@ -242,6 +234,9 @@ body {
 .plus-client {
   margin-right: 4%;
 }
+/* .list-clients {
+  min-height: 48px !important;
+} */
 @media only screen and (max-width: 768px) {
   .btn-primario .btn-cliente {
     margin: 5%;
