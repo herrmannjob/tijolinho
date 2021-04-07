@@ -8,9 +8,7 @@ export default {
   components: { ModalEditConstruction },
   mixins: [FirebaseMixin],
   props: {
-    value: {
-      required: true,
-    },
+    active: Boolean,
   },
   data() {
     return {
@@ -58,8 +56,7 @@ export default {
       phone_rules: [
         (v) => !!v || "Telefone é obrigatório",
         (v) => v.length === 11 || "Telefone com 11 dígitos - 11 98765 4321",
-        (v) =>
-          !isNaN(Number(v)) || "Telefone com 11 dígitos - 11 98765 4321",
+        (v) => !isNaN(Number(v)) || "Telefone com 11 dígitos - 11 98765 4321",
       ],
       lastname: "",
       nameRules: [(v) => !!v || "Nome é obrigatório"],
@@ -117,47 +114,6 @@ export default {
     });
   },
   methods: {
-    editarCliente(id) {
-      this.idParams = id;
-      this.isModalVisible = true;
-      this.getClients();
-    },
-    async getClients() {
-      await this.getCompanies();
-      if (this.companies.length) {
-        let client_ids = [];
-        this.companies.map((company) => {
-          company.usuarioID.map((client) => {
-            if (client !== this.user_email) client_ids.push(client);
-          });
-        });
-        if (client_ids.length) {
-          this.clients = [];
-          client_ids.map(async (item) => {
-            const response = await this.getDocument(
-              Firebase.firestore(),
-              "Usuario",
-              "id",
-              item
-            );
-            this.clients.push(response.documents[0].data);
-            this.nome.push(response.documents[0].data.nome);
-            this.TipoUsuario.push(response.documents[0].data.TipoUsuario);
-          });
-        }
-      }
-    },
-    async getCompanies() {
-      const response = await this.getDocumentList(
-        Firebase.firestore(),
-        "Empresa",
-        "usuarioID",
-        this.user_email
-      );
-      if (response.status === "ok") {
-        this.companies = response.documents;
-      }
-    },
     close() {
       this.$emit("close");
     },
@@ -216,8 +172,8 @@ export default {
       const response = await this.getDocument(
         Firebase.firestore(),
         "Usuario",
-        "email",
-        this.email
+        "telefone",
+        this.user_email
       );
       if (response.status === "empty") {
         const data = {
@@ -243,9 +199,11 @@ export default {
         );
         this.client_id = client.created_id;
         this.confirm = true;
+        this.close();
       } else {
         this.client_id = response.documents[0].id;
-        this.confirm_message = `Já existe um usuário com este email ${this.email}!`;
+        this.confirm_message =
+          "Já existe um usuário com este número" + "" + this.phone;
         this.confirm = true;
       }
       this.updateCompany();
@@ -294,181 +252,193 @@ export default {
 };
 </script>
 <template>
-  <div class="modal-backdrop">
-    <div class="modal">
-      <header class="modal-header">
-        <slot name="header">
-          <!-- {{cliente.CodigoCliente}} -->
-        </slot>
-        <button type="button" class="btn-close" @click="close">
-          <v-icon class="return-btn">mdi-arrow-left</v-icon>
-        </button>
-      </header>
+  <vs-dialog v-model="form_client" max-width="800px" prevent-close>
+    <template #header>
+      <h4 class="not-margin">Cadastrar <b>Cliente</b></h4>
+      <div @click="pickFile" class="card">
+        <div class="side side--front ">
+          <v-icon class="img-upload">mdi-image</v-icon>
+        </div>
+        <div class="side facebook side--back">Add Image</div>
 
-      <section class="modal-body">
-        <slot name="body">
-          <div class="form-container-client">
-            <div class="init-cliente">
-              <div @click="pickFile" class="card">
-                <div class="side side--front ">
-                  <v-icon class="img-upload">mdi-image</v-icon>
-                </div>
-                <div class="side facebook side--back">Add Image</div>
+        <input
+          class="card"
+          type="file"
+          style="display: none"
+          ref="image"
+          accept="image/*"
+          @change="onFilePicked"
+        />
+        <div class="image-responsive">
+          <img
+            class="image-response"
+            :src="imageUrl"
+            height="125"
+            v-if="imageUrl"
+          />
+        </div>
+      </div>
+    </template>
 
-                <input
-                  class="card"
-                  type="file"
-                  style="display: none"
-                  ref="image"
-                  accept="image/*"
-                  @change="onFilePicked"
-                />
-                <div class="image-responsive">
-                  <img
-                    class="image-response"
-                    :src="imageUrl"
-                    height="125"
-                    v-if="imageUrl"
-                  />
-                </div>
-              </div>
-            </div>
-            <v-form
-              v-model="valid"
-              style="justify-content:center; align-items: center; flex-direction: row; display: flex"
+    <div class="con-form">
+      <!-- <vs-input v-model="input1" placeholder="Email">
+        <template #icon>
+          @
+        </template>
+      </vs-input>
+      <vs-input type="password" v-model="input2" placeholder="Password">
+        <template #icon>
+          <i class="bx bxs-lock"></i>
+        </template>
+      </vs-input>
+      <div class="flex">
+        <vs-checkbox v-model="checkbox1">Remember me</vs-checkbox>
+        <a href="#">Forgot Password?</a>
+      </div> -->
+
+      <v-form
+        v-model="valid"
+        style="justify-content:center; align-items: center; flex-direction: row; display: flex"
+      >
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              v-model="firstname"
+              :rules="nameRules"
+              label="Nome do cliente"
+              required
+            ></v-text-field>
+
+            <v-text-field
+              label="Telefone"
+              v-model="phone"
+              placeholder="11 98765 4321"
+              :rules="phone_rules"
+              required
             >
-              <v-row>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="firstname"
-                    :rules="nameRules"
-                    label="Nome do cliente"
-                    required
-                  ></v-text-field>
+            </v-text-field>
 
-                  <v-text-field
-                    label="Telefone"
-                    v-model="phone"
-                    placeholder="11 98765 4321"
-                    :rules="phone_rules"
-                    required
-                  >
-                  </v-text-field>
+            <v-text-field
+              v-model="email"
+              :rules="email.length > 0 ? emailRules : []"
+              label="E-mail"
+            ></v-text-field>
 
-                  <v-text-field
-                    v-model="email"
-                    :rules="email.length > 0 ? emailRules : []"
-                    label="E-mail (opcional)"
-                  ></v-text-field>
-
-                  <v-menu
-                    ref="menuNasc"
-                    v-model="menuNasc"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                    min-width="auto"
+            <v-menu
+              ref="menuNasc"
+              v-model="menuNasc"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              offset-y
+              min-width="auto"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="dateNasc"
+                  label="Data de Nascimento (opcional)"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                ref="pickerNasc"
+                v-model="dateNasc"
+                :max="new Date().toISOString().substr(0, 10)"
+                min="1950-01-01"
+                @change="saveNasc"
+              ></v-date-picker>
+            </v-menu>
+            <v-text-field
+              label="Nome do cônjuge (opcional)"
+              v-model="firstnameConjuge"
+            ></v-text-field>
+            <v-menu
+              ref="menuNascConj"
+              v-model="menuNascConj"
+              :close-on-content-click="false"
+              transition="scale-transition"
+              offset-y
+              min-width="auto"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="dateNascConj"
+                  label="Data de Nascimento do Conjuge (opcional)"
+                  readonly
+                  required
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                ref="pickerNascConj"
+                v-model="dateNascConj"
+                :max="new Date().toISOString().substr(0, 10)"
+                min="1950-01-01"
+                @change="saveNascConj"
+              ></v-date-picker>
+            </v-menu>
+            <div class="form-btns">
+              <v-btn
+                elevation="2"
+                depressed
+                class="btn-primario btn-save"
+                @click="addUser()"
+              >
+                <p class="button-primario">SALVAR DADOS</p>
+              </v-btn>
+              <v-btn color="primary" text @click.prevent="close()">
+                Voltar
+              </v-btn>
+            </div>
+            <v-dialog v-model="confirm" persistent max-width="450">
+              <v-card>
+                <v-card-title class="headline">
+                  {{ confirm_message }}
+                </v-card-title>
+                <v-card-text>
+                  Deseja vincular uma obra a esse cliente?
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    color="primary"
+                    class="btn-primario"
+                    depressed
+                    @click="form = true"
                   >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        v-model="dateNasc"
-                        label="Data de Nascimento (opcional)"
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      ref="pickerNasc"
-                      v-model="dateNasc"
-                      :max="new Date().toISOString().substr(0, 10)"
-                      min="1950-01-01"
-                      @change="saveNasc"
-                    ></v-date-picker>
-                  </v-menu>
-                  <v-text-field
-                    label="Nome do cônjuge (opcional)"
-                    v-model="firstnameConjuge"
-                  ></v-text-field>
-                  <v-menu
-                    ref="menuNascConj"
-                    v-model="menuNascConj"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                    min-width="auto"
-                  >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        v-model="dateNascConj"
-                        label="Data de Nascimento do Conjuge (opcional)"
-                        readonly
-                        required
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      ref="pickerNascConj"
-                      v-model="dateNascConj"
-                      :max="new Date().toISOString().substr(0, 10)"
-                      min="1950-01-01"
-                      @change="saveNascConj"
-                    ></v-date-picker>
-                  </v-menu>
-                  <div class="form-btns">
-                    <v-btn
-                      elevation="2"
-                      depressed
-                      class="btn-primario btn-save"
-                      @click="addUser()"
-                    >
-                      <p class="button-primario">SALVAR DADOS</p>
-                    </v-btn>
-                    <v-btn color="primary" text @click.prevent="close()">
-                      Voltar
-                    </v-btn>
-                  </div>
-                  <v-dialog v-model="confirm" persistent max-width="450">
-                    <v-card>
-                      <v-card-title class="headline">
-                        {{ confirm_message }}
-                      </v-card-title>
-                      <v-card-text>
-                        Deseja vincular uma obra a esse cliente?
-                      </v-card-text>
-                      <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn
-                          color="primary"
-                          class="btn-primario"
-                          depressed
-                          @click="form = true"
-                        >
-                          CADASTRAR OBRA
-                        </v-btn>
-                        <v-btn color="primary" text @click="confirm = false">
-                          Agora não
-                        </v-btn>
-                      </v-card-actions>
-                    </v-card>
-                  </v-dialog>
-                  <ModalEditConstruction
-                    :form.sync="form"
-                    :confirm.sync="confirm"
-                    :refresh.sync="refresh"
-                    :user_id="user_email"
-                    :company="company.id"
-                    :client="client_id"
-                  />
-                </v-col>
-              </v-row>
-            </v-form>
-          </div>
-        </slot>
-      </section>
+                    CADASTRAR OBRA
+                  </v-btn>
+                  <v-btn color="primary" text @click="confirm = false">
+                    Agora não
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+            <ModalEditConstruction
+              :form.sync="form"
+              :confirm.sync="confirm"
+              :refresh.sync="refresh"
+              :user_id="user_email"
+              :company="company.id"
+              :client="client_id"
+            />
+          </v-col>
+        </v-row>
+      </v-form>
     </div>
-  </div>
+
+    <template #footer>
+      <div class="footer-dialog">
+        <vs-button block>
+          Sign In
+        </vs-button>
+
+        <div class="new">New Here? <a href="#">Create New Account</a></div>
+      </div>
+    </template>
+  </vs-dialog>
 </template>
 <style lang="css">
 .modal-backdrop {

@@ -9,7 +9,7 @@ import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 import "boxicons";
 import NewGantt from "@/components/NewGantt";
-
+const db = Firebase.firestore();
 export default {
   name: "Schedule",
   components: {
@@ -137,19 +137,42 @@ export default {
         this.count = false;
       }
     },
+    async getTarefasOrderby() {
+        var collectionTarefa = db.collection('Tarefa').where("cronograma_obra", "==", ''+this.cronograma_obra.id);
+        try {
+            var listTarefas = await collectionTarefa.get();
+            var tarefas = []
+            listTarefas.forEach(doc => {
+                // console.log(doc.id, '=>', doc.data().name, '=>', doc.data().start);
+                // console.log(doc.data())
+                tarefas.push(doc.data())
+            });
+            tarefas = tarefas.slice(0);
+            tarefas.sort(function(a,b) {
+                return new Date(''+a.start) - new Date(''+b.start);
+            });
+            return tarefas;
+        }
+        catch (err) {
+            console.log('Error getting documents', err);
+            return;
+        }
+    },
     async getTasks() {
-      const tasks = await this.getDocument(
-        Firebase.firestore(),
-        "Tarefa",
-        "cronograma_obra",
-        this.cronograma_obra.id
-      );
-      if (tasks.status === "ok") {
-        this.tasks = [];
-        tasks.documents.map((item) => {
-          this.tasks.push(item.data);
-          this.task_names.push(item.data.name);
-        });
+      // const tasks = await this.getDocument(
+      //   Firebase.firestore(),
+      //   "Tarefa",
+      //   "cronograma_obra",
+      //   this.cronograma_obra.id
+      // );
+      const tasks = await this.getTarefasOrderby()
+      if (tasks != undefined) {
+        this.tasks = tasks;
+        // tasks.documents.map((item) => {
+        //   this.tasks.push(item.data);
+        //   this.task_names.push(item.data.name);
+        // });
+        console.log(this.tasks)
       }
     },
     async showGantt() {
@@ -185,7 +208,7 @@ export default {
       <TopBar :email="user_email" />
       <div class="components row">
         <div class="col-12 col-sm-5 col-md-3 left-col">
-          <v-avatar size="112">
+          <v-avatar class="profile-avatar">
             <v-img
               src="https://randomuser.me/api/portraits/women/85.jpg"
             ></v-img>
@@ -275,34 +298,48 @@ export default {
             <template v-if="showFinancialComponent == true">
               <FinancialComponent />
             </template>
-            <vs-button
-              v-if="showGanttTask == true"
-              class="btn-primary-lg"
-              color="#002b4b"
-              gradient
-              @click="form_task = true"
-            >
-              Novo Serviço
-            </vs-button>
-            <div class="row">
+            <div class="group-data-gantt">
+              <vs-button
+                v-if="showGanttTask == true"
+                class="btn-primary-md"
+                color="#002b4b"
+                gradient
+                @click="form_task = true"
+              >
+                Novo Serviço
+              </vs-button>
               <vs-button
                 v-if="showGanttTask == true"
                 color="#002b4b"
-                gradient
+                border
+                @click="demoViewMode('Quarter Day')"
+                >4 Horas</vs-button
+              >
+              <vs-button
+                v-if="showGanttTask == true"
+                color="#002b4b"
+                border
+                @click="demoViewMode('Half Day')"
+                >12 Horas</vs-button
+              >
+              <vs-button
+                v-if="showGanttTask == true"
+                color="#002b4b"
+                border
                 @click="demoViewMode('day')"
                 >Dia</vs-button
               >
               <vs-button
                 v-if="showGanttTask == true"
                 color="#002b4b"
-                gradient
+                border
                 @click="demoViewMode('week')"
                 >Semana</vs-button
               >
               <vs-button
                 v-if="showGanttTask == true"
                 color="#002b4b"
-                gradient
+                border
                 @click="demoViewMode('month')"
                 >Mês</vs-button
               >
@@ -353,6 +390,17 @@ body {
   align-self: stretch;
   height: 100% !important;
   width: 100%;
+}
+.group-data-gantt {
+  display: flex;
+  flex-direction: row;
+  align-items: space-between;
+  justify-content: center;
+}
+.profile-avatar {
+  height: 112px !important;
+  min-width: 112px !important;
+  width: 112px !important;
 }
 .content {
   width: 100%;
@@ -427,6 +475,9 @@ body {
   height: 50px !important;
   max-height: 55%;
 }
+.btn-primary-md {
+  margin-right: 15% !important;
+}
 .vs-button {
   font-family: "Comfortaa", cursive !important;
   text-transform: uppercase !important;
@@ -446,5 +497,61 @@ body {
   border-radius: 10px;
   max-width: 250px;
   margin-left: 1.1%;
+}
+
+@media only screen and (max-height: 850px) {
+  /* For mobile phones: */
+
+  .group-data-schedule {
+    display: grid;
+    flex-direction: column;
+    align-items: space-evenly;
+    justify-content: center;
+    height: 70%;
+    padding-left: unset;
+    margin-right: 1%;
+  }
+
+  .btn-primary-sm {
+    padding-bottom: 0 !important;
+  }
+
+  .cards-report {
+    margin-top: 0;
+  }
+
+  .profile-avatar {
+    height: 80px !important;
+    min-width: 80px !important;
+    width: 80px !important;
+  }
+}
+
+@media only screen and (max-height: 700px) {
+  /* For mobile phones: */
+
+  .group-data-schedule {
+    display: grid;
+    flex-direction: column;
+    align-items: space-evenly;
+    justify-content: center;
+    height: 90%;
+    padding-left: unset;
+    margin-right: 1%;
+  }
+
+  .btn-primary-sm {
+    padding-bottom: 0 !important;
+  }
+
+  .cards-report {
+    margin-top: 0;
+  }
+
+  .profile-avatar {
+    height: 70px !important;
+    min-width: 70px !important;
+    width: 70px !important;
+  }
 }
 </style>
