@@ -149,9 +149,8 @@ export default {
             });
             tarefas = tarefas.slice(0);
             tarefas.sort(function(a,b) {
-                return b.start - a.start;
+                return new Date(''+a.start) - new Date(''+b.start);
             });
-            console.log(tarefas)
             return tarefas;
         }
         catch (err) {
@@ -160,19 +159,20 @@ export default {
         }
     },
     async getTasks() {
-      const tasks = await this.getDocument(
-        Firebase.firestore(),
-        "Tarefa",
-        "cronograma_obra",
-        this.cronograma_obra.id
-      );
-      await this.teste()
-      if (tasks.status === "ok") {
-        this.tasks = [];
-        tasks.documents.map((item) => {
-          this.tasks.push(item.data);
-          this.task_names.push(item.data.name);
-        });
+      // const tasks = await this.getDocument(
+      //   Firebase.firestore(),
+      //   "Tarefa",
+      //   "cronograma_obra",
+      //   this.cronograma_obra.id
+      // );
+      const tasks = await this.getTarefasOrderby()
+      if (tasks != undefined) {
+        this.tasks = tasks;
+        // tasks.documents.map((item) => {
+        //   this.tasks.push(item.data);
+        //   this.task_names.push(item.data.name);
+        // });
+        console.log(this.tasks)
       }
     },
     async showGantt() {
