@@ -9,7 +9,7 @@ import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 import "boxicons";
 import NewGantt from "@/components/NewGantt";
-
+const db = Firebase.firestore();
 export default {
   name: "Schedule",
   components: {
@@ -137,6 +137,28 @@ export default {
         this.count = false;
       }
     },
+    async getTarefasOrderby() {
+        var collectionTarefa = db.collection('Tarefa').where("cronograma_obra", "==", ''+this.cronograma_obra.id);
+        try {
+            var listTarefas = await collectionTarefa.get();
+            var tarefas = []
+            listTarefas.forEach(doc => {
+                // console.log(doc.id, '=>', doc.data().name, '=>', doc.data().start);
+                // console.log(doc.data())
+                tarefas.push(doc.data())
+            });
+            tarefas = tarefas.slice(0);
+            tarefas.sort(function(a,b) {
+                return b.start - a.start;
+            });
+            console.log(tarefas)
+            return tarefas;
+        }
+        catch (err) {
+            console.log('Error getting documents', err);
+            return;
+        }
+    },
     async getTasks() {
       const tasks = await this.getDocument(
         Firebase.firestore(),
@@ -144,6 +166,7 @@ export default {
         "cronograma_obra",
         this.cronograma_obra.id
       );
+      await this.teste()
       if (tasks.status === "ok") {
         this.tasks = [];
         tasks.documents.map((item) => {
