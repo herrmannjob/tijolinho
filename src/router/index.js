@@ -45,7 +45,7 @@ const routes = [
     component: ModalRegisterClient,
   },
   {
-    path: "/planejamento",
+    path: "/planejamento/:id",
     name: "Schedule",
     component: Schedule,
   },

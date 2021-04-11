@@ -8,7 +8,6 @@ import ModalRegisterTask from "@/components/ModalRegisterTask";
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 import "boxicons";
-import NewGantt from "@/components/NewGantt";
 const db = Firebase.firestore();
 export default {
   name: "Schedule",
@@ -19,7 +18,6 @@ export default {
     FinancialComponent,
     ModalRegisterConstruction,
     ModalRegisterTask,
-    NewGantt,
   },
   mixins: [FirebaseMixin],
   data() {
@@ -42,8 +40,8 @@ export default {
       selected: "",
       company: {},
       completed: 0,
-      form: false,
-      form_task: false,
+      formConstruction: false,
+      formTask: false,
       refresh: false,
       elapsed_time: "",
       planned_time: "",
@@ -159,19 +157,21 @@ export default {
         }
     },
     async getTasks() {
-      // const tasks = await this.getDocument(
-      //   Firebase.firestore(),
-      //   "Tarefa",
-      //   "cronograma_obra",
-      //   this.cronograma_obra.id
-      // );
+      const taskName = await this.getDocument(
+        Firebase.firestore(),
+        "Tarefa",
+        "cronograma_obra",
+        this.cronograma_obra.id
+      );
+      if (taskName != undefined) {
+        taskName.documents.map((item) => {
+          this.task_names.push(item.data.name);
+        });
+        console.log(this.task_names)
+      }
       const tasks = await this.getTarefasOrderby()
       if (tasks != undefined) {
         this.tasks = tasks;
-        // tasks.documents.map((item) => {
-        //   this.tasks.push(item.data);
-        //   this.task_names.push(item.data.name);
-        // });
         console.log(this.tasks)
       }
     },
@@ -213,13 +213,13 @@ export default {
               src="https://randomuser.me/api/portraits/women/85.jpg"
             ></v-img>
           </v-avatar>
-          <p class="username">{{ username }}</p>
+          <p class="username">{{ $route.params.id }}</p>
 
           <div class="group-data-schedule" data-app>
             <template lang="html">
               <div class="centerx row adicionar-obra">
                 <vs-button
-                  @click="form = true"
+                  @click="formConstruction = true"
                   color="#002b4b"
                   border
                   icon
@@ -304,24 +304,10 @@ export default {
                 class="btn-primary-md"
                 color="#002b4b"
                 gradient
-                @click="form_task = true"
+                @click="formTask = true"
               >
                 Novo Serviço
               </vs-button>
-              <vs-button
-                v-if="showGanttTask == true"
-                color="#002b4b"
-                border
-                @click="demoViewMode('Quarter Day')"
-                >4 Horas</vs-button
-              >
-              <vs-button
-                v-if="showGanttTask == true"
-                color="#002b4b"
-                border
-                @click="demoViewMode('Half Day')"
-                >12 Horas</vs-button
-              >
               <vs-button
                 v-if="showGanttTask == true"
                 color="#002b4b"
@@ -347,32 +333,19 @@ export default {
             <template v-if="showGanttTask == true && tasks.length">
               <Gantt :tarefas="tasks" :view-mode="mode" />
             </template>
-
-            <template v-if="showGanttTask == true">
-              <NewGantt
-                :gantt-data="GanttData"
-                :gantt-current-time="GanttCurrentTime"
-                :first-line-stick="firstLineStick"
-                :time-section="GanttTime"
-                :chart-max-height="ChartHeight"
-                :float-view-render-fn="floatRender"
-                @rightClick.native="handleRightClick"
-              >
-              </NewGantt>
-            </template>
           </div>
         </div>
       </div>
     </div>
     <ModalRegisterConstruction
-      :form.sync="form"
+      :formConstruction.sync="formConstruction"
       :refresh.sync="refresh"
       :user_id="user_email"
       :company="company.id"
       client=""
     />
     <ModalRegisterTask
-      :form.sync="form_task"
+      :formTask.sync="formTask"
       :tasks="tasks"
       :task_names="task_names"
       :user="user_email"
@@ -396,6 +369,7 @@ body {
   flex-direction: row;
   align-items: space-between;
   justify-content: center;
+  margin-bottom: 1%;
 }
 .profile-avatar {
   height: 112px !important;

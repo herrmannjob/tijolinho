@@ -7,7 +7,7 @@ export default {
   name: "ModalRegisterConstruction",
   components: { ResponseModal },
   props: {
-    form: Boolean,
+    formConstruction: Boolean,
     confirm: Boolean,
     user_id: String,
     company: String,
@@ -53,8 +53,8 @@ export default {
     schedule() {
       this.$router.push("planejamento");
     },
-    close() {
-      this.$emit("update:form", false);
+    handleClose() {
+      this.$emit("update:formConstruction", false);
     },
     async searchCep() {
       if (this.cep.length == 8) {
@@ -168,7 +168,7 @@ export default {
         this.message.text = response.error;
       }
       this.modal = true;
-      this.$emit("update:form", false);
+      this.$emit("update:formConstruction", false);
       this.$emit("update:confirm", false);
       this.$emit("update:refresh", true);
     },
@@ -176,7 +176,7 @@ export default {
 };
 </script>
 <template>
-  <vs-dialog v-model="form" max-width="800px" prevent-close>
+  <vs-dialog @close="handleClose" blur v-model="formConstruction" max-width="800px" prevent-close>
     <template #header>
       <h4 class="not-margin">Cadastrar <b>Obra</b></h4>
     </template>

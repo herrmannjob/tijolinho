@@ -227,9 +227,6 @@ export default {
     pickFile() {
       this.$refs.image.click();
     },
-    closeMyDialog() {
-      this.dialog = false;
-    },
     onFilePicked(e) {
       const files = e.target.files;
       if (files[0] !== undefined) {
@@ -253,13 +250,18 @@ export default {
 };
 </script>
 <template>
-  <vs-dialog v-model="active" max-width="800px" prevent-close>
+  <vs-dialog
+    @close="handleClose"
+    blur
+    v-model="active"
+    max-width="800px"
+    prevent-close
+  >
     <template #header>
       <div @click="pickFile" class="card">
-        <div class="side side--front ">
+        <div class="side card-upload">
           <v-icon class="img-upload">mdi-image</v-icon>
         </div>
-        <div class="side facebook side--back">Add Image</div>
 
         <input
           class="card"
@@ -269,14 +271,12 @@ export default {
           accept="image/*"
           @change="onFilePicked"
         />
-        <div class="image-responsive">
-          <img
-            class="image-response"
-            :src="imageUrl"
-            height="125"
-            v-if="imageUrl"
-          />
-        </div>
+        <img
+          class="image-response"
+          :src="imageUrl"
+          height="80"
+          v-if="imageUrl"
+        />
       </div>
       <h4 class="not-margin">Cadastrar <b>Cliente</b></h4>
     </template>
@@ -518,29 +518,12 @@ export default {
   transition: transform 0.5s ease-in-out;
 }
 
-.side--front {
+.card-upload {
   background: #002b4b;
   font-size: 3px;
 }
-
-.side--back {
-  background: white;
-  font-size: 8px;
-  align-items: baseline;
-  transform: rotateY(180deg);
-}
-
-.card:hover .side--front {
-  transform: rotateY(-180deg);
-}
-
-.card:hover .side--back {
-  transform: rotateY(0deg);
-}
-
-.card:hover .facebook {
-  transform: rotateY(0deg);
-  background: #00457a;
+.avatar-edit {
+  align-self: start;
 }
 
 @media only screen and (max-width: 768px) {

@@ -12,7 +12,6 @@ import Vuesax from "../node_modules/vuesax";
 import "vuesax/dist/vuesax.css";
 import "material-icons/iconfont/material-icons.css";
 import "boxicons";
-import NewGantt from "./components/NewGantt.vue";
 import "dayjs/locale/pt-br";
 import dayjs from "dayjs";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -24,6 +23,9 @@ import {
   FontAwesomeLayers,
   FontAwesomeLayersText,
 } from "@fortawesome/vue-fontawesome";
+import $ from "jquery";
+import VueJquery from "vue-jquery";
+import responsive from "vue-responsive";
 
 library.add(fab, fas, faWhatsapp, faTwitter, faUserSecret, faComment);
 
@@ -31,8 +33,10 @@ Vue.component("font-awesome-icon", FontAwesomeIcon);
 Vue.component("font-awesome-layers", FontAwesomeLayers);
 Vue.component("font-awesome-layers-text", FontAwesomeLayersText);
 
+Vue.use(responsive);
+Vue.use($);
+Vue.use(VueJquery);
 Vue.use(dayjs);
-Vue.use(NewGantt);
 Vue.use(Vuesax);
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);

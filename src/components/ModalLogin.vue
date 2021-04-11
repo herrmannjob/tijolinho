@@ -171,10 +171,6 @@ body {
   align-self: flex-start;
   margin: 0;
 }
-.theme--light.v-btn.v-btn--has-bg {
-  background-color: #002b4b !important;
-  color: white;
-}
 .space-init {
   width: 20rem;
   margin-left: 3rem;

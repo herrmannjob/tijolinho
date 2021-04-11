@@ -77,8 +77,9 @@ export default {
         this.companies = response.documents;
       }
     },
-    rotaCronograma() {
-      this.$router.push("planejamento");
+    rotaCronograma(client) {
+      // this.$router.push("planejamento");
+      this.$router.push("planejamento" + "/" + client);
     },
     async getClients() {
       await this.getCompanies();
@@ -137,7 +138,7 @@ export default {
               >
                 <v-list two-line class="list-clients">
                   <v-list-item>
-                    <v-list-item-avatar class="mr-4" @click="rotaCronograma()">
+                    <v-list-item-avatar class="mr-4" @click="rotaCronograma(client.nome)">
                       <v-img
                         src="https://cdn.vuetifyjs.com/images/lists/ali.png"
                       >
@@ -145,13 +146,13 @@ export default {
                     </v-list-item-avatar>
                     <v-list-item-content
                       class="ml-4 mr-4"
-                      @click="rotaCronograma()"
+                      @click="rotaCronograma(client.nome)"
                     >
                       <v-list-item-title>{{ client.nome }}</v-list-item-title>
                       <v-list-item-subtitle>Nome</v-list-item-subtitle>
                     </v-list-item-content>
 
-                    <v-list-item-content @click="rotaCronograma()">
+                    <v-list-item-content @click="rotaCronograma(client.nome)">
                       <v-list-item-title>{{ client.email }}</v-list-item-title>
                       <v-list-item-subtitle>Obras</v-list-item-subtitle>
                     </v-list-item-content>
@@ -199,8 +200,6 @@ export default {
         :firstname="this.nome"
       ></ModalEditClient>
     </v-col>
-
-    <!-- <v-data-iterator> </v-data-iterator> -->
   </div>
 </template>
 
