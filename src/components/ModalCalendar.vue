@@ -1,5 +1,5 @@
 <template>
-  <vs-dialog class="modalBg" max-width="350px" v-model="form" prevent-close>
+  <vs-dialog @close="handleClose" class="modalBg" max-width="350px" v-model="form" prevent-close>
     <div class="con-form">
       <v-col cols="12" class="gridControl">
         <vs-input
@@ -148,13 +148,15 @@ export default {
   },
   mounted() {},
   methods: {
+    handleClose() {
+      this.$emit("update:form", false);
+    },
     close() {
       this.title = "";
       this.description = "";
       this.date_end = "";
       this.time_end = "";
       this.priority = "";
-      this.$emit("update:form", false);
       this.$emit("update:refresh", true);
     },
     async save() {

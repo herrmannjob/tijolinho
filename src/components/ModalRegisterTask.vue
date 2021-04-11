@@ -6,7 +6,7 @@ export default {
   name: "ModalRegisterTask",
   components: { ResponseModal },
   props: {
-    form: Boolean,
+    formTask: Boolean,
     user: String,
     cronograma_obra: String,
     tasks: Array,
@@ -33,12 +33,8 @@ export default {
     };
   },
   methods: {
-    close() {
-      this.name = "";
-      this.dateInit = "";
-      this.dateEnd = "";
-      this.estimated_spend = "";
-      this.$emit("update:form", false);
+    handleClose() {
+      this.$emit("update:formTask", false);
     },
 
     async addStatusTarefa() {
@@ -83,12 +79,7 @@ export default {
         start: this.dateInit,
         end: this.dateEnd,
         progress: (elapsed / planned) * 100,
-        label: this.name,
-        duration: (start / end) * 100,
-        percent: 50,
-        type: "project",
         dependencies: this.selected_task.length ? this.tasks[i].id : null,
-        dependentOn: this.selected_task.length ? this.tasks[i].id : null,
         status: this.selected_status,
         cronograma_obra: this.cronograma_obra,
         gasto_previsto: this.estimated_spend,
@@ -112,14 +103,14 @@ export default {
         this.message.text = response.error;
       }
       this.modal = true;
-      this.$emit("update:form", false);
+      this.$emit("update:formTask", false);
       this.$emit("update:refresh", true);
     },
   },
 };
 </script>
 <template>
-  <vs-dialog v-model="form" max-width="800px" prevent-close>
+  <vs-dialog @close="handleClose" blur v-model="formTask" max-width="800px" prevent-close>
     <template #header>
       <h4 class="not-margin">Cadastrar <b>Tarefa</b></h4>
     </template>
@@ -148,7 +139,7 @@ export default {
               </template>
             </div>
 
-            <div class="inputControl">
+            <div class="inputControl inputFinal">
               <template>
                 <vs-input
                   id="agend"
@@ -162,7 +153,7 @@ export default {
             </div>
           </div>
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col cols="12" md="5">
           <v-text-field
             label="Gasto estimado"
             v-model="estimated_spend"
@@ -176,7 +167,7 @@ export default {
             :items="task_names"
             :close-on-content-click="false"
             :menu-props="{ top: true, offsetY: true }"
-            label="Depende de..."
+            label="Depende da Tarefa"
           ></v-select>
 
           <v-select
@@ -206,17 +197,14 @@ export default {
   flex-direction: column;
   align-items: space-between;
   justify-content: center;
-  height: 110%;
+  height: 120%;
   padding-left: unset;
 }
-
-.btn-container-client {
-  width: 11rem;
-  display: flex;
-  flex-direction: row;
-  margin: auto;
-  align-items: flex-end;
+.inputControl {
   margin-top: 2rem;
+}
+.inputFinal {
+  margin-bottom: 2rem;
 }
 .v-card {
   color: #002b4b;
@@ -242,115 +230,12 @@ export default {
   margin-right: 0.5rem;
   margin-left: 1rem;
 }
-.v-text-field .v-input__control {
-  color: #002b4b;
-  width: 15rem;
-  margin: inherit;
-}
-.return {
-  color: #002b4b !important;
-  margin: 0;
-  text-decoration: none;
-  margin-left: 30rem;
-}
-.v-menu__content {
-  align-self: center !important;
-  justify-self: center !important;
-}
-.init-client {
-  width: 8rem;
-  margin-top: 1rem;
-  background-color: white;
-}
-.middle-client {
-  width: 1rem;
-  font-weight: bold;
-  margin-left: 16rem;
-  text-decoration: none;
-}
-.end-client {
-  width: 1rem;
-  margin-left: 2.5rem;
-  margin-top: 1.7rem;
-}
-.img-radius:hover .teste {
-  transform: rotateY(0deg);
-}
-.card {
-  position: relative;
-  width: 5rem;
-  height: 5rem;
-  margin: 0.5rem;
-  text-align: center;
-  border-radius: 50%;
-  line-height: 5rem;
-  color: #f3eff5;
-  transform-style: preserve-3d;
-}
-.side {
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background-size: cover;
-  background-position: center center;
-  backface-visibility: hidden;
-  transition: transform 0.5s ease-in-out;
-}
-
-.side--front {
-  background: #002b4b;
-  font-size: 3px;
-}
-
-.side--back {
-  background: white;
-  font-size: 8px;
-  align-items: baseline;
-  transform: rotateY(180deg);
-}
-
-.card:hover .side--front {
-  transform: rotateY(-180deg);
-}
-
-.card:hover .side--back {
-  transform: rotateY(0deg);
-}
-
-.card:hover .facebook {
-  transform: rotateY(0deg);
-  background: #00457a;
-}
 
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */
   body {
     overflow-x: auto;
     overflow-y: auto;
-  }
-  .form-container-client {
-    display: block;
-    flex-direction: column;
-  }
-  .btn-container-client {
-    display: flex;
-    flex-direction: column;
-  }
-  .middle-client {
-    display: none;
-  }
-  .v-picker {
-    border-radius: 4px;
-    contain: layout style;
-    display: inline-flex;
-    flex-direction: column;
-    font-size: 1rem;
-    vertical-align: center;
-    position: relative;
   }
 }
 </style>

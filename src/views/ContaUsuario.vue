@@ -31,6 +31,7 @@ export default {
       singleSelect: true,
       selected: [],
       companies: [],
+      empresa: [],
       editModal: false,
       registerModal: false,
       nome: [],
@@ -48,6 +49,13 @@ export default {
       await this.getClients();
       this.refresh = false;
     }
+    const response = await this.getDocument(
+      Firebase.firestore(),
+      "Usuario",
+      "email",
+      this.email
+    );
+    this.username = response.documents[0].data.nome;
   },
   async mounted() {
     await Firebase.auth().onAuthStateChanged(async (user) => {
@@ -57,6 +65,15 @@ export default {
         await this.getCompanies();
       } else this.$router.push("/");
     });
+  },
+  computed: {
+    name: function() {
+      let initials = "";
+      this.username.split(" ").map((name) => {
+        initials += name[0];
+      });
+      return initials.substr(0, 2);
+    },
   },
   methods: {
     reload() {
@@ -86,7 +103,11 @@ export default {
         this.user_email
       );
       if (response.status === "ok") {
-        this.companies = response.documents;
+        // this.companies = response.documents[0];
+        // this.empresa = response.documents[0];
+        response.documents.map((item) => {
+          this.companies.push(item.nome);
+        });
       }
     },
     async getClients() {
@@ -140,12 +161,7 @@ export default {
                   <template #title>
                     <h3>{{ username }}</h3>
                   </template>
-                  <template #img>
-                    <img
-                      src="https://randomuser.me/api/portraits/women/85.jpg"
-                      alt=""
-                    />
-                  </template>
+                  <span style="color:#002b4b">{{ name }}</span>
                   <template #text>
                     <p>
                       {{ TipoUsuario }}
@@ -165,6 +181,13 @@ export default {
                         name="user"
                       ></box-icon> </template
                   ></vs-input>
+                  <v-select
+                    class="select-obra"
+                    :items="companies"
+                    label="Obras"
+                    v-model="selected"
+                    :onselect="getCompanies()"
+                  ></v-select>
                   <vs-input
                     class="input-conta"
                     primary

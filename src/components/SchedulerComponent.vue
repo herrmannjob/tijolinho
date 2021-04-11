@@ -12,16 +12,6 @@ export default {
     client_names: [],
     clients: [],
     clienteSelecionado: "",
-    color: "primary",
-    colors: [
-      "#2196F3",
-      "#3F51B5",
-      "#673AB7",
-      "#00BCD4",
-      "#4CAF50",
-      "#FF9800",
-      "#757575",
-    ],
     corPrioridade: "",
     companies: [],
     constructions: [],
@@ -364,22 +354,6 @@ export default {
           break;
       }
     },
-    // changeDaysView() {
-    //   switch (this.weekdayChange) {
-    //     case "Dom - Sáb":
-    //       this.weekday = [0, 1, 2, 3, 4, 5, 6];
-    //       break;
-    //     case "Seg - Dom":
-    //       this.weekday = [1, 2, 3, 4, 5, 6, 0];
-    //       break;
-    //     case "Seg - Sex":
-    //       this.weekday = [1, 2, 3, 4, 5];
-    //       break;
-    //     case "Final de Semana":
-    //       this.weekday = [6, 0];
-    //       break;
-    //   }
-    // },
     startDrag({ event, timed }) {
       if (event && timed) {
         this.dragEvent = event;
@@ -558,7 +532,7 @@ export default {
         <v-icon class="icone-setas">mdi-chevron-right</v-icon>
       </v-btn>
     </v-sheet>
-    <v-sheet height="600">
+    <v-sheet height="600" v-responsive="['hidden-all', 'xl']">
       <v-calendar
         ref="calendar"
         v-model="today"
@@ -570,7 +544,93 @@ export default {
         :event-color="getEventColor"
         :event-ripple="false"
         :now="today"
-        color="primary"
+        color="#002b4b"
+        dark="false"
+        @change="getEvents"
+        @mousedown:event="startDrag"
+        @mousedown:time="startTime"
+        @mousemove:time="mouseMove"
+        @mouseup:time="endDrag"
+        @mouseleave.native="cancelDrag"
+        @click:event="showEvent"
+        @click:more="viewDay"
+        @click:date="form = true"
+        ><template v-slot:event="{ event, timed, eventSummary }">
+          <div class="v-event-draggable" v-html="eventSummary()"></div>
+          <div
+            v-if="timed"
+            class="v-event-drag-bottom"
+            @mousedown.stop="extendBottom(event)"
+          ></div>
+        </template>
+        <template v-slot:day-body="{ date, week }">
+          <div
+            class="v-current-time"
+            :class="{ first: date === week[0].date }"
+            :style="{ top: nowY }"
+          ></div>
+        </template>
+      </v-calendar>
+      <v-menu
+        v-model="selectedOpen"
+        :close-on-content-click="false"
+        :activator="selectedElement"
+        offset-x
+      >
+        <v-card color="grey lighten-4" :width="350" flat>
+          <v-toolbar :color="selectedEvent.color" dark>
+            <v-btn @click="deleteEvent(selectedEvent.id)" icon>
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+            <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
+            <div class="flex-grow-1"></div>
+          </v-toolbar>
+
+          <v-card-text>
+            <form v-if="currentlyEditing !== selectedEvent.id">
+              {{ selectedEvent.details }}
+            </form>
+            <form v-else>
+              <textarea-autosize
+                v-model="selectedEvent.details"
+                type="text"
+                style="width: 100%"
+                :min-height="100"
+                placeholder="add note"
+              >
+              </textarea-autosize>
+            </form>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-btn text color="secondary" @click="selectedOpen = false">
+              Fechar
+            </v-btn>
+            <v-btn
+              v-if="currentlyEditing !== selectedEvent.id"
+              text
+              @click.prevent="editEvent(selectedEvent)"
+            >
+              Editar
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-menu>
+    </v-sheet>
+    <v-sheet height="500" v-responsive="['hidden-all', 'lg', 'md', 'sm', 'xs']">
+      <v-calendar
+        ref="calendar"
+        v-model="today"
+        :weekdays="weekday"
+        :type="type"
+        :events="events"
+        :event-overlap-mode="mode"
+        :event-overlap-threshold="30"
+        :event-color="getEventColor"
+        :event-ripple="false"
+        :now="today"
+        color="#002b4b"
+        dark="false"
         @change="getEvents"
         @mousedown:event="startDrag"
         @mousedown:time="startTime"
