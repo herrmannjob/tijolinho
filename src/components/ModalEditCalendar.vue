@@ -4,19 +4,23 @@ import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 import moment from "@/plugins/moment";
 export default {
-  name: "ModalCalendar",
+  name: "ModalEditCalendar",
   components: { ResponseModal },
   mixins: [FirebaseMixin],
   props: {
-    formCalendar: Boolean,
+    formEditCalendar: Boolean,
     refresh: Boolean,
     date: String,
     user: String,
+    editedEvent: {},
   },
   data() {
     return {
       today: new Date().toISOString().substr(0, 10),
       title: "",
+      user_email: "",
+      username: "",
+      id_generated: "",
       description: "",
       date_end: "",
       time_end: "",
@@ -45,10 +49,18 @@ export default {
       },
     };
   },
-  mounted() {},
+  async mounted() {
+    await Firebase.auth().onAuthStateChanged(async (user) => {
+      if (user) {
+        this.user_email = user.email;
+        await this.getUser();
+      }
+    });
+  },
   methods: {
     handleClose() {
-      this.$emit("update:formCalendar", false);
+      this.$emit("update:formEditCalendar", false);
+      this.editedEvent = [];
     },
     close() {
       this.title = "";
@@ -58,44 +70,57 @@ export default {
       this.priority = "";
       this.$emit("update:refresh", true);
     },
-    async save() {
-      const start = moment(this.dateStart.date);
-      const end = moment(this.dateEnd.date);
-      const duration = moment.duration(start.diff(end));
+    async getUser() {
+      const response = await this.getDocument(
+        Firebase.firestore(),
+        "Usuario",
+        "email",
+        this.user_email
+      );
+      this.username = response.documents[0].data.nome;
+    },
+    async update() {
+      const start = moment(this.editedEvent.startDate);
+      const end = moment(this.editedEvent.endDate);
+      const duration = moment.duration(end.diff(start));
       const durationDays = duration.asDays();
       const data = {
-        titulo: this.title,
-        descricao: this.description,
+        titulo: this.editedEvent.name,
+        descricao: this.editedEvent.details,
         data_inicio:
-          this.dateStart.date + " " + this.dateStart.time + ":00.000Z",
-        data_fim: this.dateEnd.date + " " + this.dateEnd.time + ":00.000Z",
+          this.editedEvent.startDate +
+          " " +
+          this.editedEvent.startTime +
+          ":00.000Z",
+        data_fim:
+          this.editedEvent.endDate +
+          " " +
+          this.editedEvent.endTime +
+          ":00.000Z",
         duracao: `${durationDays} dia(s)`,
-        prioridade: this.priority,
+        prioridade: this.editedEvent.priority,
         usuarioID: this.user,
       };
-      const response = await this.firebaseCreate(
-        Firebase.firestore(),
-        "AgendaParticular",
-        null,
-        data
-      );
+      this.id_generated = this.editedEvent.id;
       await this.firebaseUpdate(
         Firebase.firestore(),
         "AgendaParticular",
-        response.created_id,
-        { id: response.created_id }
-      );
-      console.log(response);
-      if (response.status === "ok") {
-        this.handleClose();
-        this.$emit("update:refresh", true);
-        this.message.title = "Atividade cadastrada com sucesso!";
-      } else {
-        this.message.title = "Ocorreu um erro...";
-        this.message.code = response.message.code;
-        this.message.text = response.message;
-      }
-      this.modal = true;
+        this.id_generated,
+        data
+      )
+        .then(() => {
+          this.modal = true;
+          this.message.title = "Atividade atualizada com sucesso!";
+          this.handleClose();
+          this.$emit("update:formEditCalendar", false);
+        })
+        .catch((error) => {
+          this.modal = true;
+          this.message.title = "Ocorreu um erro...";
+          this.message.code = error;
+          this.message.text = error;
+        });
+      this.$emit("update:refresh", true);
     },
   },
   computed: {
@@ -116,11 +141,11 @@ export default {
     @close="handleClose"
     class="modalBg"
     max-width="350px"
-    v-model="formCalendar"
+    v-model="formEditCalendar"
     prevent-close
   >
     <template #header>
-      <h4 class="not-margin">Cadastrar <b>Tarefa</b></h4>
+      <h4 class="not-margin">Editar <b>Tarefa</b></h4>
     </template>
     <div class="con-form">
       <v-col cols="12" class="gridControl">
@@ -129,7 +154,7 @@ export default {
           color="#002b4b"
           border
           type="text"
-          v-model="title"
+          v-model="editedEvent.name"
           :rules="[rules.required]"
           label-placeholder="Atividade"
         >
@@ -139,7 +164,7 @@ export default {
           class="inputControl"
           label-placeholder="Prioridade"
           :options="priority_list"
-          v-model="priority"
+          v-model="editedEvent.priority"
         >
           <vs-option label="Baixa" value="Baixa">
             Baixa
@@ -157,7 +182,7 @@ export default {
             <vs-input
               id="agend"
               type="date"
-              v-model="dateStart.date"
+              v-model="editedEvent.startDate"
               label="Data Inicial"
               required
               :min="today"
@@ -169,7 +194,7 @@ export default {
           <template>
             <vs-input
               type="time"
-              v-model="dateStart.time"
+              v-model="editedEvent.startTime"
               label="Horário Inicial"
               required
             />
@@ -180,7 +205,7 @@ export default {
           <template>
             <vs-input
               type="date"
-              v-model="dateEnd.date"
+              v-model="editedEvent.endDate"
               label="Data Final"
               required
             />
@@ -191,7 +216,7 @@ export default {
           <template>
             <vs-input
               type="time"
-              v-model="dateEnd.time"
+              v-model="editedEvent.endTime"
               label="Horário Final"
               required
             />
@@ -203,7 +228,7 @@ export default {
           color="#002b4b"
           border
           type="text"
-          v-model="description"
+          v-model="editedEvent.details"
           label="Observações"
         >
         </vs-input>
@@ -211,15 +236,19 @@ export default {
     </div>
     <template #footer>
       <div class="footer-dialog">
-        <vs-button :disabled="!title" class="confirmBtn" block @click="save">
-          Criar Evento
+        <vs-button
+          :disabled="!editedEvent.name"
+          class="confirmBtn"
+          block
+          @click="update"
+        >
+          Atualizar Evento
         </vs-button>
       </div>
     </template>
     <ResponseModal :modal.sync="modal" :message="message" />
   </vs-dialog>
 </template>
-
 <style lang="css">
 .modalBg {
   position: absolute;

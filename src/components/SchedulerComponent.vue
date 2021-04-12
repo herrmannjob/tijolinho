@@ -1,12 +1,13 @@
 <script>
 import ModalCalendar from "@/components/ModalCalendar";
+import ModalEditCalendar from "@/components/ModalEditCalendar";
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 // import { db } from '../services/Firebase.js'
 
 export default {
   name: "SchedulerComponent",
-  components: { ModalCalendar },
+  components: { ModalCalendar, ModalEditCalendar },
   mixins: [FirebaseMixin],
   data: () => ({
     client_names: [],
@@ -25,13 +26,15 @@ export default {
     dialogDate: false,
     dragEvent: null,
     dragStart: null,
+    editedEvent: {},
     end: null,
     endMenu: false,
     events: [],
     eventos: [],
     extendOriginal: null,
     focus: new Date().toISOString().substr(0, 10),
-    form: false,
+    formCalendar: false,
+    formEditCalendar: false,
     mode: "stack",
     modes: ["stack", "column"],
     name: null,
@@ -66,7 +69,8 @@ export default {
     particular_tasks: [],
     constructions_tasks: [],
     user: null,
-    uid: "",
+    username: "",
+    color: "#002b4b",
   }),
   computed: {
     cal() {
@@ -74,9 +78,6 @@ export default {
     },
     nowY() {
       return this.cal ? this.cal.timeToY(this.cal.times.now) + "px" : "-10px";
-    },
-    formTitle() {
-      return this.editedIndex === -1 ? "Novo Item" : "Editar Item";
     },
   },
   async mounted() {
@@ -91,13 +92,14 @@ export default {
         await this.getObras();
         await this.getClients();
         await this.getTasks();
-        // await this.getEvents();
+        await this.getEvents();
       }
     });
   },
   async updated() {
     if (this.refresh) {
       await this.getTasks();
+      await this.getEvents();
       this.refresh = false;
     }
   },
@@ -219,6 +221,7 @@ export default {
           }
           this.particular_tasks.push(item.data);
           events.push({
+            id: item.data.id,
             name: item.data.titulo,
             color: this.corPrioridade,
             details: item.data.descricao,
@@ -234,29 +237,6 @@ export default {
     },
     async getEvents() {
       const events = [];
-
-      this.constructions_tasks = [];
-      this.constructions.map(async (c) => {
-        const response = await this.getDocument(
-          Firebase.firestore(),
-          "AgendaObra",
-          "obraID",
-          c.id
-        );
-        if (response.status === "ok") {
-          response.documents.map((item) => {
-            this.constructions_tasks.push(item.data);
-            events.push({
-              name: item.data.titulo,
-              color: "#002b4b",
-              details: item.data.prioridade,
-              start: item.data.data_inicio.substr(0, 10),
-              end: item.data.data_fim.substr(0, 10),
-            });
-          });
-        }
-      });
-
       const response = await this.getDocument(
         Firebase.firestore(),
         "AgendaParticular",
@@ -264,18 +244,41 @@ export default {
         this.user_email
       );
       if (response.status === "ok") {
-        this.particular_tasks = [];
         response.documents.map((item) => {
-          this.particular_tasks.push(item.data);
+          if (item.data.prioridade == "Alta") {
+            this.corPrioridade = "#eb4034";
+          }
+          if (item.data.prioridade == "Média") {
+            this.corPrioridade = "#eb9c34";
+          }
+          if (item.data.prioridade == "Baixa") {
+            this.corPrioridade = "#71eb34";
+          }
+          if (item.data.prioridade == "") {
+            this.corPrioridade = "#002b4b";
+          }
           events.push({
+            id: item.data.id,
             name: item.data.titulo,
-            color: "#002b4b",
-            details: item.data.prioridade,
-            start: item.data.data_inicio.substr(0, 10),
-            end: item.data.data_fim.substr(0, 10),
+            color: this.corPrioridade,
+            details: item.data.descricao,
+            start:
+              item.data.data_inicio.substr(0, 10) +
+              " " +
+              item.data.data_inicio.substr(11, 8),
+            end:
+              item.data.data_fim.substr(0, 10) +
+              " " +
+              item.data.data_fim.substr(11, 8),
+            priority: item.data.prioridade,
+            startDate: item.data.data_inicio.substr(0, 10),
+            startTime: item.data.data_inicio.substr(11, 8),
+            endDate: item.data.data_fim.substr(0, 10),
+            endTime: item.data.data_fim.substr(11, 8),
           });
         });
       }
+      this.events = events;
     },
     getCurrentTime() {
       return this.cal
@@ -292,15 +295,12 @@ export default {
       setInterval(() => this.cal.updateTimes(), 60 * 1000);
     },
     dateClick(info) {
-      this.form = true;
+      this.formCalendar = true;
       this.date_clicked = info.dateStr;
     },
     viewDay({ date }) {
       this.focus = date;
       this.type = "day";
-    },
-    setToday() {
-      this.focus = this.today;
     },
     prev() {
       this.$refs.calendar.prev();
@@ -308,16 +308,16 @@ export default {
     next() {
       this.$refs.calendar.next();
     },
-    editEvent() {
-      this.form = true;
+    editEvent(selectedEvent) {
+      this.editedEvent = Object.assign({}, selectedEvent);
+      this.formEditCalendar = true;
     },
-    async deleteEvent (ev) {
+    async deleteEvent(ev) {
       Firebase.firestore(),
         "AgendaParticular",
         "usuarioID",
-        this.user_email.doc(ev).delete()
-      this.selectedOpen = false,
-      this.getEvents()
+        this.user_email.doc(ev).delete();
+      (this.selectedOpen = false), this.getEvents();
     },
     showEvent({ nativeEvent, event }) {
       const open = () => {
@@ -543,9 +543,7 @@ export default {
         :event-overlap-threshold="30"
         :event-color="getEventColor"
         :event-ripple="false"
-        :now="today"
         color="#002b4b"
-        dark="false"
         @change="getEvents"
         @mousedown:event="startDrag"
         @mousedown:time="startTime"
@@ -554,7 +552,7 @@ export default {
         @mouseleave.native="cancelDrag"
         @click:event="showEvent"
         @click:more="viewDay"
-        @click:date="form = true"
+        @click:date="formCalendar = true"
         ><template v-slot:event="{ event, timed, eventSummary }">
           <div class="v-event-draggable" v-html="eventSummary()"></div>
           <div
@@ -628,9 +626,7 @@ export default {
         :event-overlap-threshold="30"
         :event-color="getEventColor"
         :event-ripple="false"
-        :now="today"
         color="#002b4b"
-        dark="false"
         @change="getEvents"
         @mousedown:event="startDrag"
         @mousedown:time="startTime"
@@ -639,7 +635,7 @@ export default {
         @mouseleave.native="cancelDrag"
         @click:event="showEvent"
         @click:more="viewDay"
-        @click:date="form = true"
+        @click:date="formCalendar = true"
         ><template v-slot:event="{ event, timed, eventSummary }">
           <div class="v-event-draggable" v-html="eventSummary()"></div>
           <div
@@ -703,10 +699,17 @@ export default {
       </v-menu>
     </v-sheet>
     <ModalCalendar
-      :form.sync="form"
+      :formCalendar.sync="formCalendar"
       :refresh.sync="refresh"
       :date="date_clicked"
       :user="user_email"
+    />
+    <ModalEditCalendar
+      :formEditCalendar.sync="formEditCalendar"
+      :refresh.sync="refresh"
+      :date="date_clicked"
+      :user="user_email"
+      :editedEvent.sync="editedEvent"
     />
   </div>
 </template>
@@ -714,7 +717,7 @@ export default {
 <style scoped lang="scss">
 .headerCalendar {
   margin-left: 1%;
-  margin-right: 1%
+  margin-right: 1%;
 }
 
 .v-current-time {

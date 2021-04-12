@@ -35,7 +35,7 @@ html, body{
   }
 }
 .btn-primary {
-  background-color: #3f51b5 !important;
+  background-color: #002b4b !important;
   color: #fafafa !important;
   width: 80px;
 }

@@ -18,4 +18,3 @@ Firebase.initializeApp(firebaseConfig);
 Firebase.analytics();
 Firebase.firestore().enablePersistence();
 export default Firebase;
-export const db = Firebase.firestore();

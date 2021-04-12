@@ -8,13 +8,12 @@ export default {
   components: { ModalRegisterConstruction },
   mixins: [FirebaseMixin],
   props: {
-    active: Boolean,
+    formClient: Boolean,
   },
   data() {
     return {
       outlinedColor: "#002b4b",
       title: "Image Upload",
-      form: false,
       imageName: "",
       imageUrl: "",
       imageFile: "",
@@ -30,6 +29,7 @@ export default {
       dateNasc: null,
       dateNascConj: null,
       e1: 1,
+      formConstruction: false,
       idParams: "",
       picker: new Date().toISOString().substr(0, 10),
       pickerInit: new Date().toISOString().substr(0, 10),
@@ -115,6 +115,9 @@ export default {
     });
   },
   methods: {
+    handleClose() {
+      this.$emit("update:formClient", false);
+    },
     close() {
       this.$emit("close");
     },
@@ -184,6 +187,7 @@ export default {
           data_nascimento: this.dateNasc,
           nome_conjuge: this.firstnameConjuge,
           data_nascimento_conjuge: this.dateNascConj,
+          foto_perfil: this.imageUrl,
           TipoUsuario: this.tipo_usuario,
         };
         const client = await this.firebaseCreate(
@@ -253,7 +257,7 @@ export default {
   <vs-dialog
     @close="handleClose"
     blur
-    v-model="active"
+    v-model="formClient"
     max-width="800px"
     prevent-close
   >
@@ -354,10 +358,10 @@ export default {
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn
-                  color="primary"
+                  color="#002b4b"
                   class="btn-primario"
                   depressed
-                  @click="form = true"
+                  @click="formConstruction = true"
                 >
                   CADASTRAR OBRA
                 </v-btn>
@@ -368,7 +372,7 @@ export default {
             </v-card>
           </v-dialog>
           <ModalRegisterConstruction
-            :form.sync="form"
+            :formConstruction.sync="formConstruction"
             :confirm.sync="confirm"
             :refresh.sync="refresh"
             :user_id="user_email"
@@ -517,7 +521,11 @@ export default {
   backface-visibility: hidden;
   transition: transform 0.5s ease-in-out;
 }
-
+.btn-primary {
+  background-color: #002b4b !important;
+  color: #fafafa !important;
+  width: 80px;
+}
 .card-upload {
   background: #002b4b;
   font-size: 3px;

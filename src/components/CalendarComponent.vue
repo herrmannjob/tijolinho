@@ -1,319 +1,277 @@
-<script>
-import FullCalendar from "@fullcalendar/vue";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import listPlugin from "@fullcalendar/list";
-import interactionPlugin from "@fullcalendar/interaction";
-import Swal from "@/plugins/sweetalert";
-import ModalCalendar from "@/components/ModalCalendar";
-import CalendarWeek from "@/components/CalendarWeek";
-import CalendarDay from "@/components/CalendarDay";
-import CalendarMonth from "@/components/CalendarMonth";
-import Firebase from "@/services/Firebase";
-import { FirebaseMixin } from "@/mixins/FirebaseMixin";
+<template>
+  <v-row class="fill-height">
+    <v-col>
+      <v-sheet height="64">
+        <v-toolbar flat color="white">
+          <v-btn color="primary" dark @click.stop="dialog = true">
+            New Event
+          </v-btn>
+          <v-btn outlined class="mr-4" @click="setToday">
+            Today
+          </v-btn>
+          <v-btn fab text small @click="prev">
+            <v-icon small>mdi-chevron-left</v-icon>
+          </v-btn>
+          <v-btn fab text small @click="next">
+            <v-icon small>mdi-chevron-right</v-icon>
+          </v-btn>
+          <v-toolbar-title>{{ title }}</v-toolbar-title>
+          <div class="flex-grow-1"></div>
+          <v-menu bottom right>
+            <template v-slot:activator="{ on }">
+              <v-btn outlined v-on="on">
+                <span>{{ typeToLabel[type] }}</span>
+                <v-icon right>mdi-menu-down</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item @click="type = 'day'">
+                <v-list-item-title>Day</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="type = 'week'">
+                <v-list-item-title>Week</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="type = 'month'">
+                <v-list-item-title>Month</v-list-item-title>
+              </v-list-item>
+              <v-list-item @click="type = '4day'">
+                <v-list-item-title>4 days</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </v-toolbar>
+      </v-sheet>
 
+      <v-dialog v-model="dialog" max-width="500">
+        <v-card>
+          <v-container>
+            <v-form>
+              <v-text-field v-model="name" type="text" label="event name (required)"></v-text-field>
+              <v-text-field v-model="details" type="text" label="detail"></v-text-field>
+              <v-text-field v-model="start" type="date" label="start (required)"></v-text-field>
+              <v-text-field v-model="end" type="date" label="end (required)"></v-text-field>
+              <v-text-field v-model="color" type="color" label="color (click to open color menu)"></v-text-field>
+              <v-btn type="submit" color="primary" class="mr-4" @click="addEvent">
+                create event
+              </v-btn>
+            </v-form>
+          </v-container>
+        </v-card>
+      </v-dialog>
+
+<v-sheet height="600">
+  <v-calendar
+  ref="calendar"
+  v-model="focus"
+  color="primary"
+  :events="events"
+  :event-color="getEventColor"
+  :event-margin-bottom="3"
+  :now="today"
+  :type="type"
+  @click:event="showEvent"
+  @click:more="viewDay"
+  @click:date="setDialogDate"
+  @change="updateRange"
+  ></v-calendar>
+  <v-menu
+  v-model="selectedOpen"
+  :close-on-content-click="false"
+  :activator="selectedElement"
+  full-width
+  offset-x
+  >
+  <v-card color="grey lighten-4" :width="350" flat>
+    <v-toolbar :color="selectedEvent.color" dark>
+      <v-btn @click="deleteEvent(selectedEvent.id)" icon>
+        <v-icon>mdi-delete</v-icon>
+      </v-btn>
+      <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
+      <div class="flex-grow-1"></div>
+    </v-toolbar>
+
+    <v-card-text>
+      <form v-if="currentlyEditing !== selectedEvent.id">
+        {{ selectedEvent.details }}
+      </form>
+      <form v-else>
+        <textarea-autosize
+        v-model="selectedEvent.details"
+        type="text"
+        style="width: 100%"
+        :min-height="100"
+        placeholder="add note">
+      </textarea-autosize>
+    </form>
+  </v-card-text>
+
+  <v-card-actions>
+    <v-btn text color="secondary" @click="selectedOpen = false">
+      close
+    </v-btn>
+    <v-btn v-if="currentlyEditing !== selectedEvent.id" text @click.prevent="editEvent(selectedEvent)">
+      edit
+    </v-btn>
+    <v-btn text v-else type="submit" @click.prevent="updateEvent(selectedEvent)">
+      Save
+    </v-btn>
+  </v-card-actions>
+</v-card>
+</v-menu>
+</v-sheet>
+</v-col>
+</v-row>
+</template>
+
+<script>
+import { db } from '@/main'
 export default {
   name: "CalendarComponent",
-  components: {
-    ModalCalendar,
-    CalendarWeek,
-    CalendarDay,
-    CalendarMonth,
-    FullCalendar,
+  data: () => ({
+    today: new Date().toISOString().substr(0, 10),
+    focus: new Date().toISOString().substr(0, 10),
+    type: 'month',
+    typeToLabel: {
+      month: 'Month',
+      week: 'Week',
+      day: 'Day',
+      '4day': '4 Days',
+    },
+    name: null,
+    details: null,
+    start: null,
+    end: null,
+    color: '#1976D2', // default event color
+    currentlyEditing: null,
+    selectedEvent: {},
+    selectedElement: null,
+    selectedOpen: false,
+    events: [],
+    dialog: false,
+    dialogDate: false
+  }),
+  mounted () {
+    this.getEvents()
   },
-  mixins: [FirebaseMixin],
-  data() {
-    return {
-      user: null,
-      uid: "",
-      select_view: ["Agenda", "Dia", "Dias Úteis", "Semana", "Mês"],
-      calendar_view: "",
-      clients: [],
-      client_names: ["Nenhum cliente cadastrado"],
-      constructions_names: ["Nenhuma obra cadastrada"],
-      constructions: [],
-      companies: [],
-      view_week: true,
-      view_day: false,
-      view_month: false,
-      calendarOptions: {
-        aspectRatio: 2,
-        contentHeight: 600,
-        plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
-        initialView: "timeGridWeek",
-        locale: "pt-br",
-        editable: true,
-        dayHeaderFormat: { weekday: "long", day: "numeric", omitCommas: true },
-        allDayText: "Dia inteiro",
-        // headerToolbar: {
-        //   left: "title",
-        //   center: "",
-        //   right:
-        //     "prev,next today dayGridMonth,timeGridWeek,timeGridDay,listWeek",
-        // },
-        headerToolbar: {
-          left: "title",
-          center: "",
-          right: "today prev,next",
-        },
-        buttonText: {
-          today: "Hoje",
-          month: "Mês",
-          week: "Semana",
-          day: "Dia",
-          list: "Lista",
-        },
-        eventBorderColor: "rgb(255, 255, 255, 0.4)",
-        views: {
-          timeGridWeek: {
-            titleFormat: { year: "2-digit", month: "2-digit", day: "2-digit" },
-          },
-        },
-        timeZone: "UTC",
-        selectable: true,
-        selectMirror: true,
-        dayMaxEvents: true,
-        weekends: true,
-        dateClick: this.dateClick,
-        events: [],
-      },
-      form: false,
-      date_clicked: "",
-      task_titulo: null,
-      task_cliente: null,
-      task_obra: null,
-      task_prioridade: null,
-      task_categoria: null,
-      task_observacao: null,
-      particular_tasks: [],
-      constructions_tasks: [],
-      refresh: false,
-      user_email: "",
-    };
-  },
-  async mounted() {
-    await Firebase.auth().onAuthStateChanged(async (user) => {
-      if (user) {
-        this.user_email = user.email;
-        await this.getUser();
-        await this.getObras();
-        await this.getClients();
-        await this.getTasks();
+  computed: {
+    title () {
+      const { start, end } = this
+      if (!start || !end) {
+        return ''
       }
-    });
-  },
-  async updated() {
-    if (this.refresh) {
-      await this.getTasks();
-      this.refresh = false;
+      const startMonth = this.monthFormatter(start)
+      const endMonth = this.monthFormatter(end)
+      const suffixMonth = startMonth === endMonth ? '' : endMonth
+      const startYear = start.year
+      const endYear = end.year
+      const suffixYear = startYear === endYear ? '' : endYear
+      const startDay = start.day + this.nth(start.day)
+      const endDay = end.day + this.nth(end.day)
+      switch (this.type) {
+        case 'month':
+        return `${startMonth} ${startYear}`
+        case 'week':
+        case '4day':
+        return `${startMonth} ${startDay} ${startYear} - ${suffixMonth} ${endDay} ${suffixYear}`
+        case 'day':
+        return `${startMonth} ${startDay} ${startYear}`
+      }
+      return ''
+    },
+    monthFormatter () {
+      return this.$refs.calendar.getFormatter({
+        timeZone: 'UTC', month: 'long',
+      })
     }
   },
   methods: {
-    async getUser() {
-      const response = await this.getDocument(
-        Firebase.firestore(),
-        "Usuario",
-        "email",
-        this.user_email
-      );
-      this.username = response.documents[0].data.nome;
+    async getEvents () {
+      let snapshot = await db.collection('calEvent').get()
+      const events = []
+      snapshot.forEach(doc => {
+        let appData = doc.data()
+        appData.id = doc.id
+        events.push(appData)
+      })
+      this.events = events
     },
-    async getObras() {
-      const response = await this.getDocument(
-        Firebase.firestore(),
-        "Obra",
-        "usuarioID",
-        this.user_email
-      );
-      if (response.status === "ok") {
-        this.constructions = [];
-        this.constructions_names = [];
-        response.documents.map((item) => {
-          this.constructions.push(item.data);
-          this.constructions_names.push(item.data.nome);
-        });
+    setDialogDate( { date }) {
+      this.dialogDate = true
+      this.focus = date
+    },
+    viewDay ({ date }) {
+      this.focus = date
+      this.type = 'day'
+    },
+    getEventColor (event) {
+      return event.color
+    },
+    setToday () {
+      this.focus = this.today
+    },
+    prev () {
+      this.$refs.calendar.prev()
+    },
+    next () {
+      this.$refs.calendar.next()
+    },
+    async addEvent () {
+      if (this.name && this.start && this.end) {
+        await db.collection("calEvent").add({
+          name: this.name,
+          details: this.details,
+          start: this.start,
+          end: this.end,
+          color: this.color
+        })
+        this.getEvents()
+        this.name = '',
+        this.details = '',
+        this.start = '',
+        this.end = '',
+        this.color = ''
+      } else {
+        alert('You must enter event name, start, and end time')
       }
     },
-    async getCompanies() {
-      const response = await this.getDocumentList(
-        Firebase.firestore(),
-        "Empresa",
-        "usuarioID",
-        this.user_email
-      );
-      if (response.status === "ok") {
-        this.companies = response.documents;
+    editEvent (ev) {
+      this.currentlyEditing = ev.id
+    },
+    async updateEvent (ev) {
+      await db.collection('calEvent').doc(this.currentlyEditing).update({
+        details: ev.details
+      })
+      this.selectedOpen = false,
+      this.currentlyEditing = null
+    },
+    async deleteEvent (ev) {
+      await db.collection("calEvent").doc(ev).delete()
+      this.selectedOpen = false,
+      this.getEvents()
+    },
+    showEvent ({ nativeEvent, event }) {
+      const open = () => {
+        this.selectedEvent = event
+        this.selectedElement = nativeEvent.target
+        setTimeout(() => this.selectedOpen = true, 10)
       }
-    },
-    async getClients() {
-      await this.getCompanies();
-      if (this.companies.length > 0) {
-        let client_ids = [];
-        this.companies.map((company) => {
-          company.usuarioID.map((client) => {
-            if (client !== this.user_email) client_ids.push(client);
-          });
-        });
-        if (client_ids.length > 0) {
-          this.clients = [];
-          this.client_names = [];
-          client_ids.map(async (item) => {
-            const response = await this.getDocument(
-              Firebase.firestore(),
-              "Usuario",
-              "id",
-              item
-            );
-            this.clients.push(response.documents[0].data);
-            this.client_names.push(response.documents[0].data.nome);
-          });
-        }
+      if (this.selectedOpen) {
+        this.selectedOpen = false
+        setTimeout(open, 10)
+      } else {
+        open()
       }
+      nativeEvent.stopPropagation()
     },
-    async getTasks() {
-      await this.getParticularTasks();
-      await this.getConstructionsTasks();
+    updateRange ({ start, end }) {
+      this.start = start
+      this.end = end
     },
-    async getParticularTasks() {
-      const response = await this.getDocument(
-        Firebase.firestore(),
-        "AgendaParticular",
-        "usuarioID",
-        this.user_email
-      );
-      if (response.status === "ok") {
-        this.particular_tasks = [];
-        this.calendarOptions.events = [];
-        response.documents.map((item) => {
-          this.particular_tasks.push(item.data);
-          this.calendarOptions.events.push({
-            title: item.data.titulo,
-            start: item.data.data_inicio.substr(0, 19) + "Z",
-            end: item.data.data_fim.substr(0, 19) + "Z",
-          });
-        });
-      }
-    },
-    async getConstructionsTasks() {
-      this.constructions_tasks = [];
-      this.constructions.map(async (c) => {
-        const response = await this.getDocument(
-          Firebase.firestore(),
-          "AgendaObra",
-          "obraID",
-          c.id
-        );
-        if (response.status === "ok") {
-          response.documents.map((item) => {
-            this.constructions_tasks.push(item.data);
-            this.calendarOptions.events.push({
-              title: item.data.titulo,
-              start: item.data.data_inicio,
-              end: item.data.data_fim,
-            });
-          });
-        }
-      });
-    },
-    changeView() {
-      switch (this.calendar_view) {
-        case "Mês":
-          this.calendarOptions.initialView = "dayGridMonth";
-          this.view_week = false;
-          this.view_day = false;
-          this.view_month = true;
-          this.calendarOptions.weekends = true;
-          break;
-        case "Dia":
-          this.calendarOptions.initialView = "timeGridDay";
-          this.view_week = false;
-          this.view_month = false;
-          this.view_day = true;
-          this.calendarOptions.weekends = true;
-          break;
-        default:
-          this.calendarOptions.initialView = "timeGridWeek";
-          this.view_day = false;
-          this.view_month = false;
-          this.view_week = true;
-          this.calendarOptions.weekends = true;
-          break;
-        case "Agenda":
-          this.calendarOptions.initialView = "listWeek";
-          this.view_week = false;
-          this.view_month = false;
-          this.view_day = false;
-          this.view_list = true;
-          this.calendarOptions.weekends = true;
-          break;
-        case "Dias Úteis":
-          this.calendarOptions.weekends = false;
-          break;
-      }
-    },
-    dateClick(info) {
-      this.form = true;
-      this.date_clicked = info.dateStr;
-    },
-    selectDate(info) {
-      Swal.fire("selected " + info.startStr + " to " + info.endStr);
-    },
-    toggleWeekends: function() {
-      this.calendarOptions.weekends = !this.calendarOptions.weekends;
-    },
-  },
-};
+    nth (d) {
+      return d > 3 && d < 21
+      ? 'th'
+      : ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'][d % 10]
+    }
+  }
+}
 </script>
-<template>
-  <div class="demo-app">
-    <div class="demo-app-main">
-      <v-row align="center">
-        <v-col class="d-flex" cols="12" sm="4">
-          <v-select
-            :items="select_view"
-            label="Calendário"
-            v-model="calendar_view"
-            :onselect="changeView()"
-            dense
-          ></v-select>
-        </v-col>
-        <v-col class="d-flex" cols="12" sm="4">
-          <v-select :items="client_names" label="Cliente" dense></v-select>
-        </v-col>
-        <v-col class="d-flex" cols="12" sm="4">
-          <v-select :items="constructions_names" label="Obra" dense></v-select>
-        </v-col>
-      </v-row>
-
-      <ModalCalendar
-        :form.sync="form"
-        :refresh.sync="refresh"
-        :date="date_clicked"
-        :user="user_email"
-      />
-
-      <CalendarWeek
-        :options="calendarOptions"
-        v-if="view_week"
-        ref="calendar"
-      />
-
-      <CalendarDay :options="calendarOptions" v-if="view_day" ref="calendar" />
-
-      <CalendarMonth
-        :options="calendarOptions"
-        v-if="view_month"
-        ref="calendar"
-      />
-      <button @click="toggleWeekends">toggle weekends</button>
-      <FullCalendar
-        class="demo-app-calendar"
-        :options="calendarOptions"
-        v-show="false"
-      />
-    </div>
-  </div>
-</template>
-<style lang="scss">
-
-</style>

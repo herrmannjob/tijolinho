@@ -26,13 +26,29 @@ import {
 import $ from "jquery";
 import VueJquery from "vue-jquery";
 import responsive from "vue-responsive";
+import firebase from "./services/Firebase";
+import money from "v-money";
+import VueCurrencyInput from "vue-currency-input";
+import VueTheMask from "vue-the-mask";
+// import VueMask from "vue-jquery-mask";
+import VueMask from 'v-mask'
+
+export const db = firebase.firestore();
 
 library.add(fab, fas, faWhatsapp, faTwitter, faUserSecret, faComment);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 Vue.component("font-awesome-layers", FontAwesomeLayers);
 Vue.component("font-awesome-layers-text", FontAwesomeLayersText);
+const pluginOptions = {
+  /* see config reference */
+  globalOptions: { currency: "BRL" },
+};
 
+Vue.use(VueMask);
+Vue.use(VueTheMask);
+Vue.use(VueCurrencyInput, pluginOptions);
+Vue.use(money, { precision: 4 });
 Vue.use(responsive);
 Vue.use($);
 Vue.use(VueJquery);

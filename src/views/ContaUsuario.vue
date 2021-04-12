@@ -20,14 +20,12 @@ export default {
       user: null,
       username: "",
       user_email: "",
+      enderecoID: "",
+      cep: "",
+      cidade: "",
       company: {},
       form: false,
       refresh: false,
-      clients: [
-        {
-          title: "Nenhum cliente cadastrado",
-        },
-      ],
       singleSelect: true,
       selected: [],
       companies: [],
@@ -45,10 +43,6 @@ export default {
     };
   },
   async updated() {
-    if (this.refresh) {
-      await this.getClients();
-      this.refresh = false;
-    }
     const response = await this.getDocument(
       Firebase.firestore(),
       "Usuario",
@@ -63,6 +57,7 @@ export default {
         this.user_email = user.email;
         await this.getUser();
         await this.getCompanies();
+        await this.getAddress();
       } else this.$router.push("/");
     });
   },
@@ -107,30 +102,21 @@ export default {
         // this.empresa = response.documents[0];
         response.documents.map((item) => {
           this.companies.push(item.nome);
+          this.telefone = item.telefone;
+          this.enderecoID = item.enderecoID;
         });
       }
     },
-    async getClients() {
-      await this.getCompanies();
-      if (this.companies.length) {
-        let client_ids = [];
-        this.companies.map((company) => {
-          company.usuarioID.map((client) => {
-            if (client !== this.user_email) client_ids.push(client);
-          });
-        });
-        if (client_ids.length) {
-          this.clients = [];
-          client_ids.map(async (item) => {
-            const response = await this.getDocument(
-              Firebase.firestore(),
-              "Usuario",
-              "id",
-              item
-            );
-            this.clients.push(response.documents[0].data);
-          });
-        }
+    async getAddress() {
+      const response = await this.getDocumentList(
+        Firebase.firestore(),
+        "Endereco",
+        "cep",
+        this.enderecoID
+      );
+      if (response.status === "ok") {
+        this.cep = response.documents[0].data.cep;
+        this.cidade = response.documents.cidade;
       }
     },
     atualizaDados() {
@@ -161,7 +147,22 @@ export default {
                   <template #title>
                     <h3>{{ username }}</h3>
                   </template>
-                  <span style="color:#002b4b">{{ name }}</span>
+                  <template #img>
+                    <!-- <img
+                      src="https://randomuser.me/api/portraits/women/85.jpg"
+                      alt=""
+                    /> -->
+                    <v-btn
+                      class="mx-2"
+                      fab
+                      large
+                      color="#002b4b"
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      <span style="color:white">{{ name }}</span>
+                    </v-btn>
+                  </template>
                   <template #text>
                     <p>
                       {{ TipoUsuario }}
@@ -181,25 +182,33 @@ export default {
                         name="user"
                       ></box-icon> </template
                   ></vs-input>
-                  <v-select
-                    class="select-obra"
-                    :items="companies"
-                    label="Obras"
-                    v-model="selected"
-                    :onselect="getCompanies()"
-                  ></v-select>
                   <vs-input
                     class="input-conta"
                     primary
-                    v-model="nome_conjuge"
+                    v-model="companies"
                     readonly
-                    label-placeholder="Conjuge"
+                    label-placeholder="Empresa"
                     ><template #icon>
                       <box-icon
+                        type="solid"
                         color="#002b4b"
-                        name="user"
+                        name="business"
                       ></box-icon> </template
                   ></vs-input>
+                  <!-- <vs-select
+                    :state="color"
+                    filter
+                    label-placeholder="Empresa"
+                    v-model="selected"
+                  >
+                    <vs-option
+                      v-for="(empresa, index) in companies"
+                      :key="index"
+                      :label="empresa"
+                    >
+                      {{ empresa }}
+                    </vs-option>
+                  </vs-select> -->
                   <vs-input
                     class="input-conta"
                     primary
@@ -218,18 +227,6 @@ export default {
                     v-model="data_nascimento"
                     readonly
                     label="Nascimento"
-                    ><template #icon>
-                      <box-icon
-                        color="#002b4b"
-                        name="calendar"
-                      ></box-icon> </template
-                  ></vs-input>
-                  <vs-input
-                    class="input-conta"
-                    primary
-                    v-model="data_nascimento_conjuge"
-                    readonly
-                    label="Nascimento Conjuge"
                     ><template #icon>
                       <box-icon
                         color="#002b4b"
