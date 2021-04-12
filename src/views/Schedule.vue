@@ -22,15 +22,14 @@ export default {
   mixins: [FirebaseMixin],
   data() {
     return {
-      active: 0,
       showFinancialComponent: false,
       showGanttTask: false,
-      outlinedColor: "#002b4b",
-      gradientColor: "#00467a",
       today: new Date(),
       user: null,
       user_email: "",
       username: "",
+      clients: [],
+      companies: [],
       constructions: [],
       constructions_names: [],
       construction: {},
@@ -49,6 +48,11 @@ export default {
       spent_money: "",
       count: true,
       mode: "week",
+      urlImage: "",
+      idRota: "",
+      loading: false,
+      post: null,
+      error: null,
     };
   },
   async updated() {
@@ -61,9 +65,11 @@ export default {
   async mounted() {
     await Firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
+        this.idRota = this.$router.path;
         this.user_email = user.email;
         await this.getUser();
-        await this.getCompany();
+        await this.getCompanies();
+        await this.getClients();
         this.getObras();
       } else this.$router.push("/");
     });
@@ -81,7 +87,7 @@ export default {
       );
       this.username = response.documents[0].data.nome;
     },
-    async getCompany() {
+    async getCompanies() {
       const response = await this.getDocumentList(
         Firebase.firestore(),
         "Empresa",
@@ -89,7 +95,36 @@ export default {
         this.user_email
       );
       if (response.status === "ok") {
-        this.company = response.documents[0];
+        this.companies = response.documents;
+      }
+    },
+    async getClients() {
+      await this.getCompanies();
+      if (this.companies.length) {
+        let client_ids = [];
+        this.companies.map((company) => {
+          company.usuarioID.map((client) => {
+            if (client !== this.user_email) client_ids.push(client);
+          });
+        });
+        if (client_ids.length) {
+          this.clients = [];
+          client_ids.map(async (item) => {
+            const response = await this.getDocument(
+              Firebase.firestore(),
+              "Usuario",
+              "id",
+              item
+            );
+            this.clients.push(response.documents[0].data);
+            this.idRota = this.$route.params.id;
+            this.clients.map((cliente)=> {
+              if(this.idRota === cliente.nome) {
+                this.urlImage = cliente.foto_perfil
+              }
+            })
+          });
+        }
       }
     },
     async getObras() {
@@ -136,25 +171,24 @@ export default {
       }
     },
     async getTarefasOrderby() {
-        var collectionTarefa = db.collection('Tarefa').where("cronograma_obra", "==", ''+this.cronograma_obra.id);
-        try {
-            var listTarefas = await collectionTarefa.get();
-            var tarefas = []
-            listTarefas.forEach(doc => {
-                // console.log(doc.id, '=>', doc.data().name, '=>', doc.data().start);
-                // console.log(doc.data())
-                tarefas.push(doc.data())
-            });
-            tarefas = tarefas.slice(0);
-            tarefas.sort(function(a,b) {
-                return new Date(''+a.start) - new Date(''+b.start);
-            });
-            return tarefas;
-        }
-        catch (err) {
-            console.log('Error getting documents', err);
-            return;
-        }
+      var collectionTarefa = db
+        .collection("Tarefa")
+        .where("cronograma_obra", "==", "" + this.cronograma_obra.id);
+      try {
+        var listTarefas = await collectionTarefa.get();
+        var tarefas = [];
+        listTarefas.forEach((doc) => {
+          tarefas.push(doc.data());
+        });
+        tarefas = tarefas.slice(0);
+        tarefas.sort(function(a, b) {
+          return new Date("" + a.start) - new Date("" + b.start);
+        });
+        return tarefas;
+      } catch (err) {
+        console.log("Error getting documents", err);
+        return;
+      }
     },
     async getTasks() {
       const taskName = await this.getDocument(
@@ -167,12 +201,12 @@ export default {
         taskName.documents.map((item) => {
           this.task_names.push(item.data.name);
         });
-        console.log(this.task_names)
+        console.log(this.task_names);
       }
-      const tasks = await this.getTarefasOrderby()
+      const tasks = await this.getTarefasOrderby();
       if (tasks != undefined) {
         this.tasks = tasks;
-        console.log(this.tasks)
+        console.log(this.tasks);
       }
     },
     async showGantt() {
@@ -209,9 +243,7 @@ export default {
       <div class="components row">
         <div class="col-12 col-sm-5 col-md-3 left-col">
           <v-avatar class="profile-avatar">
-            <v-img
-              src="https://randomuser.me/api/portraits/women/85.jpg"
-            ></v-img>
+            <v-img :src="this.urlImage"></v-img>
           </v-avatar>
           <p class="username">{{ $route.params.id }}</p>
 

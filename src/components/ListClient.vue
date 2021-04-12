@@ -31,7 +31,9 @@ export default {
       data_nascimento_conjuge: [],
       TipoUsuario: [],
       idParams: "",
-      active: false,
+      formClient: false,
+      urlImage: [],
+      whatsapp: [],
     };
   },
   components: { ModalRegisterClient, ModalEditClient },
@@ -51,21 +53,7 @@ export default {
     closeEditModal() {
       this.editModal = false;
     },
-    linkWhatsApp() {
-      let number = 5551980478617;
-      let message = "teste".split(" ").join("%20");
 
-      var url =
-        "https://api.whatsapp.com/send?phone=" +
-        number +
-        "&text=" +
-        encodeURIComponent(message);
-
-      window.open(url);
-    },
-    sendEmail() {
-      window.open("mailto:herrmannjob@gmail.com?subject=teste&body=testando");
-    },
     async getCompanies() {
       const response = await this.getDocumentList(
         Firebase.firestore(),
@@ -101,10 +89,46 @@ export default {
             );
             this.clients.push(response.documents[0].data);
             this.nome.push(response.documents[0].data.nome);
+            this.urlImage.push(response.documents[0].data.foto_perfil);
             this.TipoUsuario.push(response.documents[0].data.TipoUsuario);
+            this.whatsapp.push(response.documents[0].data.telefone);
           });
         }
       }
+    },
+    linkWhatsApp(id) {
+      this.clients.map((item) => {
+        if (id === item.id) {
+          let whatsapp = item.telefone;
+          let message = "teste".split(" ").join("%20");
+
+          var whatsappUrl =
+            "https://api.whatsapp.com/send?phone=" +
+            whatsapp +
+            "&text=" +
+            encodeURIComponent(message);
+
+          window.open(whatsappUrl);
+        }
+      });
+    },
+    sendEmail(id) {
+      this.clients.map((item) => {
+        if (id === item.id) {
+          let email = item.email;
+          let subject = "teste";
+          let body = "testando";
+
+          var emailUrl =
+            "mailto:" +
+            email +
+            "?subject=" +
+            subject + "&body=" + body;
+
+          window.open(emailUrl);
+        }
+      });
+      window.open("mailto:herrmannjob@gmail.com?subject=teste&body=testando");
     },
   },
 };
@@ -116,17 +140,17 @@ export default {
       <vs-button
         :color="outlinedColor"
         class="btn-primary-extra-lg"
-        @click="active = !active"
+        @click="formClient = true"
         style="margin: 2%;"
         ><font-awesome-icon class="plus-client" :icon="['fas', 'plus']" />
         Novo Cliente
       </vs-button>
     </div>
-    <ModalRegisterClient :active.sync="active"></ModalRegisterClient>
+    <ModalRegisterClient :formClient.sync="formClient"></ModalRegisterClient>
     <v-col>
       <v-tabs color="deep-purple accent-4" left>
-        <v-tab>Ativos</v-tab>
-        <v-tab>Inativos</v-tab>
+        <v-tab>Em obra</v-tab>
+        <v-tab>Antigos</v-tab>
 
         <v-tab-item v-for="n in 2" :key="n">
           <v-container fluid>
@@ -138,11 +162,11 @@ export default {
               >
                 <v-list two-line class="list-clients">
                   <v-list-item>
-                    <v-list-item-avatar class="mr-4" @click="rotaCronograma(client.nome)">
-                      <v-img
-                        src="https://cdn.vuetifyjs.com/images/lists/ali.png"
-                      >
-                      </v-img>
+                    <v-list-item-avatar
+                      class="mr-4"
+                      @click="rotaCronograma(client.nome)"
+                    >
+                      <v-img :src="client.foto_perfil"> </v-img>
                     </v-list-item-avatar>
                     <v-list-item-content
                       class="ml-4 mr-4"
@@ -171,14 +195,19 @@ export default {
                         <v-icon>mdi-pencil</v-icon>
                       </v-btn>
 
-                      <v-btn primary icon class="mr-4" @click="linkWhatsApp()">
+                      <v-btn
+                        primary
+                        icon
+                        class="mr-4"
+                        @click="linkWhatsApp(client.id)"
+                      >
                         <font-awesome-icon
                           class="whatsapp"
                           :icon="['fab', 'whatsapp']"
                         />
                       </v-btn>
 
-                      <v-btn primary icon class="mr-4" @click="sendEmail()">
+                      <v-btn primary icon class="mr-4" @click="sendEmail(client.id)">
                         <v-icon>mdi-email</v-icon>
                       </v-btn>
 

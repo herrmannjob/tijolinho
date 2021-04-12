@@ -17,6 +17,7 @@ export default {
   data() {
     return {
       /* eslint-disable no-mixed-spaces-and-tabs */
+      outlinedColor: "#002b4b",
       cep: null,
       estado: null,
       logradouro: null,
@@ -176,7 +177,13 @@ export default {
 };
 </script>
 <template>
-  <vs-dialog @close="handleClose" blur v-model="formConstruction" max-width="800px" prevent-close>
+  <vs-dialog
+    @close="handleClose"
+    blur
+    v-model="formConstruction"
+    max-width="800px"
+    prevent-close
+  >
     <template #header>
       <h4 class="not-margin">Cadastrar <b>Obra</b></h4>
     </template>
@@ -219,10 +226,12 @@ export default {
             <vs-input type="date" v-model="dateEnd" label="Termino previsto" />
 
             <vs-input
-              type="number"
+              id="orcamento"
               v-model="estimated_spend"
-              label="Gasto estimado"
-            />
+              v-mask="'###.###.###,##'"
+              label="Orçamento estimado"
+              ><template #icon> <a>R$</a> </template
+            ></vs-input>
           </div>
         </v-col>
         <v-col cols="12" md="6">
@@ -230,6 +239,7 @@ export default {
             label="Cep"
             required
             v-model="cep"
+            v-mask="'#####-###'"
             @change="searchCep"
             @keyup="searchCep()"
           ></v-text-field>
@@ -250,7 +260,7 @@ export default {
     </div>
     <template #footer>
       <div class="footer-dialog">
-        <vs-button block class="btn-primario" @click="addObra()">
+        <vs-button :color="outlinedColor" block class="btn-primario" @click="addObra()">
           SALVAR
         </vs-button>
       </div>
