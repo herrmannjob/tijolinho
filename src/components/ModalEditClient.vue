@@ -1,19 +1,20 @@
 <script>
+import ResponseModal from "@/components/ResponseModal.vue";
 import image from "../assets/register.png";
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
-import ModalEditConstruction from "@/components/ModalEditConstruction";
 export default {
   name: "ModalEditClient",
-  components: { ModalEditConstruction },
+  components: {ResponseModal},
   mixins: [FirebaseMixin],
   props: {
-    active: Boolean,
+    formEditClient: Boolean,
+    editedClient: {},
   },
   data() {
     return {
+      outlinedColor: "#002b4b",
       title: "Image Upload",
-      form: false,
       imageName: "",
       imageUrl: "",
       imageFile: "",
@@ -29,17 +30,21 @@ export default {
       dateNasc: null,
       dateNascConj: null,
       e1: 1,
+      formConstruction: false,
+      id_generated: "",
       idParams: "",
       picker: new Date().toISOString().substr(0, 10),
       pickerInit: new Date().toISOString().substr(0, 10),
       pickerEnd: new Date().toISOString().substr(0, 10),
       pickerNasc: new Date().toISOString().substr(0, 10),
       pickerNascConj: new Date().toISOString().substr(0, 10),
+      message: { title: "", code: "", text: "" },
       menu: false,
       menuInit: false,
       menuEnd: false,
       menuNasc: false,
       menuNascConj: false,
+      modal: false,
       categoria: [
         "Residencial",
         "Reforma",
@@ -96,12 +101,12 @@ export default {
   },
   updated() {
     if (this.refresh) {
-      this.firstname = "";
-      (this.email = ""),
-        (this.phone = ""),
-        (this.dateNasc = null),
-        (this.firstnameConjuge = ""),
-        (this.dateNascConj = null),
+      this.editedClient.nome = "";
+      (this.editedClient.email = ""),
+        (this.editedClient.telefone = ""),
+        (this.editedClient.data_nascimento = null),
+        (this.editedClient.nome_conjuge = ""),
+        (this.editedClient.data_nascimento_conjuge = null),
         (this.refresh = false);
     }
   },
@@ -114,6 +119,9 @@ export default {
     });
   },
   methods: {
+    handleClose() {
+      this.$emit("update:formEditClient", false);
+    },
     close() {
       this.$emit("close");
     },
@@ -129,25 +137,6 @@ export default {
       );
       if (response.status === "ok") {
         this.company = response.documents[0];
-      }
-    },
-    async updateCompany() {
-      if (!this.company.usuarioID.includes(this.client_id)) {
-        this.company.usuarioID.push(this.client_id);
-        const data = {
-          enderecoID: this.company.enderecoID,
-          id: this.company.id,
-          nome: this.company.nome,
-          telefone: this.company.telefone,
-          usuarioID: this.company.usuarioID,
-        };
-        const response = await this.firebaseCreate(
-          Firebase.firestore(),
-          "Empresa",
-          data.id,
-          data
-        );
-        if (response.status === "ok") this.company = data;
       }
     },
     async addTipoUsuario() {
@@ -167,46 +156,38 @@ export default {
       this.tipo_usuario = "cliente";
     },
 
-    async addUser() {
+    async updateUser() {
       await this.addTipoUsuario();
-      const response = await this.getDocument(
+      const data = {
+        nome: this.editedClient.nome,
+        email: this.editedClient.email,
+        telefone: this.editedClient.telefone,
+        data_nascimento: this.editedClient.data_nascimento,
+        nome_conjuge: this.editedClient.nome_conjuge,
+        data_nascimento_conjuge: this.editedClient.data_nascimento_conjuge,
+        foto_perfil: this.editedClient.foto_perfil,
+        TipoUsuario: this.tipo_usuario,
+      };
+      this.id_generated = this.editedClient.id;
+      await this.firebaseUpdate(
         Firebase.firestore(),
         "Usuario",
-        "telefone",
-        this.user_email
-      );
-      if (response.status === "empty") {
-        const data = {
-          nome: this.firstname,
-          email: this.email,
-          telefone: this.phone,
-          data_nascimento: this.dateNasc,
-          nome_conjuge: this.firstnameConjuge,
-          data_nascimento_conjuge: this.dateNascConj,
-          TipoUsuario: this.tipo_usuario,
-        };
-        const client = await this.firebaseCreate(
-          Firebase.firestore(),
-          "Usuario",
-          null,
-          data
-        );
-        await this.firebaseUpdate(
-          Firebase.firestore(),
-          "Usuario",
-          client.created_id,
-          { id: client.created_id }
-        );
-        this.client_id = client.created_id;
-        this.confirm = true;
-        this.close();
-      } else {
-        this.client_id = response.documents[0].id;
-        this.confirm_message =
-          "Já existe um usuário com este número" + "" + this.phone;
-        this.confirm = true;
-      }
-      this.updateCompany();
+        this.id_generated,
+        data
+      )
+        .then(() => {
+          // debugger;
+          this.modal = true;
+          this.message.title = "Cliente atualizado com sucesso!";
+          this.handleClose();
+          this.$emit("update:formEditClient", false);
+        })
+        .catch((error) => {
+          this.modal = true;
+          this.message.title = "Ocorreu um erro...";
+          this.message.code = error;
+          this.message.text = error;
+        });
     },
     save(date) {
       this.$refs.menu.save(date);
@@ -226,9 +207,6 @@ export default {
     pickFile() {
       this.$refs.image.click();
     },
-    closeMyDialog() {
-      this.dialog = false;
-    },
     onFilePicked(e) {
       const files = e.target.files;
       if (files[0] !== undefined) {
@@ -239,27 +217,31 @@ export default {
         const fr = new FileReader();
         fr.readAsDataURL(files[0]);
         fr.addEventListener("load", () => {
-          this.imageUrl = fr.result;
+          this.editedClient.foto_perfil = fr.result;
           this.imageFile = files[0]; // this is an image file that can be sent to server...
         });
       } else {
         this.imageName = "";
         this.imageFile = "";
-        this.imageUrl = "";
+        this.editedClient.foto_perfil = "";
       }
     },
   },
 };
 </script>
 <template>
-  <vs-dialog v-model="form_client" max-width="800px" prevent-close>
+  <vs-dialog
+    @close="handleClose"
+    blur
+    v-model="formEditClient"
+    max-width="800px"
+    prevent-close
+  >
     <template #header>
-      <h4 class="not-margin">Cadastrar <b>Cliente</b></h4>
       <div @click="pickFile" class="card">
-        <div class="side side--front ">
+        <div class="side card-upload">
           <v-icon class="img-upload">mdi-image</v-icon>
         </div>
-        <div class="side facebook side--back">Add Image</div>
 
         <input
           class="card"
@@ -269,161 +251,75 @@ export default {
           accept="image/*"
           @change="onFilePicked"
         />
-        <div class="image-responsive">
-          <img
-            class="image-response"
-            :src="imageUrl"
-            height="125"
-            v-if="imageUrl"
-          />
-        </div>
+        <img
+          class="image-response"
+          :src="editedClient.foto_perfil"
+          height="80"
+          v-if="editedClient.foto_perfil"
+        />
       </div>
+      <h4 class="not-margin">Editar <b>Cliente</b></h4>
     </template>
 
     <div class="con-form">
-      <!-- <vs-input v-model="input1" placeholder="Email">
-        <template #icon>
-          @
-        </template>
-      </vs-input>
-      <vs-input type="password" v-model="input2" placeholder="Password">
-        <template #icon>
-          <i class="bx bxs-lock"></i>
-        </template>
-      </vs-input>
-      <div class="flex">
-        <vs-checkbox v-model="checkbox1">Remember me</vs-checkbox>
-        <a href="#">Forgot Password?</a>
-      </div> -->
-
       <v-form
         v-model="valid"
         style="justify-content:center; align-items: center; flex-direction: row; display: flex"
       >
         <v-row>
-          <v-col cols="12">
+          <v-col cols="12" sm="6">
             <v-text-field
-              v-model="firstname"
+              v-model="editedClient.nome"
               :rules="nameRules"
               label="Nome do cliente"
               required
             ></v-text-field>
 
             <v-text-field
+              label="Nome do cônjuge (opcional)"
+              v-model="editedClient.nome_conjuge"
+            ></v-text-field>
+
+            <v-text-field
               label="Telefone"
-              v-model="phone"
+              v-model="editedClient.telefone"
               placeholder="11 98765 4321"
               :rules="phone_rules"
               required
             >
             </v-text-field>
-
-            <v-text-field
-              v-model="email"
-              :rules="email.length > 0 ? emailRules : []"
-              label="E-mail"
-            ></v-text-field>
-
-            <v-menu
-              ref="menuNasc"
-              v-model="menuNasc"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              min-width="auto"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="dateNasc"
-                  label="Data de Nascimento (opcional)"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                ref="pickerNasc"
-                v-model="dateNasc"
-                :max="new Date().toISOString().substr(0, 10)"
-                min="1950-01-01"
-                @change="saveNasc"
-              ></v-date-picker>
-            </v-menu>
-            <v-text-field
-              label="Nome do cônjuge (opcional)"
-              v-model="firstnameConjuge"
-            ></v-text-field>
-            <v-menu
-              ref="menuNascConj"
-              v-model="menuNascConj"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              min-width="auto"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="dateNascConj"
-                  label="Data de Nascimento do Conjuge (opcional)"
-                  readonly
-                  required
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                ref="pickerNascConj"
-                v-model="dateNascConj"
-                :max="new Date().toISOString().substr(0, 10)"
-                min="1950-01-01"
-                @change="saveNascConj"
-              ></v-date-picker>
-            </v-menu>
-            <div class="form-btns">
-              <v-btn
-                elevation="2"
-                depressed
-                class="btn-primario btn-save"
-                @click="addUser()"
+          </v-col>
+          <v-col cols="12" sm="6">
+            <div class="group-data-client">
+              <div class="inputControl bornDateControl">
+                <template>
+                  <vs-input
+                    type="date"
+                    v-model="editedClient.data_nascimento"
+                    label="Data de Nascimento (opcional)"
+                    required
+                  />
+                </template>
+              </div>
+              <div class="inputControl bornDateControlPair">
+                <template>
+                  <vs-input
+                    type="date"
+                    v-model="editedClient.data_nascimento_conjuge"
+                    label="Data de Nascimento do Conjuge (opcional)"
+                    required
+                  />
+                </template>
+              </div>
+              <vs-input
+                v-model="editedClient.email"
+                placeholder="E-mail"
               >
-                <p class="button-primario">SALVAR DADOS</p>
-              </v-btn>
-              <v-btn color="primary" text @click.prevent="close()">
-                Voltar
-              </v-btn>
+                <template #icon>
+                  <v-icon>mdi-email</v-icon>
+                </template>
+              </vs-input>
             </div>
-            <v-dialog v-model="confirm" persistent max-width="450">
-              <v-card>
-                <v-card-title class="headline">
-                  {{ confirm_message }}
-                </v-card-title>
-                <v-card-text>
-                  Deseja vincular uma obra a esse cliente?
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn
-                    color="primary"
-                    class="btn-primario"
-                    depressed
-                    @click="form = true"
-                  >
-                    CADASTRAR OBRA
-                  </v-btn>
-                  <v-btn color="primary" text @click="confirm = false">
-                    Agora não
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
-            <ModalEditConstruction
-              :form.sync="form"
-              :confirm.sync="confirm"
-              :refresh.sync="refresh"
-              :user_id="user_email"
-              :company="company.id"
-              :client="client_id"
-            />
           </v-col>
         </v-row>
       </v-form>
@@ -431,58 +327,27 @@ export default {
 
     <template #footer>
       <div class="footer-dialog">
-        <vs-button block>
-          Sign In
+        <vs-button :color="outlinedColor" @click="updateUser" block>
+          Salvar Dados
         </vs-button>
-
-        <div class="new">New Here? <a href="#">Create New Account</a></div>
       </div>
     </template>
+    <ResponseModal :modal.sync="modal" :message="message" />
   </vs-dialog>
 </template>
 <style lang="css">
-.modal-backdrop {
-  opacity: 1 !important;
-  background-color: rgba(0, 0, 0, 0.548) !important;
-  display: flex;
+.bornDateControl {
+  margin-bottom: 8% !important;
+}
+.group-data-client {
+  display: grid;
+  flex-direction: column;
+  align-items: space-between;
   justify-content: center;
-  align-items: center;
+  height: 100%;
+  padding-left: unset;
+  padding-top: 5%;
 }
-
-.modal {
-  position: relative !important;
-  box-shadow: 2px 2px 20px 1px;
-  overflow-x: auto;
-  display: flex !important;
-  flex-direction: column;
-  width: 50% !important;
-  height: 80% !important;
-  border-radius: 10px !important;
-  background-color: #ffffff !important;
-}
-
-.modal-header {
-  height: 3rem;
-  position: relative;
-  border-bottom: 1px solid #eeeeee;
-  color: #4aae9b;
-  justify-content: space-between;
-  padding: 15px;
-  display: flex;
-}
-
-.modal-footer {
-  border-top: 1px solid #eeeeee;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.modal-body {
-  background-color: #ffffff;
-  position: relative;
-  padding: 20px 10px;
-}
-
 .btn-close {
   position: absolute;
   top: 0;
@@ -577,6 +442,8 @@ export default {
   flex-direction: row;
   width: 5rem;
   height: 5rem;
+  max-height: 80px !important;
+  max-width: 80px !important;
   margin: 0.5rem;
   border-radius: 50%;
   border: none !important;
@@ -597,30 +464,17 @@ export default {
   backface-visibility: hidden;
   transition: transform 0.5s ease-in-out;
 }
-
-.side--front {
+.btn-primary {
+  background-color: #002b4b !important;
+  color: #fafafa !important;
+  width: 80px;
+}
+.card-upload {
   background: #002b4b;
   font-size: 3px;
 }
-
-.side--back {
-  background: white;
-  font-size: 8px;
-  align-items: baseline;
-  transform: rotateY(180deg);
-}
-
-.card:hover .side--front {
-  transform: rotateY(-180deg);
-}
-
-.card:hover .side--back {
-  transform: rotateY(0deg);
-}
-
-.card:hover .facebook {
-  transform: rotateY(0deg);
-  background: #00457a;
+.avatar-edit {
+  align-self: start;
 }
 
 @media only screen and (max-width: 768px) {
@@ -639,15 +493,6 @@ export default {
   }
   .middle-client {
     display: none;
-  }
-  .v-picker {
-    border-radius: 4px;
-    contain: layout style;
-    display: inline-flex;
-    flex-direction: column;
-    font-size: 1rem;
-    vertical-align: center;
-    position: relative;
   }
 }
 </style>

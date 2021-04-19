@@ -48,17 +48,18 @@ export default {
       menuDateEnd: null,
       modal: false,
       message: { title: "", text: "" },
+      idRota: this.$globalValue,
     };
   },
   methods: {
     schedule() {
-      this.$router.push("planejamento");
+      this.$router.push("planejamento" + "/" + this.$globalValue);
     },
     handleClose() {
       this.$emit("update:formConstruction", false);
     },
     async searchCep() {
-      if (this.cep.length == 8) {
+      if (this.cep.length == 9) {
         const response = await Functions.searchCep(this.cep);
         this.logradouro = response.data.logradouro;
         this.cidade = response.data.localidade;
@@ -207,17 +208,31 @@ export default {
               <vs-option label="Residencial" value="Residencial">
                 Residencial
               </vs-option>
-              <vs-option label="Reforma" value="Reforma">
-                Reforma
-              </vs-option>
               <vs-option label="Comercial" value="Comercial">
                 Comercial
+              </vs-option>
+              <vs-option label="Institucional" value="Institucional">
+                Institucional
               </vs-option>
               <vs-option label="Restauração" value="Restauração">
                 Restauração
               </vs-option>
-              <vs-option label="Criação" value="Criação">
-                Criação
+            </vs-select>
+
+            <vs-select
+              filter
+              placeholder="Categoria"
+              v-model="category"
+              required
+            >
+              <vs-option label="Obra do Zero" value="Obra do Zero">
+                Obra do Zero
+              </vs-option>
+              <vs-option label="Reforma" value="Reforma">
+                Reforma
+              </vs-option>
+              <vs-option label="Decoração" value="Decoração">
+                Decoração
               </vs-option>
             </vs-select>
 
@@ -411,15 +426,6 @@ export default {
   }
   .middle-client {
     display: none;
-  }
-  .v-picker {
-    border-radius: 4px;
-    contain: layout style;
-    display: inline-flex;
-    flex-direction: column;
-    font-size: 1rem;
-    vertical-align: center;
-    position: relative;
   }
 }
 </style>

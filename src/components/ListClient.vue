@@ -3,7 +3,9 @@ import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 import ModalRegisterClient from "@/components/ModalRegisterClient";
 import ModalEditClient from "@/components/ModalEditClient";
+import ModalViewClient from "@/components/ModalViewClient";
 import "@fortawesome/free-brands-svg-icons";
+import Vue from "vue";
 export default {
   mixins: [FirebaseMixin],
   data() {
@@ -17,12 +19,14 @@ export default {
           title: "Nenhum cliente cadastrado",
         },
       ],
+      editedClient: {},
       singleSelect: true,
       selected: [],
+      selectedClient: {},
       user_email: "",
       companies: [],
-      editModal: false,
-      registerModal: false,
+      constructions: [],
+      constructions_names: [],
       nome: [],
       email: [],
       telefone: [],
@@ -32,28 +36,31 @@ export default {
       TipoUsuario: [],
       idParams: "",
       formClient: false,
+      formEditClient: false,
+      formViewClient: false,
       urlImage: [],
       whatsapp: [],
     };
   },
-  components: { ModalRegisterClient, ModalEditClient },
+  components: { ModalRegisterClient, ModalEditClient, ModalViewClient },
   async mounted() {
     await Firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         this.user_email = user.email;
         this.getClients();
+        this.getObras();
       } else this.$router.push("/");
     });
   },
   methods: {
+    showViewModal(id) {
+      this.selectedClient = Object.assign({}, id);
+      this.formViewClient = true;
+    },
     showEditModal(id) {
-      this.idParams = id;
-      this.editModal = true;
+      this.editedClient = Object.assign({}, id);
+      this.formEditClient = true;
     },
-    closeEditModal() {
-      this.editModal = false;
-    },
-
     async getCompanies() {
       const response = await this.getDocumentList(
         Firebase.firestore(),
@@ -66,7 +73,7 @@ export default {
       }
     },
     rotaCronograma(client) {
-      // this.$router.push("planejamento");
+      Vue.prototype.$globalValue = client;
       this.$router.push("planejamento" + "/" + client);
     },
     async getClients() {
@@ -96,6 +103,20 @@ export default {
         }
       }
     },
+    async getObras() {
+      const response = await this.getDocument(
+        Firebase.firestore(),
+        "Obra",
+        "usuarioID",
+        this.user_email
+      );
+      if (response.status === "ok") {
+        response.documents.map((item) => {
+          this.constructions.push(item.data);
+          this.constructions_names.push(item.data.nome);
+        });
+      }
+    },
     linkWhatsApp(id) {
       this.clients.map((item) => {
         if (id === item.id) {
@@ -120,10 +141,7 @@ export default {
           let body = "testando";
 
           var emailUrl =
-            "mailto:" +
-            email +
-            "?subject=" +
-            subject + "&body=" + body;
+            "mailto:" + email + "?subject=" + subject + "&body=" + body;
 
           window.open(emailUrl);
         }
@@ -147,11 +165,18 @@ export default {
       </vs-button>
     </div>
     <ModalRegisterClient :formClient.sync="formClient"></ModalRegisterClient>
+    <ModalEditClient
+      :formEditClient.sync="formEditClient"
+      :editedClient.sync="editedClient"
+    ></ModalEditClient>
+    <ModalViewClient
+      :formViewClient.sync="formViewClient"
+      :selectedClient.sync="selectedClient"
+    ></ModalViewClient>
     <v-col>
       <v-tabs color="deep-purple accent-4" left>
         <v-tab>Em obra</v-tab>
         <v-tab>Antigos</v-tab>
-
         <v-tab-item v-for="n in 2" :key="n">
           <v-container fluid>
             <v-row v-for="(client, index) in clients" :key="index">
@@ -182,7 +207,12 @@ export default {
                     </v-list-item-content>
 
                     <v-list-item-icon>
-                      <v-btn primary icon class="ml-4 mr-4">
+                      <v-btn
+                        primary
+                        icon
+                        class="ml-4 mr-4"
+                        @click="showViewModal(client)"
+                      >
                         <v-icon>mdi-account</v-icon>
                       </v-btn>
 
@@ -190,7 +220,7 @@ export default {
                         primary
                         icon
                         class="mr-4"
-                        @click="showEditModal(client.id)"
+                        @click="showEditModal(client)"
                       >
                         <v-icon>mdi-pencil</v-icon>
                       </v-btn>
@@ -207,10 +237,14 @@ export default {
                         />
                       </v-btn>
 
-                      <v-btn primary icon class="mr-4" @click="sendEmail(client.id)">
+                      <v-btn
+                        primary
+                        icon
+                        class="mr-4"
+                        @click="sendEmail(client.id)"
+                      >
                         <v-icon>mdi-email</v-icon>
                       </v-btn>
-
                       <!-- <v-btn primary icon>
                         <v-icon>mdi-dots-vertical</v-icon>
                       </v-btn> -->
@@ -222,12 +256,6 @@ export default {
           </v-container>
         </v-tab-item>
       </v-tabs>
-      <ModalEditClient
-        v-show="editModal"
-        @close="closeEditModal"
-        :idParams="this.idParams"
-        :firstname="this.nome"
-      ></ModalEditClient>
     </v-col>
   </div>
 </template>

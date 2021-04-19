@@ -4,7 +4,7 @@ import "./registerServiceWorker";
 import router from "./router";
 import vuetify from "./plugins/vuetify";
 import SchedulerComponent from "./components/SchedulerComponent.vue";
-import VueFlexLayout from "@jporto/vue-flex-layout";
+import VueFlexLayout from "../node_modules/@jporto/vue-flex-layout";
 import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
@@ -31,7 +31,9 @@ import money from "v-money";
 import VueCurrencyInput from "vue-currency-input";
 import VueTheMask from "vue-the-mask";
 // import VueMask from "vue-jquery-mask";
-import VueMask from 'v-mask'
+import VueMask from "v-mask";
+import Vuelidate from "vuelidate";
+import VueFlexboxLayout from "vue-flexbox-layout";
 
 export const db = firebase.firestore();
 
@@ -45,6 +47,8 @@ const pluginOptions = {
   globalOptions: { currency: "BRL" },
 };
 
+Vue.use(VueFlexboxLayout);
+Vue.use(Vuelidate);
 Vue.use(VueMask);
 Vue.use(VueTheMask);
 Vue.use(VueCurrencyInput, pluginOptions);

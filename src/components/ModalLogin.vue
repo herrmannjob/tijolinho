@@ -85,10 +85,10 @@ export default {
               <v-btn
                 elevation="2"
                 depressed
-                class="btn-primario"
+                class="primary btn-primario"
                 @click="login"
               >
-                <p class="button-primario">Entrar</p>
+                Entrar
               </v-btn>
               <br />
               <v-btn class="m2" outlined>
@@ -139,22 +139,18 @@ body {
   font-family: "Comfortaa", cursive;
 }
 .btn-primario {
-  background: #002b4b;
   width: 11rem;
   margin-left: 10px;
   margin-top: 6px;
   margin-right: 1rem;
+  font-family: "Roboto", sans-serif;
+  color: white;
 }
 .m2 {
   width: 11rem;
   margin-left: 10px;
   margin-top: 6px;
   margin-right: 1rem;
-}
-.button-primario {
-  margin: auto;
-  color: white;
-  font-family: "Roboto", sans-serif;
 }
 .button-secundario {
   margin: auto;
@@ -166,9 +162,10 @@ body {
 .btn-container {
   width: 11rem;
   display: flex;
-  transform: translate(10%);
+  transform: translate(35%);
   flex-direction: column;
   align-self: flex-start;
+  /* align-items: center; */
   margin: 0;
 }
 .space-init {

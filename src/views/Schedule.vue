@@ -4,7 +4,7 @@ import FinancialComponent from "@/components/FinancialComponent.vue";
 import Drawer from "@/components/Drawer.vue";
 import TopBar from "@/components/TopBar.vue";
 import ModalRegisterConstruction from "@/components/ModalRegisterConstruction";
-import ModalRegisterTask from "@/components/ModalRegisterTask";
+import ModalSelectTemplate from "@/components/ModalSelectTemplate";
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 import "boxicons";
@@ -17,7 +17,7 @@ export default {
     Gantt,
     FinancialComponent,
     ModalRegisterConstruction,
-    ModalRegisterTask,
+    ModalSelectTemplate,
   },
   mixins: [FirebaseMixin],
   data() {
@@ -32,7 +32,9 @@ export default {
       companies: [],
       constructions: [],
       constructions_names: [],
+      constructions_id: [],
       construction: {},
+      construction_id: null,
       cronograma_obra: {},
       tasks: [],
       task_names: [],
@@ -40,12 +42,13 @@ export default {
       company: {},
       completed: 0,
       formConstruction: false,
-      formTask: false,
+      formSelectTemplate: false,
       refresh: false,
       elapsed_time: "",
       planned_time: "",
       planned_money: "",
-      spent_money: "",
+      spent_money: null,
+      total_value: [],
       count: true,
       mode: "week",
       urlImage: "",
@@ -53,6 +56,8 @@ export default {
       loading: false,
       post: null,
       error: null,
+      clientInfo: [],
+      clientId: "",
     };
   },
   async updated() {
@@ -118,11 +123,13 @@ export default {
             );
             this.clients.push(response.documents[0].data);
             this.idRota = this.$route.params.id;
-            this.clients.map((cliente)=> {
-              if(this.idRota === cliente.nome) {
-                this.urlImage = cliente.foto_perfil
+            this.clients.map((cliente) => {
+              if (this.idRota === cliente.nome) {
+                this.urlImage = cliente.foto_perfil;
+                this.clientInfo = cliente;
+                this.clientId = cliente.id;
               }
-            })
+            });
           });
         }
       }
@@ -135,11 +142,13 @@ export default {
         this.user_email
       );
       if (response.status === "ok") {
-        this.constructions = [];
-        this.constructions_names = [];
         response.documents.map((item) => {
-          this.constructions.push(item.data);
-          this.constructions_names.push(item.data.nome);
+          if (item.data.usuarios === this.clientId) {
+            this.constructions.push(item.data);
+            this.constructions_names.push(item.data.nome);
+            this.construction_id = item.data.id;
+            this.constructions_id.push(item.data.id);
+          }
         });
       }
     },
@@ -166,6 +175,7 @@ export default {
         this.planned_time = (end - start) / 86400000; // miliseconds => day
         this.planned_money = this.cronograma_obra.gasto_previsto;
         this.completed = (this.elapsed_time / this.planned_time) * 100;
+        this.spent_money = this.cronograma_obra.gasto_total;
         await this.getTasks();
         this.count = false;
       }
@@ -201,12 +211,10 @@ export default {
         taskName.documents.map((item) => {
           this.task_names.push(item.data.name);
         });
-        console.log(this.task_names);
       }
       const tasks = await this.getTarefasOrderby();
       if (tasks != undefined) {
         this.tasks = tasks;
-        console.log(this.tasks);
       }
     },
     async showGantt() {
@@ -282,30 +290,30 @@ export default {
               class="btn-primary-lg"
               color="#002b4b"
               border
-              @click="showFinancial()"
+              @click="showGantt()"
             >
-              Financeiro
+              Cronograma
             </vs-button>
             <vs-button
               v-if="selected.length"
               class="btn-primary-lg"
               color="#002b4b"
               border
-              @click="showGantt()"
+              @click="showFinancial()"
             >
-              Cronograma
+              Financeiro
             </vs-button>
             <div class="row cards-report">
               <v-card elevation="2" shaped class="one-card card-color">
                 <v-card-text class="text-center">
-                  <div><span class="text-card">Tempo decorrido</span></div>
-                  <p class="text-content">{{ elapsed_time }} dias</p>
+                  <div><span class="text-card">Tempo planejado</span></div>
+                  <p class="text-content">{{ planned_time }} dias</p>
                 </v-card-text>
               </v-card>
               <v-card elevation="2" shaped class="one-card card-color">
                 <v-card-text class="text-center">
-                  <div><span class="text-card">Tempo planejado</span></div>
-                  <p class="text-content">{{ planned_time }} dias</p>
+                  <div><span class="text-card">Tempo decorrido</span></div>
+                  <p class="text-content">{{ elapsed_time }} dias</p>
                 </v-card-text>
               </v-card>
             </div>
@@ -328,7 +336,10 @@ export default {
         <div class="col-12 col-sm-7 col-md-9">
           <div style="padding: 10px">
             <template v-if="showFinancialComponent == true">
-              <FinancialComponent />
+              <FinancialComponent
+                :user="user_email"
+                :obraID="this.construction.id"
+              />
             </template>
             <div class="group-data-gantt">
               <vs-button
@@ -336,7 +347,7 @@ export default {
                 class="btn-primary-md"
                 color="#002b4b"
                 gradient
-                @click="formTask = true"
+                @click="formSelectTemplate = true"
               >
                 Novo Serviço
               </vs-button>
@@ -363,7 +374,11 @@ export default {
               >
             </div>
             <template v-if="showGanttTask == true && tasks.length">
-              <Gantt :tarefas="tasks" :view-mode="mode" />
+              <Gantt
+                :tarefas="tasks"
+                :view-mode="mode"
+                :nome_tarefas="task_names"
+              />
             </template>
           </div>
         </div>
@@ -376,8 +391,8 @@ export default {
       :company="company.id"
       client=""
     />
-    <ModalRegisterTask
-      :formTask.sync="formTask"
+    <ModalSelectTemplate
+      :formSelectTemplate.sync="formSelectTemplate"
       :tasks="tasks"
       :task_names="task_names"
       :user="user_email"
@@ -442,9 +457,6 @@ body {
 }
 .group-data > p {
   padding: 0;
-}
-.primary {
-  background-color: #2c3e50;
 }
 .text-card {
   color: #fafafa !important;

@@ -85,7 +85,6 @@ export default {
         response.created_id,
         { id: response.created_id }
       );
-      console.log(response);
       if (response.status === "ok") {
         this.handleClose();
         this.$emit("update:refresh", true);

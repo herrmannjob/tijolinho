@@ -2,13 +2,12 @@
 import image from "../assets/register.png";
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
-import ModalRegisterConstruction from "@/components/ModalRegisterConstruction";
 export default {
-  name: "ModalRegisterClient",
-  components: { ModalRegisterConstruction },
+  name: "ModalViewClient",
   mixins: [FirebaseMixin],
   props: {
-    formClient: Boolean,
+    formViewClient: Boolean,
+    selectedClient: {},
   },
   data() {
     return {
@@ -116,7 +115,7 @@ export default {
   },
   methods: {
     handleClose() {
-      this.$emit("update:formClient", false);
+      this.$emit("update:formViewClient", false);
     },
     handleOpen() {
       this.$emit("formConstruction", true);
@@ -185,13 +184,13 @@ export default {
       );
       if (response.status === "empty") {
         const data = {
-          nome: this.firstname,
-          email: this.email,
-          telefone: this.phone,
-          data_nascimento: this.dateNasc,
-          nome_conjuge: this.firstnameConjuge,
-          data_nascimento_conjuge: this.dateNascConj,
-          foto_perfil: this.imageUrl,
+          nome: this.selectedClient.nome,
+          email: this.selectedClient.email,
+          telefone: this.selectedClient.telefone,
+          data_nascimento: this.selectedClient.data_nascimento,
+          nome_conjuge: this.selectedClient.nome_conjuge,
+          data_nascimento_conjuge: this.selectedClient.data_nascimento_conjuge,
+          foto_perfil: this.selectedClient.foto_perfil,
           TipoUsuario: this.tipo_usuario,
         };
         const client = await this.firebaseCreate(
@@ -245,13 +244,13 @@ export default {
         const fr = new FileReader();
         fr.readAsDataURL(files[0]);
         fr.addEventListener("load", () => {
-          this.imageUrl = fr.result;
+          this.selectedClient.foto_perfil = fr.result;
           this.imageFile = files[0]; // this is an image file that can be sent to server...
         });
       } else {
         this.imageName = "";
         this.imageFile = "";
-        this.imageUrl = "";
+        this.selectedClient.foto_perfil = "";
       }
     },
   },
@@ -261,7 +260,7 @@ export default {
   <vs-dialog
     @close="handleClose"
     blur
-    v-model="formClient"
+    v-model="formViewClient"
     max-width="800px"
     prevent-close
   >
@@ -270,23 +269,14 @@ export default {
         <div class="side card-upload">
           <v-icon class="img-upload">mdi-image</v-icon>
         </div>
-
-        <input
-          class="card"
-          type="file"
-          style="display: none"
-          ref="image"
-          accept="image/*"
-          @change="onFilePicked"
-        />
         <img
           class="image-response"
-          :src="imageUrl"
+          :src="selectedClient.foto_perfil"
           height="80"
-          v-if="imageUrl"
+          v-if="selectedClient.foto_perfil"
         />
       </div>
-      <h4 class="not-margin">Cadastrar <b>Cliente</b></h4>
+      <h4 class="not-margin">Visualizar <b>{{selectedClient.TipoUsuario}}</b></h4>
     </template>
 
     <div class="con-form">
@@ -296,35 +286,44 @@ export default {
       >
         <v-row>
           <v-col cols="12" sm="6">
-            <v-text-field
-              v-model="firstname"
-              :rules="nameRules"
-              label="Nome do cliente"
-              required
-            ></v-text-field>
-
-            <v-text-field
-              label="Nome do cônjuge (opcional)"
-              v-model="firstnameConjuge"
-            ></v-text-field>
-
-            <v-text-field
-              label="Telefone"
-              v-model="phone"
-              placeholder="11 98765 4321"
-              :rules="phone_rules"
-              required
-            >
-            </v-text-field>
+            <div class="group-data-client">
+              <template>
+                <vs-input
+                  readonly
+                  v-model="selectedClient.nome"
+                  :rules="nameRules"
+                  label="Nome do cliente"
+                  required
+                />
+              </template>
+              <template>
+                <vs-input
+                  readonly
+                  label="Nome do cônjuge"
+                  v-model="selectedClient.nome_conjuge"
+                />
+              </template>
+              <template>
+                <vs-input
+                  readonly
+                  label="Telefone"
+                  v-model="selectedClient.telefone"
+                  placeholder="11 98765 4321"
+                  :rules="phone_rules"
+                  required
+                />
+              </template>
+            </div>
           </v-col>
           <v-col cols="12" sm="6">
             <div class="group-data-client">
               <div class="inputControl bornDateControl">
                 <template>
                   <vs-input
+                    readonly
                     type="date"
-                    v-model="dateNasc"
-                    label="Data de Nascimento (opcional)"
+                    v-model="selectedClient.data_nascimento"
+                    label="Data de Nascimento"
                     required
                   />
                 </template>
@@ -332,67 +331,34 @@ export default {
               <div class="inputControl bornDateControlPair">
                 <template>
                   <vs-input
+                    readonly
                     type="date"
-                    v-model="dateNascConj"
-                    label="Data de Nascimento do Conjuge (opcional)"
+                    v-model="selectedClient.data_nascimento_conjuge"
+                    label="Data de Nascimento do Conjuge"
                     required
                   />
                 </template>
               </div>
-              <vs-input
-                v-model="email"
-                :rules="email.length > 0 ? emailRules : []"
-                placeholder="E-mail"
-              >
-                <template #icon>
-                  <v-icon>mdi-email</v-icon>
-                </template>
-              </vs-input>
+              <div class="inputControl">
+                <vs-input
+                  readonly
+                  v-model="selectedClient.email"
+                  :rules="email.length > 0 ? emailRules : []"
+                  label="E-mail"
+                >
+                  <template #icon>
+                    <v-icon>mdi-email</v-icon>
+                  </template>
+                </vs-input>
+              </div>
             </div>
           </v-col>
-
-          <v-dialog v-model="confirm" persistent max-width="450">
-            <v-card>
-              <v-card-title class="headline">
-                {{ confirm_message }}
-              </v-card-title>
-              <v-card-text>
-                Deseja vincular uma obra a esse cliente?
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                  color="#002b4b"
-                  class="btn-primario"
-                  depressed
-                  @click="handleOpen()"
-                >
-                  CADASTRAR OBRA
-                </v-btn>
-                <v-btn color="primary" text @click="confirm = false">
-                  Agora não
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-          <ModalRegisterConstruction
-            :formConstruction.sync="formConstruction"
-            :confirm.sync="confirm"
-            :refresh.sync="refresh"
-            :user_id="user_email"
-            :company="company.id"
-            :client="client_id"
-          />
         </v-row>
       </v-form>
     </div>
 
     <template #footer>
-      <div class="footer-dialog">
-        <vs-button :color="outlinedColor" @click="addUser()" block>
-          Salvar Dados
-        </vs-button>
-      </div>
+      <div class="footer-dialog"></div>
     </template>
   </vs-dialog>
 </template>

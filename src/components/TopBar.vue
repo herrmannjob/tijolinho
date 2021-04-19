@@ -19,9 +19,9 @@ export default {
         {
           title: "Conta", method: this.account
         },
-        {
-          title: "Configurações", method: this.settings
-        },
+        // {
+        //   title: "Configurações", method: this.settings
+        // },
       ],
       signedIn: false,
       error_dialog: false,
@@ -116,7 +116,7 @@ export default {
             </v-list-item>
             <v-list-item style="display:contents">
               <vs-button class="btn-primary-sm" :color="outlinedColor"
-              type="border" @click="logout">
+              type="border" @click="logout" block>
                 Sair
               </vs-button>
             </v-list-item>
@@ -192,6 +192,7 @@ body {
 .btn-primary-sm {
   font-family: "Comfortaa", cursive;
   height: 45%;
+  max-width: 80% !important;
 }
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */

@@ -1,13 +1,17 @@
 <script>
-// import ModalCalendar from "@/components/ModalCalendar";
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 
 export default {
   name: "FinancialComponent",
-  //   components: { ModalCalendar },
   mixins: [FirebaseMixin],
+  props: {
+    user: String,
+    obraID: String,
+  },
   data: () => ({
+    items_forma_pagamento: ['Transferencia/Pix', 'Boleto', 'Cartão', 'Cheque'],
+    items_tipo_pagamento: ['A vista', 'Parcelado', 'Sinal + Parcelas', 'Sinal + Ao finalizar'],
     outlinedColor: "#002b4b",
     client_names: [],
     clients: [],
@@ -32,25 +36,27 @@ export default {
     dialogDelete: false,
     headers: [
       {
-        text: "Descrição",
+        text: "Serviço",
         align: "start",
         sortable: false,
-        value: "name",
+        value: "servico",
       },
-      { text: "Data", value: "data_solicitada" },
       { text: "Fornecedor", value: "fornecedor" },
-      { text: "Pedido", value: "pedido" },
-      { text: "Anexos", value: "anexos" },
-      { text: "Forma de Pagamento", value: "pagamento" },
-      { text: "Parcelas", value: "parcelas" },
-      { text: "Vencimento", value: "data_vencimento" },
       { text: "Valor", value: "valor_total" },
+      { text: "Forma de Pagamento", value: "forma_pagamento" },
+      { text: "Pagamento", value: "pagamento" },
+      { text: "Parcelas", value: "parcelas" },
+      { text: "Vencimento da Parcela", value: "data_vencimento" },
+      { text: "Data do Fechamento do Pedido", value: "data_fechamento" },
+      { text: "Data da Entrega do Produto", value: "data_entrega" },
+      { text: "Anexos", value: "anexos" },
       { text: "Actions", value: "actions", sortable: false },
     ],
     orcamentos: [],
     editedIndex: -1,
     editedItem: {},
     defaultItem: {},
+    spent_money: null,
   }),
   computed: {
     formTitle() {
@@ -68,7 +74,7 @@ export default {
   },
 
   created() {
-    this.initialize();
+    this.getFinances();
   },
 
   async mounted() {
@@ -76,15 +82,13 @@ export default {
       if (user) {
         this.user_email = user.email;
         await this.getUser();
-        await this.getObras();
         await this.getClients();
-        await this.getTasks();
       }
     });
   },
   async updated() {
     if (this.refresh) {
-      await this.getTasks();
+      await this.getFinances();
       this.refresh = false;
     }
   },
@@ -135,298 +139,29 @@ export default {
         this.companies = response.documents;
       }
     },
-    async getObras() {
+    async getFinances() {
       const response = await this.getDocument(
         Firebase.firestore(),
-        "Obra",
-        "usuarioID",
-        this.user_email
+        "Financeiro",
+        "obraID",
+        this.obraID
       );
       if (response.status === "ok") {
-        this.constructions = [];
-        this.constructions_names = [];
         response.documents.map((item) => {
-          this.constructions.push(item.data);
-          this.constructions_names.push(item.data.nome);
+          this.orcamentos.push(item.data);
         });
-        this.getConstructionsTasks();
       }
     },
-    async getTasks() {
-      this.tasks = [];
-      this.constructions.map(async (c) => {
-        const response = await this.getDocument(
-          Firebase.firestore(),
-          "AgendaObra",
-          "obraID",
-          c.id
-        );
-        if (response.status === "ok") {
-          response.documents.map((item) => {
-            this.tasks.push(item.data);
-          });
-        }
-      });
-    },
-    async getAllTasks() {
-      await this.getParticularTasks();
-      await this.getConstructionsTasks();
-    },
 
-    async getConstructionsTasks() {
-      this.constructions_tasks = [];
-      this.constructions.map(async (c) => {
-        const response = await this.getDocument(
-          Firebase.firestore(),
-          "AgendaObra",
-          "obraID",
-          c.id
-        );
-        if (response.status === "ok") {
-          response.documents.map((item) => {
-            this.constructions_tasks.push(item.data);
-            this.calendarOptions.events.push({
-              title: item.data.titulo,
-              start: item.data.data_inicio,
-              end: item.data.data_fim,
-            });
-          });
-        }
-      });
-    },
-    async getParticularTasks() {
-      const response = await this.getDocument(
+    async getCronograma() {
+      const cronogramas = await this.getDocument(
         Firebase.firestore(),
-        "AgendaParticular",
-        "usuarioID",
-        this.user_email
+        "CronogramaObra",
+        "obraID",
+        this.construction.id
       );
-      if (response.status === "ok") {
-        this.particular_tasks = [];
-        this.calendarOptions.events = [];
-        response.documents.map((item) => {
-          this.particular_tasks.push(item.data);
-          this.calendarOptions.events.push({
-            title: item.data.titulo,
-            start: item.data.data_inicio.substr(0, 19) + "Z",
-            end: item.data.data_fim.substr(0, 19) + "Z",
-          });
-        });
-      }
-    },
-    getCurrentTime() {
-      return this.cal
-        ? this.cal.times.now.hour * 60 + this.cal.times.now.minute
-        : 0;
-    },
-    scrollToTime() {
-      const time = this.getCurrentTime();
-      const first = Math.max(0, time - (time % 30) - 30);
-
-      this.cal.scrollToTime(first);
-    },
-    updateTime() {
-      setInterval(() => this.cal.updateTimes(), 60 * 1000);
-    },
-    dateClick(info) {
-      this.form = true;
-      this.date_clicked = info.dateStr;
-    },
-    viewDay({ date }) {
-      this.focus = date;
-      this.type = "day";
-    },
-    prev() {
-      this.$refs.calendar.prev();
-    },
-    next() {
-      this.$refs.calendar.next();
-    },
-    showEvent({ nativeEvent, event }) {
-      const open = () => {
-        this.selectedEvent = event;
-        this.selectedElement = nativeEvent.target;
-        setTimeout(() => {
-          this.selectedOpen = true;
-        }, 10);
-      };
-
-      if (this.selectedOpen) {
-        this.selectedOpen = false;
-        setTimeout(open, 10);
-      } else {
-        open();
-      }
-
-      nativeEvent.stopPropagation();
-    },
-    updateRange({ start, end }) {
-      const events = [];
-
-      const min = new Date(`${start.date}T00:00:00`);
-      const max = new Date(`${end.date}T23:59:59`);
-      const days = (max.getTime() - min.getTime()) / 86400000;
-      const eventCount = this.rnd(days, days + 20);
-
-      for (let i = 0; i < eventCount; i++) {
-        const allDay = this.rnd(0, 3) === 0;
-        const firstTimestamp = this.rnd(min.getTime(), max.getTime());
-        const first = new Date(firstTimestamp - (firstTimestamp % 900000));
-        const secondTimestamp = this.rnd(2, allDay ? 288 : 8) * 900000;
-        const second = new Date(first.getTime() + secondTimestamp);
-
-        events.push({
-          name: this.names[this.rnd(0, this.names.length - 1)],
-          start: first,
-          end: second,
-          color: this.colors[this.rnd(0, this.colors.length - 1)],
-          timed: !allDay,
-        });
-      }
-
-      this.events = events;
-    },
-    startDrag({ event, timed }) {
-      if (event && timed) {
-        this.dragEvent = event;
-        this.dragTime = null;
-        this.extendOriginal = null;
-      }
-    },
-    startTime(tms) {
-      const mouse = this.toTime(tms);
-
-      if (this.dragEvent && this.dragTime === null) {
-        const start = this.dragEvent.start;
-
-        this.dragTime = mouse - start;
-      } else {
-        this.createStart = this.roundTime(mouse);
-        this.createEvent = {
-          name: `Event #${this.events.length}`,
-          color: this.rndElement(this.colors),
-          start: this.createStart,
-          end: this.createStart,
-          timed: true,
-        };
-
-        this.events.push(this.createEvent);
-      }
-    },
-    extendBottom(event) {
-      this.createEvent = event;
-      this.createStart = event.start;
-      this.extendOriginal = event.end;
-    },
-    mouseMove(tms) {
-      const mouse = this.toTime(tms);
-
-      if (this.dragEvent && this.dragTime !== null) {
-        const start = this.dragEvent.start;
-        const end = this.dragEvent.end;
-        const duration = end - start;
-        const newStartTime = mouse - this.dragTime;
-        const newStart = this.roundTime(newStartTime);
-        const newEnd = newStart + duration;
-
-        this.dragEvent.start = newStart;
-        this.dragEvent.end = newEnd;
-      } else if (this.createEvent && this.createStart !== null) {
-        const mouseRounded = this.roundTime(mouse, false);
-        const min = Math.min(mouseRounded, this.createStart);
-        const max = Math.max(mouseRounded, this.createStart);
-
-        this.createEvent.start = min;
-        this.createEvent.end = max;
-      }
-    },
-    endDrag() {
-      this.dragTime = null;
-      this.dragEvent = null;
-      this.createEvent = null;
-      this.createStart = null;
-      this.extendOriginal = null;
-    },
-    cancelDrag() {
-      if (this.createEvent) {
-        if (this.extendOriginal) {
-          this.createEvent.end = this.extendOriginal;
-        } else {
-          const i = this.events.indexOf(this.createEvent);
-          if (i !== -1) {
-            this.events.splice(i, 1);
-          }
-        }
-      }
-
-      this.createEvent = null;
-      this.createStart = null;
-      this.dragTime = null;
-      this.dragEvent = null;
-    },
-    roundTime(time, down = true) {
-      const roundTo = 15; // minutes
-      const roundDownTime = roundTo * 60 * 1000;
-
-      return down
-        ? time - (time % roundDownTime)
-        : time + (roundDownTime - (time % roundDownTime));
-    },
-    toTime(tms) {
-      return new Date(
-        tms.year,
-        tms.month - 1,
-        tms.day,
-        tms.hour,
-        tms.minute
-      ).getTime();
-    },
-    getEventColor(event) {
-      const rgb = parseInt(event.color.substring(1), 16);
-      const r = (rgb >> 16) & 0xff;
-      const g = (rgb >> 8) & 0xff;
-      const b = (rgb >> 0) & 0xff;
-
-      return event === this.dragEvent
-        ? `rgba(${r}, ${g}, ${b}, 0.7)`
-        : event === this.createEvent
-        ? `rgba(${r}, ${g}, ${b}, 0.7)`
-        : event.color;
-    },
-    getEvents({ start, end }) {
-      const events = [];
-
-      const min = new Date(`${start.date}T00:00:00`).getTime();
-      const max = new Date(`${end.date}T23:59:59`).getTime();
-      const days = (max - min) / 86400000;
-      const eventCount = this.rnd(days, days + 20);
-
-      for (let i = 0; i < eventCount; i++) {
-        const timed = this.rnd(0, 3) !== 0;
-        const firstTimestamp = this.rnd(min, max);
-        const secondTimestamp = this.rnd(2, timed ? 8 : 288) * 900000;
-        const start = firstTimestamp - (firstTimestamp % 900000);
-        const end = start + secondTimestamp;
-
-        events.push({
-          name: this.rndElement(this.names),
-          color: this.rndElement(this.colors),
-          start,
-          end,
-          timed,
-        });
-      }
-
-      this.events = events;
-    },
-    rnd(a, b) {
-      return Math.floor((b - a + 1) * Math.random()) + a;
-    },
-    rndElement(arr) {
-      return arr[this.rnd(0, arr.length - 1)];
-    },
-    initialize() {
-      this.orcamentos;
+      this.cronograma_obra = cronogramas.documents[0].data;
+      this.spent_money = parseInt(this.cronograma_obra.gasto_total);
     },
 
     editItem(item) {
@@ -462,13 +197,51 @@ export default {
       });
     },
 
-    save() {
+    async save() {
       if (this.editedIndex > -1) {
         Object.assign(this.orcamentos[this.editedIndex], this.editedItem);
       } else {
         this.orcamentos.push(this.editedItem);
       }
+      const data = {
+        servico: this.editedItem.servico,
+        data_fechamento: this.editedItem.data_fechamento,
+        data_entrega: this.editedItem.data_entrega,
+        fornecedor: this.editedItem.fornecedor,
+        anexos: this.editedItem.anexos,
+        valor_total: this.editedItem.valor_total,
+        forma_pagamento: this.editedItem.forma_pagamento,
+        pagamento: this.editedItem.pagamento,
+        parcelas: this.editedItem.parcelas,
+        data_vencimento: this.editedItem.data_vencimento,
+        usuarioID: this.user,
+        obraID: this.obraID,
+      };
+      const response = await this.firebaseCreate(
+        Firebase.firestore(),
+        "Financeiro",
+        null,
+        data
+      );
+      await this.firebaseUpdate(
+        Firebase.firestore(),
+        "Financeiro",
+        response.created_id,
+        { id: response.created_id }
+      );
+      console.log("resposta salvar", response);
+      await this.saveCronograma();
       this.close();
+    },
+    async saveCronograma() {
+      const data = parseInt(this.editedItem.gasto_total) + this.spent_money;
+      const response = await this.firebaseUpdate(
+        Firebase.firestore(),
+        "Financeiro",
+        this.obraID,
+        { gasto_total: data }
+      );
+      console.log("resposta salvar", response);
     },
   },
 };
@@ -478,10 +251,8 @@ export default {
   <v-data-table
     :headers="headers"
     :items="orcamentos"
-    sort-by="data_solicitada"
+    sort-by="data_fechamento"
     class="elevation-1"
-    :single-expand="singleExpand"
-    :expanded.sync="expanded"
     item-key="name"
     show-expand
   >
@@ -512,25 +283,24 @@ export default {
                   <div class="group-data-item">
                     <vs-input
                       type="text"
-                      v-model="editedItem.name"
-                      label="Descrição"
+                      v-model="editedItem.servico"
+                      label="Serviço"
                       required
                     />
                     <vs-input
                       type="date"
-                      v-model="editedItem.data_solicitada"
-                      label="Data"
+                      v-model="editedItem.data_fechamento"
+                      label="Data do Fechamento do Pedido"
+                    />
+                    <vs-input
+                      type="date"
+                      v-model="editedItem.data_entrega"
+                      label="Data da Entrega do Produto"
                     />
                     <vs-input
                       type="text"
                       v-model="editedItem.fornecedor"
                       label="Fornecedor"
-                      required
-                    />
-                    <vs-input
-                      type="text"
-                      v-model="editedItem.pedido"
-                      label="Pedido"
                       required
                     />
                     <vs-input
@@ -544,13 +314,68 @@ export default {
                 <v-col cols="12" sm="6">
                   <div class="group-data-item">
                     <vs-input
-                      type="text"
-                      v-model="editedItem.pagamento"
-                      label="Forma de Pagamento"
+                      v-model="editedItem.valor_total"
+                      v-mask="'###.###.###,##'"
+                      label="Valor"
                       required
-                    />
+                      ><template #icon> <a>R$</a> </template></vs-input
+                    >
+                    <v-select :items="items_forma_pagamento" v-model="editedItem.forma_pagamento" label="Forma de Pagamento"></v-select>
+                    <v-select :items="items_tipo_pagamento" v-model="editedItem.pagamento" label="Pagamento"></v-select>
+                    <!-- <vs-select
+                      filter
+                      placeholder="Forma de Pagamento"
+                      v-model="editedItem.forma_pagamento"
+                    >
+                      <vs-option
+                        label="Transferencia/Pix"
+                        value="Transferencia/Pix"
+                      >
+                        Transferencia/Pix
+                      </vs-option>
+                      <vs-option label="Boleto" value="Boleto">
+                        Boleto
+                      </vs-option>
+                      <vs-option label="Cartão" value="Cartão">
+                        Cartão
+                      </vs-option>
+                      <vs-option label="Cheque" value="Cheque">
+                        Cheque
+                      </vs-option>
+                    </vs-select> -->
+                    <!-- <vs-select
+                      filter
+                      placeholder="Pagamento"
+                      v-model="editedItem.pagamento"
+                    >
+                      <vs-option label="A vista" value="A vista">
+                        A vista
+                      </vs-option>
+                      <vs-option label="Parcelado" value="Parcelado">
+                        Parcelado
+                      </vs-option>
+                      <vs-option
+                        label="Sinal + Parcelas"
+                        value="Sinal + Parcelas"
+                      >
+                        Sinal + Parcelas
+                      </vs-option>
+                      <vs-option
+                        label="Sinal + Ao finalizar"
+                        value="Sinal + Ao finalizar"
+                      >
+                        Sinal + Ao finalizar
+                      </vs-option>
+                    </vs-select> -->
                     <vs-input
-                      type="text"
+                      v-if="
+                        editedItem.pagamento == 'Parcelado' ||
+                          editedItem.pagamento == 'Sinal + Parcelas'
+                      "
+                      type="number"
+                      placeholder="Máx 24 parcelas"
+                      v-mask="'##'"
+                      :max="24"
                       v-model="editedItem.parcelas"
                       label="Parcelas"
                       required
@@ -558,13 +383,7 @@ export default {
                     <vs-input
                       type="date"
                       v-model="editedItem.data_vencimento"
-                      label="Vencimento"
-                    />
-                    <vs-input
-                      type="number"
-                      v-model="editedItem.valor_total"
-                      label="Valor"
-                      required
+                      label="Vencimento da Parcela"
                     />
                   </div>
                 </v-col>
@@ -608,11 +427,6 @@ export default {
         mdi-delete
       </v-icon>
     </template>
-    <template v-slot:no-data>
-      <v-btn color="primary" @click="initialize">
-        Limpar
-      </v-btn>
-    </template>
     <template v-if="parcelas > 1" v-slot:expanded-item="{ headers, item }">
       <td :colspan="headers.length">More info about {{ item.name }}</td>
     </template>
@@ -630,7 +444,7 @@ export default {
 }
 .container-financial {
   padding: 30px;
-  padding-bottom: 160px;
+  padding-bottom: 200px;
 }
 .toolbar-text {
   font-family: "Comfortaa", cursive;

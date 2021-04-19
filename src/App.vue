@@ -34,13 +34,15 @@ html, body{
     } */
   }
 }
+.primary {
+  background-color: #002b4b !important;
+}
 .btn-primary {
   background-color: #002b4b !important;
-  color: #fafafa !important;
+  color: #ffffff !important;
   width: 80px;
 }
 @media only screen and (max-width: 768px) {
-  /* For mobile phones: */
  #nav{
    display: none;
  }

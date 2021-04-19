@@ -1,135 +1,120 @@
 <template>
-  <v-dialog
-    max-width="600px"
-    v-model="form"
-    persistent
+  <vs-dialog
+    @close="handleClose"
+    blur
+    v-model="formGantt"
+    max-width="800px"
+    prevent-close
   >
-    <v-card>
-      <v-card-title>
-        <span class="headline">Nova atividade:</span>
-      </v-card-title>
-      <v-card-text>
-        <div>
-          <v-col
-            cols="12"
-          >
-
-            <v-text-field
-              label="Atividade*"
+    <template #header>
+      <h4 class="not-margin">Atualizar <b>{{ selectedTask.name }}</b></h4>
+    </template>
+    <div class="con-form">
+      <v-row>
+        <v-col cols="12" md="6">
+          <div class="group-data-task">
+            <vs-input
+              type="text"
+              v-model="selectedTask.name"
+              label="Nome da tarefa"
+              :rules="nameRules"
               required
-              v-model="title"
-            ></v-text-field>
+            />
 
-            <v-textarea
-              color="teal"
-              v-model="description"
-            >
-              <template v-slot:label>
-                <div>
-                  Descrição
-                </div>
+            <div class="inputControl">
+              <template>
+                <vs-input
+                  id="agend"
+                  type="date"
+                  v-model="selectedTask.start"
+                  label="Data de Início"
+                  required
+                  :min="today"
+                />
               </template>
-            </v-textarea>
+            </div>
 
-            <v-menu
-              ref="menu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              min-width="auto"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="date"
-                  label="Início"
-                  prepend-icon="mdi-calendar"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
+            <div class="inputControl inputFinal">
+              <template>
+                <vs-input
+                  id="agend"
+                  type="date"
+                  v-model="selectedTask.end"
+                  label="Término previsto"
+                  required
+                  :min="today"
+                />
               </template>
-              <v-date-picker
-                ref="picker"
-                v-model="date"
-                min="1950-01-01"
-              ></v-date-picker>
-            </v-menu>
+            </div>
+          </div>
+        </v-col>
+        <v-col cols="12" md="5">
+          <v-text-field
+            label="Orçamento estimado"
+            v-model="selectedTask.gasto_previsto"
+            required
+            hint="Apenas números"
+          ></v-text-field>
 
-            <v-menu
-              ref="menu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              min-width="auto"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="end_date"
-                  label="Término"
-                  prepend-icon="mdi-calendar"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                ref="picker"
-                v-model="end_date"
-                min="1950-01-01"
-              ></v-date-picker>
-            </v-menu>
-          </v-col>
-        </div>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          color="blue darken-1"
-          text
-          @click="close"
-        >
-          Fechar
-        </v-btn>
-        <v-btn
-          color="blue darken-1"
-          text
-          @click="save"
-        >
-          Salvar
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+          <v-select
+            v-if="task_names.length"
+            v-model="selectedTask.dependencies"
+            :items="task_names"
+            :close-on-content-click="false"
+            :menu-props="{ top: true, offsetY: true }"
+            label="Depende da Tarefa"
+          ></v-select>
+
+          <v-select
+            v-model="selectedTask.Status"
+            :items="status"
+            :close-on-content-click="false"
+            :menu-props="{ top: true, offsetY: true }"
+            label="Status"
+          ></v-select>
+        </v-col>
+      </v-row>
+    </div>
+    <template #footer>
+      <div class="footer-dialog">
+        <vs-button block class="btn-primario" @click="addTarefa()">
+          SALVAR
+        </vs-button>
+      </div>
+    </template>
     <ResponseModal :modal.sync="modal" :message="message" />
-  </v-dialog>
+  </vs-dialog>
 </template>
 
 <script>
-import ResponseModal from '@/components/ResponseModal.vue'
+import ResponseModal from "@/components/ResponseModal.vue";
 export default {
-  name: 'ModalGantt',
+  name: "ModalGantt",
   components: { ResponseModal },
   props: {
-    form: Boolean,
-    date: String,
-    user: Object
+    selectedTask: {},
+    formGantt: Boolean,
+    tasks: Array,
+    task_names: Array,
   },
-  data () {
+  data() {
     return {
-      title: '',
-      description: '',
-      end_date: '',
+      title: "",
+      description: "",
+      end_date: "",
       modal: false,
-      message: { title: '', code: '', text: '' }
-    }
+      message: { title: "", code: "", text: "" },
+      selected_task: "",
+      status: ["A iniciar", "Em andamento", "Finalizado"],
+      selected_status: "A iniciar",
+    };
   },
-  created () {
-
-  },
+  created() {},
   methods: {
-    close () {
-      this.$emit('update:form', false)
+    handleClose() {
+      this.$emit("update:formGantt", false);
     },
-    async save () {
+    async save() {
       // const start = new Date(this.date)
       // const end = new Date(this.end_date)
       // const duration = (end - start) / 1000 / 60 / 60 / 24
@@ -149,14 +134,14 @@ export default {
       //   this.message.text = response.error.message
       // }
       // this.modal = true
-    }
-  }
-}
+    },
+  },
+};
 </script>
 <style lang="css">
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */
-  body{
+  body {
     overflow-x: auto;
     overflow-y: auto;
   }

@@ -4,24 +4,16 @@ import Functions from "@/functions/Functions";
 import Firebase from "@/services/Firebase";
 import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 import { validationMixin } from "vuelidate";
-import { required, email } from "vuelidate/lib/validators";
+import { required, email, minLength, sameAs } from "vuelidate/lib/validators";
+import ResponseModal from "@/components/ResponseModal.vue";
 export default {
   /* eslint-disable no-mixed-spaces-and-tabs */
   mixins: [validationMixin, FirebaseMixin],
-
-  validations: {
-    name: { required },
-    email: { required, email },
-    select: { required },
-    checkbox: {
-      checked(val) {
-        return val;
-      },
-    },
-  },
+  components: { ResponseModal },
   data() {
     return {
-      genders: ["Masculino", "Feminino", "Outro"],
+      message: { title: "", text: "" },
+      genders: ["Masculino", "Feminino", "Não Binário", "Outro"],
       e1: 1,
       picker: new Date().toISOString().substr(0, 10),
       menu: false,
@@ -37,8 +29,9 @@ export default {
         (v) => /.+@.+\..+/.test(v) || "E-mail precisa ser um formato válido",
       ],
       confirmationPasswordRules: [
+        (v) => !!v || "Informe a confirmação da senha",
         (v) =>
-          v !== this.email ||
+          v == this.user.password ||
           "A confirmação de senha precisa ser igual com a senha informada",
       ],
       cep: "",
@@ -50,8 +43,6 @@ export default {
       data: null,
       image: image,
       show: false,
-      password: "",
-      confirm_password: "",
       code: "",
       items: [
         "AC",
@@ -84,16 +75,35 @@ export default {
       ],
       confirm_code: false,
       date: null,
+      cep_rules: [(v) => !!v || "CEP é obrigatório"],
+      company_rules: [(v) => !!v || "Empresa é obrigatória"],
       company: "",
       phone: "",
-      phone_rules: [
-        (v) => !!v || "Telefone é obrigatório",
-        (v) => v.length === 11 || "Telefone com 11 dígitos - 11 98765 4321",
-      ],
+      phone_rules: [(v) => !!v || "Telefone é obrigatório"],
       error_dialog: false,
       error: "",
       tipo_usuario: "",
+      user: {
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      },
     };
+  },
+  validations: {
+    user: {
+      fullName: { required },
+      email: { required, email },
+      password: { required, minLength: minLength(6) },
+      confirmPassword: { required, sameAsPassword: sameAs("password") },
+      select: { required },
+      checkbox: {
+        checked(val) {
+          return val;
+        },
+      },
+    },
   },
   mounted() {
     Firebase.auth().onAuthStateChanged((user) => {
@@ -138,7 +148,7 @@ export default {
       this.$refs.form.validate();
     },
     async searchCep(cep) {
-      if (cep.length == 8) {
+      if (cep.length == 9) {
         const response = await Functions.searchCep(cep);
         this.logradouro = response.data.logradouro;
         this.cidade = response.data.localidade;
@@ -173,20 +183,20 @@ export default {
         Firebase.firestore(),
         "Usuario",
         "email",
-        this.email
+        this.user.email
       );
       if (response.status === "empty") {
         const data = {
-          id: this.email,
-          nome: this.name,
-          email: this.email,
-          data_nascimento: this.date,
+          id: this.user.email,
+          nome: this.user.fullName,
+          email: this.user.email,
+          data_nascimento: this.user.date,
           TipoUsuario: this.tipo_usuario,
         };
         await this.firebaseCreate(
           Firebase.firestore(),
           "Usuario",
-          this.email,
+          this.user.email,
           data
         );
       }
@@ -231,7 +241,7 @@ export default {
           nome: this.company,
           telefone: this.phone,
           enderecoID: this.cep,
-          usuarioID: [this.email],
+          usuarioID: [this.user.email],
         };
         await this.firebaseCreate(Firebase.firestore(), "Empresa", id, data);
       }
@@ -240,7 +250,7 @@ export default {
     async signUp() {
       try {
         Firebase.auth().createUserWithEmailAndPassword(
-          this.email,
+          this.user.email,
           this.password
         );
         await this.addUser();
@@ -288,43 +298,50 @@ export default {
                 <v-form ref="form" v-model="valid" lazy-validation>
                   <v-container style="padding-bottom:unset">
                     <v-text-field
-                      v-model="name"
+                      v-model="user.fullName"
                       :rules="nameRules"
-                      label="Name"
+                      label="Nome completo"
                       required
                     ></v-text-field>
                     <v-text-field
-                      v-model="email"
+                      v-model="user.email"
                       :rules="emailRules"
                       label="E-mail"
                       required
                     ></v-text-field>
                     <v-text-field
                       class="text"
-                      label="Senha*"
-                      v-model="password"
+                      label="Senha"
+                      v-model="user.password"
                       :rules="passwordRules"
-                      required
                       :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
                       @click:append="show = !show"
                       :type="show ? 'text' : 'password'"
+                      required
                     ></v-text-field>
                     <v-text-field
                       class="text"
-                      required
-                      label="Confirme sua senha*"
-                      v-model="confirm_password"
+                      label="Confirme sua senha"
+                      v-model="user.confirmPassword"
+                      :rules="confirmationPasswordRules"
                       :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
                       @click:append="show = !show"
                       :type="show ? 'text' : 'password'"
-                      :rules="confirmationPasswordRules"
+                      required
                     ></v-text-field>
                   </v-container>
                 </v-form>
-
                 <v-btn
+                  class="btn-nextPage"
                   color="primary"
-                  :disabled="!valid"
+                  align="center"
+                  :disabled="
+                    !valid ||
+                      !user.fullName ||
+                      !user.email ||
+                      !user.password ||
+                      !user.confirmPassword
+                  "
                   v-on="validate ? { click: () => [(e1 = 2)] } : { disabled }"
                 >
                   PRÓXIMO
@@ -337,22 +354,25 @@ export default {
                   <v-text-field
                     label="Empresa"
                     v-model="company"
+                    :rules="company_rules"
                     required
                   ></v-text-field>
                   <v-text-field
                     label="Telefone"
                     v-model="phone"
-                    hint="Apenas números (11 dígitos)"
+                    v-mask="'(##) #####-####'"
                     placeholder="11 98765 4321"
                     :rules="phone_rules"
                     required
                   ></v-text-field>
                   <v-text-field
                     label="Cep"
-                    required
                     v-model="cep"
+                    v-mask="'#####-###'"
                     @change="searchCep(cep)"
                     @keyup="searchCep(cep)"
+                    :rules="cep_rules"
+                    required
                   ></v-text-field>
                   <v-row align="center" class="cidadeEstado">
                     <v-col class="d-flex" cols="12" sm="6">
@@ -387,13 +407,14 @@ export default {
                 </v-form>
 
                 <v-btn
+                  class="btn-nextPage"
                   color="primary"
                   @click="signUp(), validate"
-                  :disabled="!valid"
+                  :disabled="!valid || !company || !phone || !cep"
                 >
                   ENVIAR
                 </v-btn>
-                <v-btn text @click="e1 = 1">
+                <v-btn class="btn-previousPage" text @click="e1 = 1">
                   ANTERIOR
                 </v-btn>
               </v-card>
@@ -402,6 +423,7 @@ export default {
         </v-stepper>
       </div>
     </div>
+    <ResponseModal :modal.sync="modal" :message="message" />
     <v-dialog v-model="error_dialog" max-width="290">
       <v-card>
         <v-card-title class="headline">
@@ -431,6 +453,9 @@ export default {
 </template>
 <style lang="css">
 html,
+.v-picker {
+  width: 100% !important;
+}
 body {
   overflow-y: hidden;
   background-color: white !important;
@@ -485,6 +510,16 @@ img {
 
 .card-register {
   width: 60%;
+}
+
+.btn-previousPage {
+  margin-top: 10rem;
+  float: left;
+}
+
+.btn-nextPage {
+  margin-top: 10rem;
+  float: right;
 }
 
 @media only screen and (width: 768px) and (min-height: 1024px) {
@@ -542,7 +577,7 @@ img {
 
 @media only screen and (max-width: 768px) {
   /* For mobile phones: */
-  
+
   .card-register {
     width: 100% !important;
   }
