@@ -1,383 +1,7 @@
 {
   "supertopics": [
     {
-      "supertopicName": "Obra Bruta",
-      "topics": [
-        {
-          "topicName": "Proteção peças existentes",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido material proteção"
-            },
-            {
-              "subtopicName": "Separar itens a serem reaproveitados"
-            },
-            {
-              "subtopicName": "Proteção pisos existentes"
-            }
-          ]
-        },
-        {
-          "topicName": "Demolição",
-          "subtopics": [
-            {
-              "subtopicName": "Demolições paredes"
-            },
-            {
-              "subtopicName": "Retirada de portas"
-            },
-            {
-              "subtopicName": "Retirada de pisos"
-            },
-            {
-              "subtopicName": "Retirada de bancadas"
-            },
-            {
-              "subtopicName": "Retirada de louças e metais"
-            }
-          ]
-        },
-        {
-          "topicName": "Retirada de entulho",
-          "subtopics": [
-            {
-              "subtopicName": "Entrega sacos de entulho"
-            },
-            {
-              "subtopicName": "Retirada de entulho por carreto ou caçamba"
-            }
-          ]
-        },
-        {
-          "topicName": "Alvenaria",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido material bruto"
-            },
-            {
-              "subtopicName": "Execução paredes de vedação"
-            }
-          ]
-        },
-        {
-          "topicName": "Contra piso",
-          "subtopics": [
-            {
-              "subtopicName": "Regularização contrapiso"
-            }
-          ]
-        },
-        {
-          "topicName": "Hidráulico e Sanitário",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido hidráulico e sanitário"
-            },
-            {
-              "subtopicName": "Execução pontos de água fria"
-            },
-            {
-              "subtopicName": "Execução pontos de água quente"
-            },
-            {
-              "subtopicName": "Execução pontos esgoto"
-            },
-            {
-              "subtopicName": "Execução pontos água pluvial"
-            },
-            {
-              "subtopicName": "Execução pontos de respiro"
-            },
-            {
-              "subtopicName": "Execução pontos aquecimento piscina"
-            },
-            {
-              "subtopicName": "Execução pontos aquecimento solar/fotovoltaico"
-            },
-            {
-              "subtopicName": "Execução pontos de dreno ar condicionado"
-            },
-            {
-              "subtopicName": "Instalação de ralos"
-            }
-          ]
-        },
-        {
-          "topicName": "Elétrica",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido material elétrico"
-            },
-            {
-              "subtopicName": "Execução de recortes paredes para caixinhas"
-            },
-            {
-              "subtopicName": "Execução infra iluminação"
-            },
-            {
-              "subtopicName": "Execução infra tomadas/interruptores"
-            },
-            {
-              "subtopicName": "Cabeamento"
-            }
-          ]
-        },
-        {
-          "topicName": "Rede/Lógica",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido material elétrico"
-            },
-            {
-              "subtopicName": "Execução de recortes paredes para caixinhas"
-            },
-            {
-              "subtopicName": "Execução infra rede"
-            },
-            {
-              "subtopicName": "Execução infra lógica"
-            },
-            {
-              "subtopicName": "Cabeamento"
-            }
-          ]
-        },
-        {
-          "topicName": "Gás",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido tubulação gás"
-            },
-            {
-              "subtopicName": "Execução de recortes paredes para pontos"
-            },
-            {
-              "subtopicName": "Execução infra gás"
-            },
-            {
-              "subtopicName": "Teste de estanqueidade"
-            },
-            {
-              "subtopicName": "Cabeamento"
-            }
-          ]
-        },
-        {
-          "topicName": "Piscina",
-          "subtopics": [
-            {
-              "subtopicName": "Contratação serviço piscina"
-            },
-            {
-              "subtopicName": "medição"
-            },
-            {
-              "subtopicName": "Pedido material bruto"
-            },
-            {
-              "subtopicName": "Pedido revestimentos"
-            },
-            {
-              "subtopicName": "Pedido material hidráulico e elétrico"
-            },
-            {
-              "subtopicName": "Execução construção piscina e testes"
-            },
-            {
-              "subtopicName": "Execução casa de máquinas"
-            },
-            {
-              "subtopicName": "Execução revestimentos e bordas"
-            }
-          ]
-        },
-        {
-          "topicName": "Ar condicionado - infra",
-          "subtopics": [
-            {
-              "subtopicName": "Contratação ar condiciondo"
-            },
-            {
-              "subtopicName": "Ragos para tubulação de cobre"
-            },
-            {
-              "subtopicName": "Furo nas vigas"
-            },
-            {
-              "subtopicName": "Passagem tubulação"
-            }
-          ]
-        },
-        {
-          "topicName": "Automação - infra",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido automação"
-            },
-            {
-              "subtopicName": "Visita técnica automação"
-            },
-            {
-              "subtopicName": "Infra automação"
-            },
-            {
-              "subtopicName": "Cabeamento automação"
-            }
-          ]
-        },
-        {
-          "topicName": "Contra marcos",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido contra marcos das portas e janelas"
-            },
-            {
-              "subtopicName": "Execução de contra marcos das portas e janelas"
-            }
-          ]
-        },
-        {
-          "topicName": "Impermeabilização",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido impermeabilizante"
-            },
-            {
-              "subtopicName": "Impermeabilização áreas molhadas"
-            }
-          ]
-        },
-        {
-          "topicName": "Contrapiso",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido material bruto"
-            },
-            {
-              "subtopicName": "Execução contrapiso"
-            }
-          ]
-        },
-        {
-          "topicName": "Reboco interno",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido material bruto"
-            },
-            {
-              "subtopicName": "Execução rebocos paredes internas"
-            }
-          ]
-        },
-        {
-          "topicName": "Reboco Externo",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido material bruto"
-            },
-            {
-              "subtopicName": "Execução rebocos paredes externas"
-            }
-          ]
-        },
-        {
-          "topicName": "Iluminação",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido iluminação embutidos peças decorativas e fitas led"
-            },
-            {
-              "subtopicName": "Entrega iluminação embutidos para corte no gesso"
-            },
-            {
-              "subtopicName": "Coifas e churrasqueira"
-            }
-          ]
-        },
-        {
-          "topicName": "Gesso",
-          "subtopics": [
-            {
-              "subtopicName": "Pedido gesso"
-            },
-            {
-              "subtopicName": "Vistoria gesso"
-            },
-            {
-              "subtopicName": "Entrega material gesso"
-            },
-            {
-              "subtopicName": "Execução dos forros"
-            },
-            {
-              "subtopicName": "Execução cortineiros"
-            },
-            {
-              "subtopicName": "Execução recortes iluminação"
-            }
-          ]
-        },
-        {
-          "topicName": "Deck Permeável Suspenso",
-          "subtopics": [
-            {
-              "subtopicName": "Contratação serviço deck"
-            },
-            {
-              "subtopicName": "Medição (prever alçapões)"
-            },
-            {
-              "subtopicName": "Execução da 'fundação' deck"
-            },
-            {
-              "subtopicName": "Execução deck suspenso"
-            },
-            {
-              "subtopicName": "Proteção do deck"
-            }
-          ]
-        },
-        {
-          "topicName": "Pergolado",
-          "subtopics": [
-            {
-              "subtopicName": "Contratação serviço pergolado"
-            },
-            {
-              "subtopicName": "Medição"
-            },
-            {
-              "subtopicName": "Execução pergolado"
-            },
-            {
-              "subtopicName": "Proteção do pergolado"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "supertopicName": "Fachada",
-      "topics": [
-        {
-          "topicName": "Instalação caixa correio"
-        },
-        {
-          "topicName": "Instalação lixeira"
-        },
-        {
-          "topicName": "Instalação hidrometro"
-        },
-        {
-          "topicName": "Instalação relógio de luz"
-        },
-        {
-          "topicName": "Instalação relógios de gás"
-        }
-      ]
-    },
-    {
-      "supertopicName": "Obra FIna",
+      "supertopicName": "OBRA FINA",
       "topics": [
         {
           "topicName": "Pisos e Revestimentos",
@@ -402,15 +26,15 @@
             },
             {
               "subtopicName": "Proteção pisos internos"
-            },
-            {
-              "subtopicName": "Piso de madeira"
             }
           ]
         },
         {
-          "topicName": "Pedido piso de madeira",
+          "topicName": "Piso de madeira",
           "subtopics": [
+            {
+              "subtopicName": "Pedido piso de madeira"
+            },
             {
               "subtopicName": "Vistoria piso de madeira inicial"
             },
@@ -458,10 +82,10 @@
               "subtopicName": "Execução base de alveranria (se necessário)"
             },
             {
-              "subtopicName": "Medição áreas molhadas"
+              "subtopicName": "Medição áreas molhadas "
             },
             {
-              "subtopicName": "Entrega áreas molhadas"
+              "subtopicName": "Entrega áreas molhadas "
             },
             {
               "subtopicName": "Medição área seca"
@@ -532,7 +156,7 @@
           ]
         },
         {
-          "topicName": "Esquadrias Guarda-corpos e portão",
+          "topicName": "Esquadrias, Guarda-corpos e portão",
           "subtopics": [
             {
               "subtopicName": "Pedido esquadrias"
@@ -588,12 +212,10 @@
             },
             {
               "subtopicName": "Instalação portões automáticos e interfone"
-            }
-          ]
-        },
-        {
-          "topicName": "Proteção portões",
-          "subtopics": [
+            },
+            {
+              "subtopicName": "Proteção portões"
+            },
             {
               "subtopicName": "Instalação equipamentos"
             },
@@ -643,10 +265,10 @@
           "topicName": "Espelhos elétricos",
           "subtopics": [
             {
-              "subtopicName": "Contagem espelhos aparentes X não aparentes"
+              "subtopicName": "Contagem espelhos aparentesXnão aparentes"
             },
             {
-              "subtopicName": "Pedido espelhos elétricos campainha sensor"
+              "subtopicName": "Pedido espelhos elétricos, campainha, sensor"
             },
             {
               "subtopicName": "Instalação espelhos elétricos"
@@ -660,7 +282,7 @@
           "topicName": "Iluminação",
           "subtopics": [
             {
-              "subtopicName": "Entrega iluminação"
+              "subtopicName": "Entrega iluminação "
             },
             {
               "subtopicName": "Entrega iluminação peças decorativas"
@@ -692,10 +314,7 @@
               "subtopicName": "Instalação e teste aquecedor"
             },
             {
-              "subtopicName": "Instalação e teste bombas"
-            },
-            {
-              "subtopicName": "Boiler e coletores"
+              "subtopicName": "Instalação e teste bombas, boiler e coletores"
             }
           ]
         },
@@ -733,7 +352,7 @@
       ]
     },
     {
-      "supertopicName": "Interiores",
+      "supertopicName": "INTERIORES",
       "topics": [
         {
           "topicName": "Cortinas e persianas",
@@ -871,7 +490,7 @@
       ]
     },
     {
-      "supertopicName": "Final da Obra",
+      "supertopicName": "FINAL DA OBRA",
       "topics": []
     }
   ]

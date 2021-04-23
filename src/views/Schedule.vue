@@ -75,6 +75,7 @@ export default {
         await this.getUser();
         await this.getCompanies();
         await this.getClients();
+        await this.getCompany();
         this.getObras();
       } else this.$router.push("/");
     });
@@ -101,6 +102,17 @@ export default {
       );
       if (response.status === "ok") {
         this.companies = response.documents;
+      }
+    },
+    async getCompany() {
+      const response = await this.getDocumentList(
+        Firebase.firestore(),
+        "Empresa",
+        "usuarioID",
+        this.user_email
+      );
+      if (response.status === "ok") {
+        this.company = response.documents[0];
       }
     },
     async getClients() {
@@ -387,9 +399,9 @@ export default {
     <ModalRegisterConstruction
       :formConstruction.sync="formConstruction"
       :refresh.sync="refresh"
-      :user_id="user_email"
+      :user="user_email"
+      :clientId="clientId"
       :company="company.id"
-      client=""
     />
     <ModalSelectTemplate
       :formSelectTemplate.sync="formSelectTemplate"
