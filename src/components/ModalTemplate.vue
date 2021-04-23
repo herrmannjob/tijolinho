@@ -43,7 +43,7 @@ export default {
         text: "Tarefa",
         align: "start",
         sortable: false,
-        value: "taskName",
+        value: "supertopicName",
       },
       { text: "Data de Início", value: "startDate" },
       { text: "Término Previsto", value: "endDate" },
@@ -105,7 +105,7 @@ export default {
       this.loading = true;
       this.fakeApiCall().then((data) => {
         console.log("data: ", data.items[0]);
-        this.renovation_results = data.items[0];
+        this.renovation_results = data.items;
         this.totalDesserts = data.total;
         this.loading = false;
       });
@@ -208,12 +208,12 @@ export default {
           :items="renovation_results.supertopics"
           :options.sync="options"
           :server-items-length="totalDesserts"
-          item-key="id"
+          item-key="supertopicName"
           show-select
           :loading="loading"
           class="elevation-1"
         >
-          <!-- <template v-slot:item.startDate="{ item }">
+          <template v-slot:item.startDate="{ item }">
             <vs-input class="input-date" type="date" v-model="item.startDate" />
           </template>
           <template v-slot:item.endDate="{ item }">
@@ -226,7 +226,7 @@ export default {
               v-model="item.status"
               outlined
             ></v-select>
-          </template> -->
+          </template>
           <template v-slot:item.supertopicName="props">
             <v-edit-dialog
               :return-value.sync="props.item.supertopicName"
