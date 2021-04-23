@@ -9,9 +9,9 @@ export default {
   props: {
     formConstruction: Boolean,
     confirm: Boolean,
-    user_id: String,
+    user: String,
+    clientId: String,
     company: String,
-    client: String,
   },
   mixins: [FirebaseMixin],
   data() {
@@ -40,7 +40,8 @@ export default {
       nameRules: [(v) => !!v || "Nome é obrigatório"],
       email: "",
       phone: "",
-      category: "",
+      construction_category: "",
+      construction_type: "",
       estimated_spend: "",
       endereco: null,
       obra: null,
@@ -52,9 +53,6 @@ export default {
     };
   },
   methods: {
-    schedule() {
-      this.$router.push("planejamento" + "/" + this.$globalValue);
-    },
     handleClose() {
       this.$emit("update:formConstruction", false);
     },
@@ -92,21 +90,41 @@ export default {
       }
     },
     async addTipoObra() {
-      this.tipo_obra = this.category.toLowerCase();
+      const constructionType = this.construction_type.toLowerCase();
       const response = await this.getDocument(
         Firebase.firestore(),
         "TipoObra",
         "id",
-        this.tipo_obra
+        constructionType
       );
       if (response.status === "empty") {
         const data = {
-          nome: this.category,
+          nome: this.construction_type,
         };
         await this.firebaseCreate(
           Firebase.firestore(),
           "TipoObra",
-          this.tipo_obra,
+          constructionType,
+          data
+        );
+      }
+    },
+    async addCategoriaObra() {
+      const constructionCategory = this.construction_category.toLowerCase();
+      const response = await this.getDocument(
+        Firebase.firestore(),
+        "CategoriaObra",
+        "id",
+        constructionCategory
+      );
+      if (response.status === "empty") {
+        const data = {
+          nome: this.construction_category,
+        };
+        await this.firebaseCreate(
+          Firebase.firestore(),
+          "CategoriaObra",
+          constructionCategory,
           data
         );
       }
@@ -114,13 +132,15 @@ export default {
     async addObra() {
       await this.addAddress();
       await this.addTipoObra();
+      await this.addCategoriaObra();
       const data = {
         nome: this.firstname,
         enderecoID: this.cep,
-        tipoObra: this.tipo_obra,
+        tipoObra: this.construction_type,
+        categoriaObra: this.construction_category,
         empresaID: this.company,
-        usuarioID: this.user_id,
-        usuarios: this.client,
+        usuarioID: this.user,
+        usuarios: this.clientId,
       };
       const response = await this.firebaseCreate(
         Firebase.firestore(),
@@ -128,6 +148,7 @@ export default {
         null,
         data
       );
+      console.log("resposta", response);
       await this.firebaseUpdate(
         Firebase.firestore(),
         "Obra",
@@ -137,7 +158,6 @@ export default {
       if (response.status === "ok") {
         this.obra = response.created_id;
         this.addCronogramaObra();
-        this.schedule();
       }
     },
     async addCronogramaObra() {
@@ -164,12 +184,12 @@ export default {
         { id: response.created_id }
       );
       if (response.status === "ok") {
+        this.modal = true;
         this.message.title = "Obra cadastrada com sucesso!";
       } else {
         this.message.title = "Ocorreu um erro...";
         this.message.text = response.error;
       }
-      this.modal = true;
       this.$emit("update:formConstruction", false);
       this.$emit("update:confirm", false);
       this.$emit("update:refresh", true);
@@ -202,7 +222,7 @@ export default {
             <vs-select
               filter
               placeholder="Categoria"
-              v-model="category"
+              v-model="construction_category"
               required
             >
               <vs-option label="Residencial" value="Residencial">
@@ -221,8 +241,8 @@ export default {
 
             <vs-select
               filter
-              placeholder="Categoria"
-              v-model="category"
+              placeholder="Tipo de Obra"
+              v-model="construction_type"
               required
             >
               <vs-option label="Obra do Zero" value="Obra do Zero">
@@ -245,8 +265,8 @@ export default {
               v-model="estimated_spend"
               v-mask="'###.###.###,##'"
               label="Orçamento estimado"
-              ><template #icon> <a>R$</a> </template
-            ></vs-input>
+              ><template #icon> <a>R$</a> </template></vs-input
+            >
           </div>
         </v-col>
         <v-col cols="12" md="6">
@@ -275,7 +295,12 @@ export default {
     </div>
     <template #footer>
       <div class="footer-dialog">
-        <vs-button :color="outlinedColor" block class="btn-primario" @click="addObra()">
+        <vs-button
+          :color="outlinedColor"
+          block
+          class="btn-primario"
+          @click="addObra()"
+        >
           SALVAR
         </vs-button>
       </div>
