@@ -97,12 +97,13 @@ export default {
         { id: response.created_id }
       );
       if (response.status === "ok") {
+        this.modal = true;
         this.message.title = "Tarefa cadastrada com sucesso!";
       } else {
+        this.modal = true;
         this.message.title = "Ocorreu um erro...";
         this.message.text = response.error;
       }
-      this.modal = true;
       this.$emit("update:formTask", false);
       this.$emit("update:refresh", true);
     },

@@ -3,6 +3,8 @@ import ResponseModal from "@/components/ResponseModal.vue";
 import reforma from "../functions/templates/reforma.json";
 import reforma_zero from "../functions/templates/reforma_zero.json";
 import decoracao from "../functions/templates/decoracao.json";
+import Firebase from "@/services/Firebase";
+import { FirebaseMixin } from "@/mixins/FirebaseMixin";
 export default {
   name: "ModalTemplate",
   components: { ResponseModal },
@@ -13,19 +15,26 @@ export default {
     tasks: Array,
     task_names: Array,
   },
+  mixins: [FirebaseMixin],
   data: () => ({
     formTask: false,
     modal: false,
-    message: { title: "", code: "", text: "" },
+    message: { title: "", text: "" },
     allCheck: false,
-    selected: [],
+    search: "",
     renovation: reforma,
     renovation_zero: reforma_zero,
     renovation_decoracao: decoracao,
     renovation_seleceted: [],
     renovation_results: [],
     items_renovation_type: ["Obra do Zero", "Reforma", "Decoração"],
+    taskSelected: [],
     taskStatus: [
+      { text: "A iniciar", value: "A iniciar" },
+      { text: "Em andamento", value: "Em andamento" },
+      { text: "Parado", value: "Parado" },
+    ],
+    taskProgress: [
       { text: "A iniciar", value: 0 },
       { text: "Em andamento", value: 15 },
       { text: "Parado", value: 50 },
@@ -33,7 +42,7 @@ export default {
     snack: false,
     snackColor: "",
     snackText: "",
-    max25chars: (v) => v.length <= 25 || "Input too long!",
+    max25chars: (v) => v.length <= 50 || "Titulo muito grande!",
     totalDesserts: 0,
     desserts: [],
     loading: true,
@@ -175,6 +184,81 @@ export default {
       this.snackColor = "#c90e0e";
       this.snackText = "Alteração cancelada";
     },
+    async saveTemplate() {
+      console.log("payload: ", this.renovation_results.supertopics);
+      console.log("payload: ", this.taskSelected);
+      if (this.taskSelected.length <= 0) {
+        this.modal = true;
+        this.message.title = "Erro ao salvar!";
+        this.message.text = `Selecione ao menos uma tarefa`;
+      }
+      this.taskSelected.forEach((selectedResult) => {
+        if (!selectedResult.endDate) {
+          this.modal = true;
+          this.message.title = "Erro ao salvar!";
+          this.message.text = `Término Previsto de ${selectedResult.supertopicName} não preenchido`;
+        }
+        if (!selectedResult.startDate) {
+          this.modal = true;
+          this.message.title = "Erro ao salvar!";
+          this.message.text = `Data de Início de ${selectedResult.supertopicName} não preenchido`;
+        }
+        if (!selectedResult.status) {
+          this.modal = true;
+          this.message.title = "Erro ao salvar!";
+          this.message.text = `Status de ${selectedResult.supertopicName} não preenchido`;
+        }
+        if (selectedResult.status === "A iniciar") {
+          let body = {
+            progress: 0,
+          };
+          Object.assign(selectedResult, body);
+        }
+        if (selectedResult.status === "Em andamento") {
+          let body = {
+            progress: 15,
+          };
+          Object.assign(selectedResult, body);
+        }
+        if (selectedResult.status === "Parado") {
+          let body = {
+            progress: 50,
+          };
+          Object.assign(selectedResult, body);
+        }
+        const data = {
+          name: selectedResult.supertopicName,
+          usuarioID: this.user,
+          start: selectedResult.startDate,
+          end: selectedResult.endDate,
+          status: selectedResult.status,
+          cronograma_obra: this.cronograma_obra,
+          progress: selectedResult.progress,
+        };
+        console.log("data: ", data);
+        const response = this.firebaseCreate(
+        Firebase.firestore(),
+        "Tarefa",
+        null,
+        data
+        );
+        // this.firebaseUpdate(
+        // Firebase.firestore(),
+        // "Tarefa",
+        // response.created_id,
+        // { id: response.created_id }
+        // );
+        if (response.status === "ok") {
+          this.modal = true;
+          this.message.title = "Tarefa cadastrada com sucesso!";
+        } else {
+          this.modal = true;
+          this.message.title = "Ocorreu um erro...";
+        }
+        this.$emit("update:formTemplate", false);
+        this.$emit("update:refresh", true);
+      });
+    },
   },
 };
 </script>
@@ -202,12 +286,22 @@ export default {
         :onselect="getTemplate(renovation_seleceted)"
         label="Selecione"
       ></v-select>
+      <v-text-field
+        v-model="search"
+        append-icon="mdi-magnify"
+        label="Pesquisar tarefa"
+        single-line
+        hide-details
+      ></v-text-field>
       <div class="con-content row" style="margin-top: 2em">
         <v-data-table
           :headers="headers"
           :items="renovation_results.supertopics"
+          :search="search"
           :options.sync="options"
+          hide-default-footer
           :server-items-length="totalDesserts"
+          v-model="taskSelected"
           item-key="supertopicName"
           show-select
           :loading="loading"
@@ -265,6 +359,13 @@ export default {
         </v-snackbar>
       </div>
     </div>
+    <template #footer>
+      <div class="footer-dialog">
+        <vs-button block @click="saveTemplate" :disabled="!taskSelected">
+          Cadastrar tarefa(s)
+        </vs-button>
+      </div>
+    </template>
     <ResponseModal :modal.sync="modal" :message="message" />
   </vs-dialog>
 </template>
