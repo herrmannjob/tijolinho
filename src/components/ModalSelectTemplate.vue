@@ -19,6 +19,12 @@ export default {
     handleClose() {
       this.$emit("update:formSelectTemplate", false);
     },
+    formTaskOpen() {
+      this.formTask = true;
+    },
+    formTemplateOpen() {
+      this.formTemplate = true;
+    },
   },
 };
 </script>
@@ -40,10 +46,10 @@ export default {
       especialmente feito por nós!
     </h6>
     <div class="con-content row" style="margin-top: 2em">
-      <vs-button @click="formTask = true">
+      <vs-button @click="formTaskOpen()">
         Criar Manualmente
       </vs-button>
-      <vs-button @click="formTemplate = true">
+      <vs-button @click="formTemplateOpen()">
         Escolher Template
       </vs-button>
     </div>

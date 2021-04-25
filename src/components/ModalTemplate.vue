@@ -21,13 +21,14 @@ export default {
     modal: false,
     message: { title: "", text: "" },
     allCheck: false,
-    search: "",
+    expanded: [],
     renovation: reforma,
     renovation_zero: reforma_zero,
     renovation_decoracao: decoracao,
-    renovation_seleceted: [],
+    renovation_selected: [],
     renovation_results: [],
     items_renovation_type: ["Obra do Zero", "Reforma", "Decoração"],
+    topicSelected: [],
     taskSelected: [],
     taskStatus: [
       { text: "A iniciar", value: "A iniciar" },
@@ -66,54 +67,53 @@ export default {
       },
       deep: true,
     },
+    getItems() {
+      this.getTopics();
+    }
   },
   mounted() {
     this.getDataFromApi();
+    this.getTopics();
   },
   methods: {
     handleClose() {
       this.$emit("update:formTemplate", false);
     },
+    getTopics() {
+      this.taskSelected.forEach((selectedResult) => {
+        selectedResult.topics.forEach((topic) => {
+          this.topicSelected = {
+            name: topic.topicName,
+            usuarioID: this.user,
+            start: topic.startDate,
+            end: topic.endDate,
+            status: topic.status,
+            cronograma_obra: this.cronograma_obra,
+            progress: topic.progress,
+          };
+        });
+      });
+      console.log("getTopics: ", this.topicSelected);
+    },
     getTemplate(template) {
-      console.log("template: ", template);
       var _json;
       if (template == "Reforma") {
         _json = reforma;
-        console.log("reforma: ", reforma);
         this.renovation_results = reforma;
-        console.log("renovation_results: ", this.renovation_results);
-        this.renovation_results.supertopics.forEach((result) => {
-          return [
-            {
-              supertopicName: result.supertopicName,
-            },
-          ];
-        });
       }
       if (template == "Obra do Zero") {
         _json = reforma_zero;
-        console.log("obra zero: ", reforma_zero);
         this.renovation_results = reforma_zero;
-        console.log("renovation_results: ", this.renovation_results);
-        this.renovation_results.supertopics.forEach((result) => {
-          console.log("result: ", result);
-        });
       }
       if (template == "Decoração") {
         _json = decoracao;
         this.renovation_results = decoracao;
-        console.log("decoração: ", decoracao);
-        console.log("renovation_results:", this.renovation_results);
-        this.renovation_results.supertopics.forEach((result) => {
-          console.log("result: ", result);
-        });
       }
       return _json;
     },
     getDataFromApi() {
       this.loading = true;
       this.fakeApiCall().then((data) => {
-        console.log("data: ", data.items[0]);
         this.renovation_results = data.items;
         this.totalDesserts = data.total;
         this.loading = false;
@@ -159,7 +159,6 @@ export default {
       let body = reforma;
       body.supertopics.forEach((result) => {
         this.renovation_results = result;
-        console.log("resultado: ", this.renovation_results);
       });
       return [this.renovation_results];
     },
@@ -179,14 +178,11 @@ export default {
       this.snackText = "Alteração aberta";
     },
     close() {
-      console.log("Dialog closed");
       this.snack = true;
       this.snackColor = "#c90e0e";
       this.snackText = "Alteração cancelada";
     },
     async saveTemplate() {
-      console.log("payload: ", this.renovation_results.supertopics);
-      console.log("payload: ", this.taskSelected);
       if (this.taskSelected.length <= 0) {
         this.modal = true;
         this.message.title = "Erro ao salvar!";
@@ -235,19 +231,18 @@ export default {
           cronograma_obra: this.cronograma_obra,
           progress: selectedResult.progress,
         };
-        console.log("data: ", data);
         const response = this.firebaseCreate(
-        Firebase.firestore(),
-        "Tarefa",
-        null,
-        data
+          Firebase.firestore(),
+          "Tarefa",
+          null,
+          data
         );
-        // this.firebaseUpdate(
-        // Firebase.firestore(),
-        // "Tarefa",
-        // response.created_id,
-        // { id: response.created_id }
-        // );
+        this.firebaseUpdate(
+          Firebase.firestore(),
+          "Tarefa",
+          response.created_id,
+          { id: response.created_id }
+        );
         if (response.status === "ok") {
           this.modal = true;
           this.message.title = "Tarefa cadastrada com sucesso!";
@@ -256,6 +251,7 @@ export default {
           this.message.title = "Ocorreu um erro...";
         }
         this.$emit("update:formTemplate", false);
+        this.$emit("update:formSelectTemplate", false);
         this.$emit("update:refresh", true);
       });
     },
@@ -282,29 +278,23 @@ export default {
     <div class="container-center">
       <v-select
         :items="items_renovation_type"
-        v-model="renovation_seleceted"
-        :onselect="getTemplate(renovation_seleceted)"
+        v-model="renovation_selected"
+        :onselect="getTemplate(renovation_selected)"
         label="Selecione"
       ></v-select>
-      <v-text-field
-        v-model="search"
-        append-icon="mdi-magnify"
-        label="Pesquisar tarefa"
-        single-line
-        hide-details
-      ></v-text-field>
       <div class="con-content row" style="margin-top: 2em">
         <v-data-table
           :headers="headers"
           :items="renovation_results.supertopics"
-          :search="search"
           :options.sync="options"
-          hide-default-footer
           :server-items-length="totalDesserts"
+          :expanded.sync="expanded"
+          :loading="loading"
           v-model="taskSelected"
           item-key="supertopicName"
           show-select
-          :loading="loading"
+          show-expand
+          hide-default-footer
           class="elevation-1"
         >
           <template v-slot:item.startDate="{ item }">
@@ -340,6 +330,9 @@ export default {
                 ></v-text-field>
               </template>
             </v-edit-dialog>
+          </template>
+          <template v-slot:expanded-item="{ headers, topicSelected }">
+            <td :colspan="headers.length">{{ topicSelected }}</td>
           </template>
         </v-data-table>
         <v-snackbar
