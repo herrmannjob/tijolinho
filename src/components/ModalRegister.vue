@@ -251,7 +251,7 @@ export default {
       try {
         Firebase.auth().createUserWithEmailAndPassword(
           this.user.email,
-          this.password
+          this.user.password
         );
         await this.addUser();
         if (this.company.length > 0) {
