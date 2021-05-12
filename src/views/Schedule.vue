@@ -76,7 +76,7 @@ export default {
         await this.getCompanies();
         await this.getClients();
         await this.getCompany();
-        this.getObras();
+        await this.getObras();
       } else this.$router.push("/");
     });
   },

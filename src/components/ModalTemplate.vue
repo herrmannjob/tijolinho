@@ -297,13 +297,13 @@ export default {
           hide-default-footer
           class="elevation-1"
         >
-          <template v-slot:item.startDate="{ item }">
+          <template `v-slot:item.startDate={ item }`>
             <vs-input class="input-date" type="date" v-model="item.startDate" />
           </template>
-          <template v-slot:item.endDate="{ item }">
+          <template `v-slot:item.endDate={ item }`>
             <vs-input class="input-date" type="date" v-model="item.endDate" />
           </template>
-          <template v-slot:item.status="{ item }">
+          <template `v-slot:item.status={ item }`>
             <v-select
               class="input-select"
               :items="taskStatus"

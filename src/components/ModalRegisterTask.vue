@@ -155,13 +155,6 @@ export default {
           </div>
         </v-col>
         <v-col cols="12" md="5">
-          <v-text-field
-            label="Orçamento estimado"
-            v-model="estimated_spend"
-            required
-            hint="Apenas números"
-          ></v-text-field>
-
           <v-select
             v-if="task_names.length"
             v-model="selected_task"

@@ -47,7 +47,7 @@
     "dhtmlx-scheduler": "^5.3.11",
     "element-ui": "^2.15.1",
     "firebase": "^8.2.10",
-    "firebase-tools": "^9.1.0",
+    "firebase-tools": "^9.10.0",
     "frappe-gantt": "^0.5.0",
     "fullcalendar": "^5.5.1",
     "gantt-elastic": "^1.0.12",
@@ -93,7 +93,7 @@
     "vuesax": "^4.0.1-alpha.25",
     "vuetify": "^2.4.7",
     "vuetify-datetime-picker": "^2.1.1",
-    "webpack": "5.0.0"
+    "webpack": "^5.36.2"
   },
   "devDependencies": {
     "@types/vuelidate": "^0.7.14",
@@ -101,7 +101,7 @@
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-plugin-pwa": "~4.5.0",
     "@vue/cli-plugin-router": "~4.5.0",
-    "@vue/cli-service": "^4.5.11",
+    "@vue/cli-service": "^4.5.12",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
