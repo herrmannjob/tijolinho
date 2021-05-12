@@ -19,6 +19,7 @@ export default {
           title: "Nenhum cliente cadastrado",
         },
       ],
+      clientConstructions: [],
       editedClient: {},
       singleSelect: true,
       selected: [],
@@ -47,7 +48,7 @@ export default {
     await Firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         this.user_email = user.email;
-        this.getClients();
+        // this.getClients();
         this.getObras();
       } else this.$router.push("/");
     });
@@ -104,16 +105,31 @@ export default {
       }
     },
     async getObras() {
+      await this.getClients();
       const response = await this.getDocument(
         Firebase.firestore(),
         "Obra",
         "usuarioID",
         this.user_email
       );
+      console.log("response", response.status);
       if (response.status === "ok") {
         response.documents.map((item) => {
-          this.constructions.push(item.data);
-          this.constructions_names.push(item.data.nome);
+          this.clients.forEach((client) => {
+            if (item.data.usuarios === client.id) {
+              this.clientConstructions.push(client);
+              this.constructions.push(item.data);
+              let body = {
+                constructionLength: this.constructions.length.toString(),
+              };
+              Object.assign(client, body);
+              let objeto = Object.assign(client, body);
+              console.log("objeto", objeto);
+              // this.constructions.push(item.data);
+              this.constructions_names.push(item.data.nome);
+              // console.log("this.constructions name", this.constructions_names);
+            }
+          });
         });
       }
     },
@@ -202,7 +218,7 @@ export default {
                     </v-list-item-content>
 
                     <v-list-item-content @click="rotaCronograma(client.nome)">
-                      <v-list-item-title>{{ client.email }}</v-list-item-title>
+                      <v-list-item-title>{{ client.quantidade_obra }}</v-list-item-title>
                       <v-list-item-subtitle>Obras</v-list-item-subtitle>
                     </v-list-item-content>
 

@@ -117,8 +117,11 @@ export default {
   methods: {
     handleClose() {
       this.$emit("update:formClient", false);
+      this.$emit("update:confirm", false);
+      this.$emit("update:refresh", true);
     },
     handleOpen() {
+      this.$emit("update:formClient", false);
       this.$emit("formConstruction", true);
       this.$emit("confirm", false);
     },
@@ -361,15 +364,10 @@ export default {
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn
-                  color="#002b4b"
-                  class="btn-primario"
-                  depressed
-                  @click="handleOpen()"
-                >
+                <vs-button :color="outlinedColor" @click="handleOpen()">
                   CADASTRAR OBRA
-                </v-btn>
-                <v-btn color="primary" text @click="confirm = false">
+                </vs-button>
+                <v-btn color="primary" text @click="handleClose()">
                   Agora não
                 </v-btn>
               </v-card-actions>

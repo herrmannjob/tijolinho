@@ -50,7 +50,11 @@ export default {
       modal: false,
       message: { title: "", text: "" },
       idRota: this.$globalValue,
+      construction_amount: [],
     };
+  },
+  async mounted() {
+    await this.getQuantidadeObra();
   },
   methods: {
     handleClose() {
@@ -156,9 +160,32 @@ export default {
         { id: response.created_id }
       );
       if (response.status === "ok") {
+        await this.updateClient();
         this.obra = response.created_id;
         this.addCronogramaObra();
       }
+    },
+    async getQuantidadeObra() {
+      const response = await this.getDocument(
+        Firebase.firestore(),
+        "Obra",
+        "usuarios",
+        this.clientId
+      );
+      if (response.status === "ok") {
+        response.documents.map((item) => {
+          this.construction_amount.push(item.data);
+        });
+        console.log(this.construction_amount.length);
+      }
+    },
+    async updateClient() {
+      await this.firebaseUpdate(
+        Firebase.firestore(),
+        "Usuario",
+        this.clientId,
+        { quantidade_obra: this.construction_amount.length }
+      );
     },
     async addCronogramaObra() {
       const start = new Date(this.dateInit);
