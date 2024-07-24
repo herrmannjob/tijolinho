@@ -2624,14 +2624,6 @@
     cssnano-preset-default "^4.0.0"
     postcss "^7.0.0"
 
-"@jporto/vue-flex-layout@^3.0.2":
-  version "3.0.2"
-  resolved "https://registry.npmjs.org/@jporto/vue-flex-layout/-/vue-flex-layout-3.0.2.tgz"
-  integrity sha512-F0Spj8nelsFnnMRLP9A9x3QLyD+QByxIQS7qbdINAFVwNzhvft9AbNRfpDVfqBOn8L0+aQep1X5nwg5S/QFF8A==
-  dependencies:
-    core-js "^2.6.5"
-    vue "^2.6.10"
-
 "@jsdevtools/ono@^7.1.3":
   version "7.1.3"
   resolved "https://registry.npmjs.org/@jsdevtools/ono/-/ono-7.1.3.tgz"
